@@ -61,8 +61,8 @@ const mariage = await (async () => {
   return list.length ? list : fallback;
 })();
 
-const voyage = await (async () => {
-  const list = galleries.voyage ? await listBlobsFromPublicContainer(galleries.voyage) : [];
+const GR3 = await (async () => {
+  const list = galleries.GR3 ? await listBlobsFromPublicContainer(galleries.GR3) : [];
   return list.length ? list : fallback;
 })();
 ---
@@ -87,14 +87,14 @@ const voyage = await (async () => {
     <nav class="gallery-toggle fade-in" role="tablist" aria-label="Galeries">
       <button class="toggle-btn active" data-target="londres" type="button">Londres</button>
       <button class="toggle-btn" data-target="paris" type="button">Paris</button>
-      <button class="toggle-btn" data-target="mariage" type="button">Mariage</button>
-      <button class="toggle-btn" data-target="voyage" type="button">Voyage</button>
+      <button class="toggle-btn" data-target="mariage" type="button" style="">Mariage</button>
+      <button class="toggle-btn" data-target="GR3" type="button">GR1-3</button>
     </nav>
 
     <Gallery id="londres" title="Londres" photos={londres} />
     <Gallery id="paris" title="Paris" photos={paris} />
     <Gallery id="mariage" title="Mariage" photos={mariage} />
-    <Gallery id="voyage" title="Voyage" photos={voyage} />
+    <Gallery id="GR3" title="GR1-3" photos={GR3} />
 
     <script>
       (function () {

@@ -4,7 +4,10 @@ const { id = 'gallery', title = 'Gallery', photos = [] } = Astro.props;
 
 <section id={id} class="gallery-section">
   <div class="container">
-    <h2 class="section-title">{title}</h2>
+    <div class="section-head">
+      <h2 class="section-title">{title}</h2>
+      <button class="download-all-btn" type="button" aria-label={`Télécharger toutes les photos de ${title}`}>Télécharger tout</button>
+    </div>
     <div class="grid" role="list">
       {photos.map((p, i) => (
         <figure class="photo" style={`--i:${i}`}>
@@ -62,25 +65,67 @@ const { id = 'gallery', title = 'Gallery', photos = [] } = Astro.props;
           const lbShare = lightbox.querySelector('.lb-share');
           const lbClose = lightbox.querySelector('.lb-close');
 
-          images.forEach((img) => {
+            // make images keyboard-focusable so we can restore focus on close
+            images.forEach((img) => img.setAttribute('tabindex', '0'));
+
+            let lastOpenedImg = null;
+            let scrollLock = null;
+
+            images.forEach((img) => {
             img.addEventListener('click', (e) => {
               e.stopPropagation();
               const src = img.currentSrc || img.src;
-              lbImg.src = src;
-              lbDownload.href = src;
-              lightbox.classList.add('active');
-              lightbox.setAttribute('aria-hidden', 'false');
-              document.documentElement.style.overflow = 'hidden';
-              document.body.style.overflow = 'hidden';
+              lastOpenedImg = img;
+              openLightbox(src);
+            });
+            img.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const src = img.currentSrc || img.src;
+                lastOpenedImg = img;
+                openLightbox(src);
+              }
             });
           });
+
+          function lockScroll() {
+            const y = window.scrollY || document.documentElement.scrollTop;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${y}px`;
+            scrollLock = y;
+          }
+
+          function unlockScroll() {
+            if (scrollLock !== null) {
+              document.body.style.position = '';
+              const y = scrollLock;
+              document.body.style.top = '';
+              window.scrollTo(0, y);
+              scrollLock = null;
+            }
+          }
+
+          function openLightbox(src) {
+            lbImg.src = src;
+            lbDownload.href = src;
+            lightbox.classList.add('active');
+            lightbox.setAttribute('aria-hidden', 'false');
+            lockScroll();
+            // set focus to close button for keyboard users
+            lbClose.focus();
+          }
 
           function closeLightbox() {
             lightbox.classList.remove('active');
             lightbox.setAttribute('aria-hidden', 'true');
             lbImg.src = '';
-            document.documentElement.style.overflow = '';
-            document.body.style.overflow = '';
+            unlockScroll();
+            // restore focus to the image that opened the lightbox
+            try {
+              if (lastOpenedImg && typeof lastOpenedImg.focus === 'function') lastOpenedImg.focus({ preventScroll: true });
+            } catch (e) {
+              /* ignore */
+            }
           }
 
           // Click overlay or close button
@@ -114,6 +159,68 @@ const { id = 'gallery', title = 'Gallery', photos = [] } = Astro.props;
           document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
           });
+
+          // Download all button: create zip of all images in this section using JSZip (CDN)
+          const downloadAllBtn = section.querySelector('.download-all-btn');
+          async function loadScript(url) {
+            return new Promise((resolve, reject) => {
+              if (window.JSZip) return resolve(window.JSZip);
+              const s = document.createElement('script');
+              s.src = url;
+              s.onload = () => resolve(window.JSZip);
+              s.onerror = reject;
+              document.head.appendChild(s);
+            });
+          }
+
+          async function downloadAll() {
+            if (!downloadAllBtn) return;
+            const imgs = images.map((i) => i.currentSrc || i.src).filter(Boolean);
+            if (!imgs.length) return;
+            downloadAllBtn.disabled = true;
+            const originalText = downloadAllBtn.textContent;
+            downloadAllBtn.textContent = 'Préparation...';
+            try {
+              await loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js');
+              const JSZip = window.JSZip;
+              const zip = new JSZip();
+              for (let i = 0; i < imgs.length; i++) {
+                const url = imgs[i];
+                downloadAllBtn.textContent = `Téléchargement ${i + 1}/${imgs.length}`;
+                try {
+                  const res = await fetch(url);
+                  if (!res.ok) throw new Error('Fetch failed');
+                  const blob = await res.blob();
+                  const name = url.split('/').pop().split('?')[0] || `image-${i + 1}.jpg`;
+                  zip.file(name, blob);
+                } catch (err) {
+                  console.warn('Failed to fetch', url, err);
+                }
+              }
+              downloadAllBtn.textContent = 'Création archive...';
+              const content = await zip.generateAsync({ type: 'blob' }, (meta) => {
+                const pct = Math.round((meta.percent || 0));
+                downloadAllBtn.textContent = `Compression ${pct}%`;
+              });
+              const zipName = `${id || 'photos'}.zip`;
+              const url = URL.createObjectURL(content);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = zipName;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(url);
+            } catch (err) {
+              console.error(err);
+              alert('Impossible de créer l’archive. Réessayez ou téléchargez les images individuellement.');
+            } finally {
+              downloadAllBtn.disabled = false;
+              downloadAllBtn.textContent = originalText;
+            }
+          }
+
+          if (downloadAllBtn) downloadAllBtn.addEventListener('click', downloadAll);
         });
       })();
     </script>
