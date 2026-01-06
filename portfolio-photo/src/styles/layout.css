@@ -1,0 +1,62 @@
+:root {
+  --container: 1200px;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+}
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.site-header {
+  backdrop-filter: blur(6px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 1000;
+  background: rgba(255,255,255,0.6);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 20px;
+}
+.brand a{
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.brand a:hover {
+  color: var(--accent);
+}
+
+.site-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  margin-left: 18px;
+  font-weight: 600;
+}
+.site-nav a:hover {
+  color: var(--accent);
+}
+.site-footer {
+  color: var(--muted);
+  padding: 36px 0;
+  font-size: 14px;
+}
+
+/* Ensure main content isn't hidden behind the fixed header */
+main { padding-top: 64px; }
+@media (max-width: 768px) { .site-header { height: 56px } .header-inner { height:56px } main { padding-top:56px } }

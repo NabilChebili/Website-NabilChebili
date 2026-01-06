@@ -1,0 +1,37 @@
+---
+import "../styles/global.css";
+import "../styles/photo.css";
+import Layout from "../layouts/header.astro";
+import Gallery from "../components/Gallery.astro";
+
+const londres = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
+const paris = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
+const mariage = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
+const voyage = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
+---
+
+<Layout>
+  <main class="page">
+    <h1 class="page-title fade-in">Bienvenue</h1>
+
+    <p class="paragraph-center fade-in page-intro">Page en cours de création, cliquez <a href="/photo">ici</a> pour accéder aux photos</p>
+
+    <script>
+      (function () {
+        const title = document.querySelector('.page-title');
+        const intro = document.querySelector('.page-intro');
+
+        function staggerShow() {
+          if (title) setTimeout(() => title.classList.add('is-visible'), 120);
+          if (intro) setTimeout(() => intro.classList.add('is-visible'), 520);
+        }
+
+        document.addEventListener('DOMContentLoaded', staggerShow);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(staggerShow, 20);
+      })();
+    </script>
+
+  </main>
+
+  
+</Layout>

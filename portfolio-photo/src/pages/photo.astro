@@ -1,0 +1,150 @@
+---
+import "../styles/global.css";
+import "../styles/photo.css";
+import Layout from "../layouts/header.astro";
+import Gallery from "../components/Gallery.astro";
+import galleries from "../data/galleries.json";
+
+// Local fallbacks (kept from original test images) used if remote listing fails
+const fallback = [
+  "/photos/A7401177.jpg",
+  "/photos/A7401113.jpg",
+  "/photos/A7401167.jpg",
+  "/photos/A7401181.jpg",
+];
+
+async function listBlobsFromPublicContainer(containerUrl) {
+  try {
+    const u = new URL(containerUrl);
+    const origin = u.origin; // e.g. https://nchphoto.blob.core.windows.net
+    const parts = u.pathname.split("/").filter(Boolean); // ['photopublic','GR1-1']
+    const container = parts[0] || "";
+    const prefix = parts.slice(1).join("/");
+
+    if (!container) return [];
+
+    // Azure list blobs API for public containers
+    let listUrl = `${origin}/${container}?restype=container&comp=list`;
+    if (prefix) {
+      // ensure prefix ends with slash to list folder-like paths
+      const p = prefix.endsWith("/") ? prefix : prefix + "/";
+      listUrl += `&prefix=${encodeURIComponent(p)}`;
+    }
+
+    const res = await fetch(listUrl);
+    if (!res.ok) return [];
+    const xml = await res.text();
+
+    // Simple XML parse to extract <Name> elements (looks like: <Name>GR1-1/photo.jpg</Name>)
+    const names = Array.from(xml.matchAll(/<Name>([^<]+)<\/Name>/g)).map((m) => m[1]);
+    if (!names.length) return [];
+
+    // Build full public URLs for each blob
+    return names.map((name) => `${origin}/${container}/${name}`);
+  } catch (err) {
+    return [];
+  }
+}
+
+const londres = await (async () => {
+  const list = galleries.londres ? await listBlobsFromPublicContainer(galleries.londres) : [];
+  return list.length ? list : fallback;
+})();
+
+const paris = await (async () => {
+  const list = galleries.paris ? await listBlobsFromPublicContainer(galleries.paris) : [];
+  return list.length ? list : fallback;
+})();
+
+const mariage = await (async () => {
+  const list = galleries.mariage ? await listBlobsFromPublicContainer(galleries.mariage) : [];
+  return list.length ? list : fallback;
+})();
+
+const voyage = await (async () => {
+  const list = galleries.voyage ? await listBlobsFromPublicContainer(galleries.voyage) : [];
+  return list.length ? list : fallback;
+})();
+---
+
+<Layout>
+  <main class="page">
+    <h1 class="page-title fade-in">Photographie</h1>
+    <p class="paragraph-center fade-in page-intro">
+      Bienvenue dans ma sélection photographique : un aperçu de voyages, moments et instants précieux. 
+      <br><br>
+      
+      A travers le design et la recherche d’esthétique dans les détails, la photographie s’est rapidement imposée comme un moyen d’expression naturel
+      
+      Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main. Chaque déplacement est devenu une occasion de raconter une histoire, de figer une ambiance, un regard, un instant.
+      
+      Les images qui suivent sont des fragments de ces voyages, entre lieux traversés et moments vécus.
+      <br><br><br>
+
+      Cliquez sur une catégorie pour afficher sa galerie.
+    </p>
+
+    <nav class="gallery-toggle fade-in" role="tablist" aria-label="Galeries">
+      <button class="toggle-btn active" data-target="londres" type="button">Londres</button>
+      <button class="toggle-btn" data-target="paris" type="button">Paris</button>
+      <button class="toggle-btn" data-target="mariage" type="button">Mariage</button>
+      <button class="toggle-btn" data-target="voyage" type="button">Voyage</button>
+    </nav>
+
+    <Gallery id="londres" title="Londres" photos={londres} />
+    <Gallery id="paris" title="Paris" photos={paris} />
+    <Gallery id="mariage" title="Mariage" photos={mariage} />
+    <Gallery id="voyage" title="Voyage" photos={voyage} />
+
+    <script>
+      (function () {
+        const sections = Array.from(document.querySelectorAll('.gallery-section'));
+        const buttons = Array.from(document.querySelectorAll('.toggle-btn'));
+        const title = document.querySelector('.page-title');
+        const intro = document.querySelector('.page-intro');
+        const nav = document.querySelector('.gallery-toggle');
+
+        function staggerShow() {
+          // H1 first
+          if (title) setTimeout(() => title.classList.add('is-visible'), 120);
+          // intro second
+          if (intro) setTimeout(() => intro.classList.add('is-visible'), 520);
+          // nav third
+          if (nav) setTimeout(() => nav.classList.add('is-visible'), 840);
+          // sections last (each delayed)
+          sections.forEach((sec, idx) => {
+            setTimeout(() => sec.classList.add('is-visible'), 1200 + idx * 420);
+          });
+        }
+
+        function showSection(id) {
+          sections.forEach((s) => {
+            if (s.id === id) {
+              s.style.display = '';
+              // add visible class so section container reveals; images reveal when loaded
+              setTimeout(() => s.classList.add('is-visible'), 120);
+            } else {
+              s.style.display = 'none';
+              s.classList.remove('is-visible');
+            }
+          });
+          buttons.forEach((b) => b.classList.toggle('active', b.dataset.target === id));
+        }
+
+        // Initial: hide all sections then show first
+        if (sections.length) {
+          sections.forEach((s, i) => {
+            s.style.display = i === 0 ? '' : 'none';
+            if (i === 0) setTimeout(() => s.classList.add('is-visible'), 600);
+          });
+        }
+
+        buttons.forEach((btn) => btn.addEventListener('click', () => showSection(btn.dataset.target)));
+
+        document.addEventListener('DOMContentLoaded', staggerShow);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(staggerShow, 20);
+      })();
+    </script>
+	
+  </main>
+</Layout>

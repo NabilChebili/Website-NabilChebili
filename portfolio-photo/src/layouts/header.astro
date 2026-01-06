@@ -1,0 +1,38 @@
+---
+import "../styles/layout.css";
+---
+
+<!doctype html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/LogoRond.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title> Nabil Chebili</title>
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="container header-inner">
+				<div class="brand">
+					<a href="/">Nabil Chebili</a>
+				</div>
+				<nav class="site-nav" aria-label="Sections">
+					<a href="#londres">Acceuil</a>
+					<a href="#voyage">Azure</a>
+					<a href="#paris">Photo</a>
+					<a href="#mariage">Musique</a>
+					
+				</nav>
+			</div>
+		</header>
+
+		<main>
+			<slot />
+		</main>
+
+		<footer class="site-footer">
+			<div class="container">© {new Date().getFullYear()} — Nabil Chebili</div>
+		</footer>
+	</body>
+</html>

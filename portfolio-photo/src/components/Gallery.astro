@@ -1,0 +1,120 @@
+---
+const { id = 'gallery', title = 'Gallery', photos = [] } = Astro.props;
+---
+
+<section id={id} class="gallery-section">
+  <div class="container">
+    <h2 class="section-title">{title}</h2>
+    <div class="grid" role="list">
+      {photos.map((p, i) => (
+        <figure class="photo" style={`--i:${i}`}>
+          <img src={p} alt="" loading="lazy" data-section={id} />
+        </figure>
+      ))}
+    </div>
+    <div class="lightbox" aria-hidden="true">
+      <div class="lb-inner">
+        <img src="" alt="" />
+        <div class="lb-controls">
+          <a class="lb-download" href="#" download>Télécharger</a>
+          <button class="lb-share" type="button">Partager</button>
+          <button class="lb-close" type="button" aria-label="Fermer">✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script>
+      (function () {
+        const sections = Array.from(document.querySelectorAll('.gallery-section'));
+        sections.forEach((section) => {
+            const grid = section.querySelector('.grid');
+            const images = Array.from(grid.querySelectorAll('img'));
+
+            // show images only when fully loaded and animate their appearance
+            images.forEach((img) => {
+              const fig = img.closest('.photo');
+              // default placeholder aspect ratio to avoid big layout jumps
+              if (fig) fig.style.aspectRatio = '3 / 2';
+
+              function markLoaded() {
+                // set accurate aspect-ratio if available
+                if (img.naturalWidth && img.naturalHeight && fig) {
+                  fig.style.aspectRatio = (img.naturalWidth / img.naturalHeight).toString();
+                }
+                if (fig) fig.classList.add('is-loaded');
+              }
+
+              if (img.complete && img.naturalHeight !== 0) {
+                markLoaded();
+              } else {
+                img.addEventListener('load', markLoaded, { once: true });
+              }
+            });
+
+            // Using CSS columns for masonry — no JS sizing required. Keep lightbox handlers only.
+
+          // Lightbox
+          const lightbox = section.querySelector('.lightbox');
+          const lbInner = lightbox.querySelector('.lb-inner');
+          const lbImg = lightbox.querySelector('img');
+          const lbDownload = lightbox.querySelector('.lb-download');
+          const lbShare = lightbox.querySelector('.lb-share');
+          const lbClose = lightbox.querySelector('.lb-close');
+
+          images.forEach((img) => {
+            img.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const src = img.currentSrc || img.src;
+              lbImg.src = src;
+              lbDownload.href = src;
+              lightbox.classList.add('active');
+              lightbox.setAttribute('aria-hidden', 'false');
+              document.documentElement.style.overflow = 'hidden';
+              document.body.style.overflow = 'hidden';
+            });
+          });
+
+          function closeLightbox() {
+            lightbox.classList.remove('active');
+            lightbox.setAttribute('aria-hidden', 'true');
+            lbImg.src = '';
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+          }
+
+          // Click overlay or close button
+          lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox || e.target === lbClose) closeLightbox();
+          });
+          lbClose.addEventListener('click', closeLightbox);
+
+          // Share button (navigator.share when available, fallback to copy URL)
+          lbShare.addEventListener('click', async () => {
+            const url = lbImg.src;
+            if (navigator.share) {
+              try {
+                await navigator.share({ title: section.querySelector('.section-title').textContent, url });
+              } catch (err) {
+                /* user cancelled */
+              }
+            } else {
+              try {
+                await navigator.clipboard.writeText(location.origin + url);
+                const original = lbShare.textContent;
+                lbShare.textContent = 'Copié';
+                setTimeout(() => (lbShare.textContent = original), 1400);
+              } catch (err) {
+                // fallback: open in new tab
+                window.open(url, '_blank');
+              }
+            }
+          });
+
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+          });
+        });
+      })();
+    </script>
+</section>
