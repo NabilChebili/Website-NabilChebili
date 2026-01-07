@@ -19,7 +19,7 @@ const { id = 'gallery', title = 'Gallery', photos = [] } = Astro.props;
       <div class="lb-inner">
         <img src="" alt="" />
         <div class="lb-controls">
-          <a class="lb-download" href="#" download>Télécharger</a>
+          <button class="lb-download" type="button">Télécharger</button>
           <button class="lb-share" type="button">Partager</button>
           <button class="lb-close" type="button" aria-label="Fermer">✕</button>
         </div>
@@ -107,7 +107,6 @@ const { id = 'gallery', title = 'Gallery', photos = [] } = Astro.props;
 
           function openLightbox(src) {
             lbImg.src = src;
-            lbDownload.href = src;
             lightbox.classList.add('active');
             lightbox.setAttribute('aria-hidden', 'false');
             lockScroll();
@@ -268,6 +267,36 @@ const { id = 'gallery', title = 'Gallery', photos = [] } = Astro.props;
                 // fallback: open in new tab
                 window.open(url, '_blank');
               }
+            }
+          });
+
+          // Download button: force download with blob fetch and blob URL
+          lbDownload.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const url = lbImg.src;
+            if (!url) return;
+            lbDownload.disabled = true;
+            const originalText = lbDownload.textContent;
+            lbDownload.textContent = 'Téléchargement...';
+            try {
+              const res = await fetch(url);
+              if (!res.ok) throw new Error('Fetch failed');
+              const blob = await res.blob();
+              const filename = url.split('/').pop().split('?')[0] || 'image.jpg';
+              const blobUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = blobUrl;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(blobUrl);
+            } catch (err) {
+              console.error('Download failed:', err);
+              alert("Impossible de télécharger l'image. Réessayez.");
+            } finally {
+              lbDownload.disabled = false;
+              lbDownload.textContent = originalText;
             }
           });
 
