@@ -1,37 +1,141 @@
 ---
 import "../styles/global.css";
-import "../styles/photo.css";
+import "../styles/layout.css";
+import "../styles/index.css";
 import Layout from "../layouts/header.astro";
-import Gallery from "../components/Gallery.astro";
-
-const londres = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
-const paris = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
-const mariage = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
-const voyage = ["/photos/A7401177.jpg","/photos/A7401113.jpg", "/photos/A7401167.jpg","/photos/A7401181.jpg"];
 ---
 
 <Layout>
   <main class="page">
-    <h1 class="page-title fade-in">Bienvenue</h1>
+    <section class="hero fade-in">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <h1 class="page-title fade-in">Bienvenue</h1>
+          <p class="lead fade-in">
+            Ce site est un espace personnel où je partage mes projets, mes
+            passions et ce qui m'inspire au quotidien.
+          </p>
+        </div>
+      </div>
+      <div class="hero-ctas">
+        <a class="btn" href="/clouddevops">Cloud DevOps</a>
+        <a class="btn btn-outline" href="/photo">Photographie</a>
+        <a class="btn" href="/musique">Musique</a>
+        <a class="btn btn-outline" href="/gaming">Gaming</a>
+      </div>
+    </section>
 
-    <p class="paragraph-center fade-in page-intro">Page en cours de création, cliquez <a href="/photo">ici</a> pour accéder aux photos</p>
+    <section class="section two-col reverse fade-in">
+      <div class="container two-col-inner">
+        <div class="media">
+          <img src="/photos/A7401113.jpg" alt="Portrait" />
+        </div>
+        <div class="content">
+          <h2>Vous vous demandez sûrement qui je suis ?</h2>
+          <p>
+            Je suis quelqu’un de curieux, attiré par les choses que l’on construit et que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des systèmes ou des images. 
+            Ce qui m’intéresse autant que le résultat, c’est le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à ce que tout fasse sens.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section cards-overview fade-in">
+      <div class="container">
+        <h2 style="margin-bottom:18px;">Explorer</h2>
+        <div class="cards-grid">
+          <article class="card fade-in">
+            <img src="1729092923441.jpeg" alt="Cloud" />
+            <div class="card-body">
+              <h3>Cloud & DevOps</h3>
+              <p>Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.</p>
+              <a class="btn btn-outline" href="/clouddevops">Voir</a>
+            </div>
+          </article>
+
+          <article class="card fade-in">
+            <img src="A7401833.jpg" alt="Photographie" />
+            <div class="card-body">
+              <h3>Photographie</h3>
+              <p>Galeries & séries photographiques : voyages, portraits et instantanés.</p>
+              <a class="btn" href="/photo">Voir</a>
+            </div>
+          </article>
+
+          <article class="card fade-in">
+            <img src="image.png" alt="Musique" />
+            <div class="card-body">
+              <h3>Musique</h3>
+              <p>Captures, enregistrements et petites compositions — un carnet sonore.</p>
+              <a class="btn btn-outline" href="/musique">Voir</a>
+            </div>
+          </article>
+
+          <article class="card fade-in">
+            <img src="twitch.png" alt="Gaming" />
+            <div class="card-body">
+              <h3>Gaming</h3>
+              <p>Twitch, streaming et jeux vidéo.</p>
+              <a class="btn" href="/gaming">Voir</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section contact fade-in">
+      <div class="container">
+        <div class="contact-card">
+          
+            <div class="contact-card-main">
+              <h2>Contact</h2>
+              <p class="contact-lead">Pour toute question, collaboration ou prise de contact rapide — écrivez-moi.</p>
+              <p class="contact-note">Je réponds généralement sous quelques heures.</p>
+            </div>
+
+            <div class="contact-card-side">
+              <div class="contact-ctas">
+                <a class="btn" href="mailto:nabilchebili1999@gmail.com">Envoyer un email</a>
+                <a class="btn btn-outline" href="https://www.linkedin.com/in/chebili-nabil/" target="_blank" rel="noopener">LinkedIn</a>
+              </div>
+            </div>
+          
+        </div>
+      </div>
+    </section>
 
     <script>
+      // Reveal: find all `.fade-in` in document, sort by vertical position and reveal them sequentially
       (function () {
-        const title = document.querySelector('.page-title');
-        const intro = document.querySelector('.page-intro');
+        const nodes = Array.from(document.querySelectorAll('main .fade-in'));
+        if (!nodes.length) return;
 
-        function staggerShow() {
-          if (title) setTimeout(() => title.classList.add('is-visible'), 120);
-          if (intro) setTimeout(() => intro.classList.add('is-visible'), 520);
+        // compute absolute top positions and sort
+        const list = nodes
+          .map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
+          .sort((a, b) => a.top - b.top)
+          .map((o) => o.el);
+
+        const baseDelay = 80;
+        const step = 120;
+        list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
+
+        // Contact form: build a mailto with form contents as fallback
+        const form = document.getElementById('contactForm');
+        if (form) {
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const data = new FormData(form);
+            const name = data.get('name') || '';
+            const email = data.get('email') || '';
+            const message = data.get('message') || '';
+            const subject = encodeURIComponent('Contact depuis le site — ' + (name || ''));
+            const body = encodeURIComponent(`Nom: ${name}\nEmail: ${email}\n\n${message}`);
+            // open mail client
+            window.location.href = `mailto:nabilchebili1999@gmail.com?subject=${subject}&body=${body}`;
+          });
         }
-
-        document.addEventListener('DOMContentLoaded', staggerShow);
-        if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(staggerShow, 20);
       })();
     </script>
-
   </main>
-
-  
 </Layout>

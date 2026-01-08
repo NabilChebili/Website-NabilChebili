@@ -36,11 +36,32 @@ body {
   text-decoration: none;
   color: var(--muted);
   font-size: 18px;
+  white-space: nowrap;
 }
 
 .brand a:hover {
   color: var(--accent);
 }
+
+/* Prevent brand text from wrapping when header gets narrow */
+.brand {
+  flex: 0 0 auto;
+}
+
+/* Keep nav wrap stable on larger viewports so 'Accueil' doesn't jump or overlap */
+.nav-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-home {
+  font-weight: 700;
+  margin-right: 8px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.nav-home:hover { color: var(--accent); }
 
 .site-nav a {
   color: var(--muted);
@@ -51,6 +72,9 @@ body {
 .site-nav a:hover {
   color: var(--accent);
 }
+
+/* hide mobile toggle by default */
+.nav-toggle { display: none; }
 .site-footer {
   color: var(--muted);
   padding: 36px 0;
@@ -60,3 +84,42 @@ body {
 /* Ensure main content isn't hidden behind the fixed header */
 main { padding-top: 64px; }
 @media (max-width: 768px) { .site-header { height: 56px } .header-inner { height:56px } main { padding-top:56px } }
+@media (max-width: 480px) {
+  .header-inner { padding: 0 12px; }
+  .brand a { font-size: 16px; }
+  .site-nav a { margin-left: 8px; font-size: 14px; }
+}
+
+/* Responsive nav: switch to a wrapping flex row on smaller screens so links flow to new lines */
+@media (max-width: 900px) {
+  .site-nav {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    padding: 6px 0;
+  }
+  /* ensure individual links have comfortable tap targets when wrapped */
+  .site-nav a {
+    margin-left: 0;
+    padding: 6px 8px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+  .header-inner { align-items: center; }
+}
+
+/* Mobile: collapse nav into hamburger under 590px */
+@media (max-width: 590px) {
+  .nav-wrap { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: flex-end }
+  .nav-home { margin-right: 8px; font-weight:700; display: inline-block; color: var(--muted); text-decoration: none; }
+  .nav-home:hover { color: var(--accent); }
+  .nav-toggle { background: transparent; border: none; font-size: 18px; padding: 8px; cursor: pointer; border-radius: 8px; display: inline-flex; align-items: center; }
+  .nav-toggle:focus { outline: 2px solid rgba(0,0,0,0.08); }
+  /* hide the nav by default on very small screens; it will be shown when .open is added */
+  .site-nav { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--ui-bg, #fff); padding: 10px 20px; box-shadow: 0 10px 30px rgba(2,6,23,0.06); z-index: 1500; flex-direction: column; gap: 6px; }
+  .site-nav.open { display: flex; }
+  .site-nav a { display: block; padding: 10px 0; margin-left: 0; }
+  .header-inner { position: relative; }
+}

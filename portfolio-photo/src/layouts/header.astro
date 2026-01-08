@@ -17,13 +17,18 @@ import "../styles/layout.css";
 				<div class="brand">
 					<a href="/">Nabil Chebili</a>
 				</div>
-				<nav class="site-nav" aria-label="Sections">
-					<a href="/">Accueil</a>
-					<a href="/azure">Azure</a>
-					<a href="/photo">Photo</a>
-					<a href="/musique">Musique</a>
-					
-				</nav>
+				<div class="nav-wrap">
+					<a class="nav-home" href="/">Accueil</a>
+					<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu">
+						<span class="hamburger" aria-hidden="true">☰</span>
+					</button>
+					<nav id="site-nav" class="site-nav" aria-label="Sections">
+						<a href="/clouddevops">Cloud DevOps</a>
+						<a href="/photo">Photo</a>
+						<a href="/musique">Musique</a>
+						<a href="/gaming">Gaming</a>
+					</nav>
+				</div>
 			</div>
 		</header>
 
@@ -31,8 +36,33 @@ import "../styles/layout.css";
 			<slot />
 		</main>
 
+		<section class="section footer-nav">
+			<div class="container">
+				<nav aria-label="Navigation finale">
+				<a href="/photo">Photographie</a> · <a href="/clouddevops">Cloud DevOps</a> · <a
+					href="/musique">Musique</a
+				> · <a href="/gaming">Gaming</a>
+				</nav>
+			</div>
+		</section>
+
 		<footer class="site-footer">
 			<div class="container">© {new Date().getFullYear()} — Nabil Chebili</div>
 		</footer>
+
+		<script>
+			(function () {
+				const btn = document.querySelector('.nav-toggle');
+				const nav = document.getElementById('site-nav');
+				const wrap = document.querySelector('.nav-wrap');
+				if (!btn || !nav) return;
+				btn.addEventListener('click', function () {
+					const expanded = this.getAttribute('aria-expanded') === 'true';
+					this.setAttribute('aria-expanded', String(!expanded));
+					nav.classList.toggle('open');
+					wrap.classList.toggle('open');
+				});
+			})();
+		</script>
 	</body>
 </html>

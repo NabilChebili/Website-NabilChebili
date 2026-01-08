@@ -11,6 +11,7 @@
   justify-content: space-between;
   gap: 12px;
 }
+
 .download-all-btn {
   background: var(--ui-bg, #ffffff);
   border: 1px solid rgba(0,0,0,0.08);
@@ -156,8 +157,12 @@
 
 @media (max-width: 600px) {
   .grid {
-    column-count: 3;
+    column-count: 2;
   }
+}
+
+@media (max-width: 420px) {
+  .grid { column-count: 1; }
 }
 
 /* Gallery toggle buttons */

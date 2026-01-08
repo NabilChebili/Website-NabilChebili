@@ -1,6 +1,6 @@
 :root {
   /* Background: subtle dark gradient for a photography portfolio */
-  --bg: rgb(255, 255, 255);
+  --bg: linear-gradient(180deg, #ffffff 0%, #f5f6f7 100%);
   --bg-accents: radial-gradient(
       circle at 10% 8%,
       rgba(255, 255, 255, 0.02),
@@ -11,8 +11,9 @@
       rgba(255, 255, 255, 0.01),
       transparent 20%
     );
-  --muted: #000000b2;
-  --accent: #000000; /* light text */
+  --muted: #000000b9;
+  --accent: #000000; /* primary text (near black) */
+  --ui-bg: #ffffff;
 }
 
 html,
@@ -20,13 +21,6 @@ body {
   height: 100%;
   margin: 0;
   background: var(--bg);
-  :root {
-    /* Black & white theme with a light gradient background */
-    --bg: linear-gradient(180deg, #ffffff 0%, #f5f6f7 100%);
-    --muted: #000000b9; /* grey */
-    --accent: #000000; /* primary text (near black) */
-    --ui-bg: #ffffff;
-  }
 }
 
 .page {
@@ -73,38 +67,66 @@ body {
 }
 
 /* Photo figure + reveal animation */
-.photo{
+.photo {
   aspect-ratio: 3 / 2; /* default placeholder ratio to avoid big shifts */
   overflow: hidden;
   border-radius: 8px;
   margin: 0 0 18px;
   background: linear-gradient(180deg, #f6f6f6, #efefef);
 }
-.photo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-  opacity:0;
-  transform: translateY(12px) scale(.995);
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transform: translateY(12px) scale(0.995);
   transition-property: opacity, transform;
-  transition-duration: .8s;
-  transition-timing-function: cubic-bezier(.2,.9,.3,1);
-  transition-delay: calc(var(--i,0) * 120ms);
+  transition-duration: 0.8s;
+  transition-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1);
+  transition-delay: calc(var(--i, 0) * 120ms);
 }
-.photo.is-loaded img{ opacity:1; transform:none }
-.photo[style*="--i"] img{ /* stagger based on --i */ }
+.photo.is-loaded img {
+  opacity: 1;
+  transform: none;
+}
+.photo[style*="--i"] img {
+  /* stagger based on --i */
+}
 
 /* Reveal order animations for page title, intro text and sections */
-.page-title{opacity:0;transform:translateY(-8px);transition:opacity .6s ease,transform .6s ease}
-.page-title.is-visible{opacity:1;transform:none}
-.paragraph-center{opacity:0;transform:translateY(-6px);transition:opacity .6s ease .2s,transform .6s ease .2s}
-.paragraph-center.is-visible{opacity:1;transform:none}
-.gallery-section{opacity:0;transform:translateY(12px);transition:opacity .8s ease,transform .8s ease}
-.gallery-section.is-visible{opacity:1;transform:none}
+.page-title {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.page-title.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.paragraph-center {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
+}
+.paragraph-center.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.gallery-section {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.gallery-section.is-visible {
+  opacity: 1;
+  transform: none;
+}
 
 /* Keep existing lightbox controls readable on light background */
-.lb-controls a, .lb-controls button{ background: rgba(0,0,0,0.06); border:1px solid rgba(0,0,0,0.06); color:var(--accent) }
-
-
-
+.lb-controls a,
+.lb-controls button {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: var(--accent);
+}

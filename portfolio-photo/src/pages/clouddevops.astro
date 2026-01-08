@@ -1,0 +1,33 @@
+---
+import "../styles/global.css";
+import "../styles/layout.css";
+import "../styles/index.css";
+import Layout from "../layouts/header.astro";
+---
+
+<Layout>
+  <main class="page">
+    <h1 class="page-title fade-in">Cloud DevOps</h1>
+    <p class="paragraph-center fade-in">Travail en cours — cette page est en construction. Revenez bientôt pour des projets et retours d'expérience autour du Cloud et du DevOps.</p>
+
+    <section class="section fade-in">
+      <div class="container">
+        <p style="text-align:center; margin-top:18px;">En attendant, explorez la section <a href="/photo">Photographie</a> ou contactez-moi via la section Contact.</p>
+      </div>
+    </section>
+
+    <script>
+      (function () {
+        const nodes = Array.from(document.querySelectorAll('main .fade-in'));
+        if (!nodes.length) return;
+        const list = nodes
+          .map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
+          .sort((a, b) => a.top - b.top)
+          .map((o) => o.el);
+        const baseDelay = 80;
+        const step = 120;
+        list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
+      })();
+    </script>
+  </main>
+</Layout>
