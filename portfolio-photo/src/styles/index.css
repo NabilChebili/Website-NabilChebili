@@ -115,9 +115,7 @@ main > section:nth-child(even) {
     display: block;
   }
 }
-.footer-nav {
-  padding: 40px 0 80px;
-}
+
 @media (max-width: 900px) {
   /* Stack hero vertically and center content */
   .hero-inner {
@@ -161,17 +159,7 @@ main > section:nth-child(even) {
   }
 }
 
-/* Footer nav links: match header style */
-.footer-nav .container {
-  text-align: center;
-}
-.footer-nav nav a {
-  color: var(--muted);
-  text-decoration: none;
-  margin: 0 10px;
-  font-weight: 600;
-  display: inline-block;
-}
+
 
 /* Content paragraph indentation and readability */
 .content p {
@@ -218,10 +206,7 @@ main > section:nth-child(even) {
     padding: 10px 12px;
   }
 }
-.footer-nav nav a:hover {
-  color: var(--accent);
-  text-decoration: none;
-}
+
 
 /* Cards overview grid */
 .cards-grid {

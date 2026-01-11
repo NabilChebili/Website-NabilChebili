@@ -130,3 +130,24 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.06);
   color: var(--accent);
 }
+
+.footer-nav nav a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Footer nav links: match header style */
+.footer-nav .container {
+  text-align: center;
+}
+.footer-nav nav a {
+  color: var(--muted);
+  text-decoration: none;
+  margin: 0 10px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.footer-nav {
+  padding: 40px 0 80px;
+}

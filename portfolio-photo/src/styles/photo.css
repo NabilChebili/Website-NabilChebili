@@ -129,13 +129,13 @@
   padding: 6px 8px;
 }
 
-  .page {
-    padding: 24px 12px;
-  }
-  .grid {
-    column-gap: 12px;
-  }
+.page {
+  padding: 24px 12px;
 }
+.grid {
+  column-gap: 12px;
+}
+
 
 /* Responsive */
 @media (max-width: 1200px) {
