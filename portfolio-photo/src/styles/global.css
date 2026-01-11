@@ -140,6 +140,7 @@ body {
 .footer-nav .container {
   text-align: center;
 }
+
 .footer-nav nav a {
   color: var(--muted);
   text-decoration: none;
