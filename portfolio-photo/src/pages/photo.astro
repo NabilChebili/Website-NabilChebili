@@ -65,6 +65,21 @@ const GR3 = await (async () => {
   const list = galleries.GR3 ? await listBlobsFromPublicContainer(galleries.GR3) : [];
   return list.length ? list : fallback;
 })();
+
+const illumination = await (async () => {
+  const list = galleries.illumination ? await listBlobsFromPublicContainer(galleries.illumination) : [];
+  return list.length ? list : fallback;
+})();
+
+const croatie = await (async () => {
+  const list = galleries.croatie ? await listBlobsFromPublicContainer(galleries.croatie) : [];
+  return list.length ? list : fallback;
+})();
+
+const GR1_2 = await (async () => {
+  const list = galleries.GR1_2 ? await listBlobsFromPublicContainer(galleries.GR1_2) : [];
+  return list.length ? list : fallback;
+})();
 ---
 
 <Layout>
@@ -91,14 +106,21 @@ const GR3 = await (async () => {
 
     <nav class="gallery-toggle fade-in" role="tablist" aria-label="Galeries">
       <button class="toggle-btn active" data-target="londres" type="button">Londres</button>
-      <button class="toggle-btn" data-target="paris" type="button">Paris</button>
+      <button class="toggle-btn" data-target="paris" type="button">GR1 (1)</button>
+      <button class="toggle-btn" data-target="GR1_2" type="button">GR1 (2)</button>
+      <button class="toggle-btn" data-target="GR3" type="button">GR1 (3)</button>
       <button class="toggle-btn" data-target="mariage" type="button" style="">Mariage</button>
-      <button class="toggle-btn" data-target="GR3" type="button">GR1-3</button>
+      <button class="toggle-btn" data-target="illumination" type="button">Illumination</button>
+      <button class="toggle-btn" data-target="croatie" type="button">Croatie</button>
+      
     </nav>
 
     <Gallery id="londres" title="Londres" photos={londres} />
     <Gallery id="paris" title="Paris" photos={paris} />
     <Gallery id="mariage" title="Mariage" photos={mariage} />
+    <Gallery id="illumination" title="Illumination" photos={illumination} />
+    <Gallery id="croatie" title="Croatie" photos={croatie} />
+    <Gallery id="GR1_2" title="GR1-2" photos={GR1_2} />
     <Gallery id="GR3" title="GR1-3" photos={GR3} />
 
     <script>

@@ -2,5 +2,8 @@
   "londres": "https://nchphoto.blob.core.windows.net/photopublic/Londres/",
   "paris": "https://nchphoto.blob.core.windows.net/photopublic/GR1-1/",
   "mariage": "https://nchphoto.blob.core.windows.net/photopublic/Mariage-Pierre/",
-  "GR3": "https://nchphoto.blob.core.windows.net/photopublic/GR1-3/"
+  "GR3": "https://nchphoto.blob.core.windows.net/photopublic/GR1-3/",
+  "illumination": "https://nchphoto.blob.core.windows.net/photopublic/ExpoLum/",
+  "croatie": "https://nchphoto.blob.core.windows.net/photopublic/Croatie/",
+  "GR1_2": "https://nchphoto.blob.core.windows.net/photopublic/GR1-2/"
 }
