@@ -95,7 +95,7 @@ body {
 }
 
 /* Reveal order animations for page title, intro text and sections */
-.page-title {
+.page-title.fade-in {
   opacity: 0;
   transform: translateY(-8px);
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -104,7 +104,7 @@ body {
   opacity: 1;
   transform: none;
 }
-.paragraph-center {
+.paragraph-center.fade-in {
   opacity: 0;
   transform: translateY(-6px);
   transition: opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s;
@@ -113,7 +113,7 @@ body {
   opacity: 1;
   transform: none;
 }
-.gallery-section {
+.gallery-section.fade-in {
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 0.8s ease, transform 0.8s ease;

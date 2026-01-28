@@ -2,31 +2,143 @@
 import "../styles/global.css";
 import "../styles/layout.css";
 import "../styles/index.css";
+import "../styles/musique.css";
 import Layout from "../layouts/header.astro";
+	const videos = [
+	  // première vidéo fournie (embed)
+	  "https://www.youtube.com/watch?v=6gsqAnGUTvw",
+	  // autre vidéo (embed)
+	];
+
 ---
 
 <Layout>
 	<main class="page">
 		<h1 class="page-title fade-in">Musique</h1>
-		<p class="paragraph-center fade-in">Travail en cours — cette page est en construction. Bientôt des extraits, captures etc...</p>
+
+		<p class="paragraph-center fade-in">
+			Cette page est dédiée à ma passion pour la musique, en particulier la guitare.
+		</p>
+
+		<section class="section two-col">
+			<div class="container two-col-inner fade-in">
+				<div class="content">
+					<p class="paragraph-center narrow">
+						J’ai commencé la guitare presque par hasard, en apprenant le riff de <em>Come As You Are</em> lors d’un voyage. 
+						Ce moment simple a été un déclic. 
+						De retour chez moi, j’ai découvert quelques accords sur Internet et je me suis mis à m’entraîner régulièrement pour reproduire des chansons que j’aimais.
+					<br><br>
+					</p>
+					<p class="paragraph-center narrow">
+						Peu à peu, la guitare a pris une place dans mon quotidien. 
+						Elle m’a appris à écouter autrement, à reproduire ce que j’entendais, puis à laisser venir mes propres idées. 
+						Avec le temps, j’y ai trouvé une vraie satisfaction : progresser par étapes, avec patience.
+					</p>
+				</div>
+				<div class="media">
+					<img src="image.png" alt="Guitare" />
+				</div>
+			</div>
+		</section>
 
 		<section class="section fade-in">
 			<div class="container">
-				<p style="text-align:center; margin-top:18px;">En attendant, vous pouvez visiter la galerie <a href="/photo">Photographie</a> ou me contacter via la section Contact.</p>
+				<h2 style="margin-bottom:12px;">Carrousel de vidéos</h2>
+
+				<div class="video-carousel" aria-label="Carrousel vidéo">
+					<button class="car-btn prev" aria-label="Précédent">‹</button>
+					<div class="carousel-track" role="list">
+						{videos.map((src) => (
+							<div class="carousel-item" role="listitem">
+								<iframe
+									width="200"
+									height="315"
+									src={`https://www.youtube.com/embed/${src.split('v=')[1]}`}
+									title="YouTube video player"
+									frameborder="0"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+									allowfullscreen
+								></iframe>
+							</div>
+						))}
+					</div>
+					<button class="car-btn next" aria-label="Suivant">›</button>
+				</div>
+
+				<p class="paragraph-center">Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile, balayez la zone.</p>
+			</div>
+		</section>
+
+		<section class="section two-col">
+			<div class="tab-card fade-in">
+				<div class="tab-card-media" aria-hidden="true">🎸</div>
+				<div class="tab-card-body">
+					<h3>Tablatures</h3>
+					<p class="muted">Envie de jouer ces morceaux ? J'ai rassemblé des tablatures simplifiées pour commencer rapidement.</p>
+					<a class="tab-btn" href="https://drive.google.com/drive/folders/1X1YJH1kTgk3v2Yk3lKXJHjKXJHjKXJHj?usp=sharing" target="_blank" rel="noopener noreferrer">Accéder aux tablatures</a>
+				</div>
 			</div>
 		</section>
 
 		<script>
 			(function () {
+				// reveal animations (existing behavior)
 				const nodes = Array.from(document.querySelectorAll('main .fade-in'));
-				if (!nodes.length) return;
-				const list = nodes
-					.map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
-					.sort((a, b) => a.top - b.top)
-					.map((o) => o.el);
-				const baseDelay = 80;
-				const step = 120;
-				list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
+				if (nodes.length) {
+					const list = nodes
+						.map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
+						.sort((a, b) => a.top - b.top)
+						.map((o) => o.el);
+					const baseDelay = 80;
+					const step = 120;
+					list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
+				}
+
+				// Carousel logic (use native horizontal scroll + CSS scroll-snap)
+				const carousel = document.querySelector('.video-carousel');
+				if (!carousel) return;
+				const track = carousel.querySelector('.carousel-track');
+				let items = Array.from(track.querySelectorAll('.carousel-item'));
+				const prev = carousel.querySelector('.car-btn.prev');
+				const next = carousel.querySelector('.car-btn.next');
+				let index = 0;
+
+				function clamp(i) { return Math.max(0, Math.min(i, items.length - 1)); }
+
+				function scrollToIndex(i) {
+					const w = carousel.getBoundingClientRect().width;
+					track.scrollTo({ left: i * w, behavior: 'smooth' });
+					index = clamp(i);
+				}
+
+				prev.addEventListener('click', () => { scrollToIndex(index - 1); });
+				next.addEventListener('click', () => { scrollToIndex(index + 1); });
+
+				// keyboard navigation
+				document.addEventListener('keydown', (e) => {
+					if (e.key === 'ArrowLeft') scrollToIndex(index - 1);
+					if (e.key === 'ArrowRight') scrollToIndex(index + 1);
+				});
+
+				// update index on native scroll end (debounced)
+				let scrollTimer = null;
+				track.addEventListener('scroll', () => {
+					if (scrollTimer) clearTimeout(scrollTimer);
+					scrollTimer = setTimeout(() => {
+						const w = carousel.getBoundingClientRect().width;
+						index = Math.round(track.scrollLeft / w);
+					}, 120);
+				});
+
+				// make carousel responsive: set items width to carousel width (use inline-block sizing)
+				function resize() {
+					const w = carousel.getBoundingClientRect().width;
+					items = Array.from(track.querySelectorAll('.carousel-item'));
+					items.forEach((it) => { it.style.width = w + 'px'; });
+					scrollToIndex(index);
+				}
+				window.addEventListener('resize', resize);
+				resize();
 			})();
 		</script>
 	</main>
