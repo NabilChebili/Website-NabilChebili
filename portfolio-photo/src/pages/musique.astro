@@ -48,19 +48,22 @@ import Layout from "../layouts/header.astro";
 				<div class="video-carousel" aria-label="Carrousel vidéo">
 					<button class="car-btn prev" aria-label="Précédent">‹</button>
 					<div class="carousel-track" role="list">
-						{videos.map((src) => (
-							<div class="carousel-item" role="listitem">
-								<iframe
-									width="200"
-									height="315"
-									src={`https://www.youtube.com/embed/${src.split('v=')[1]}`}
-									title="YouTube video player"
-									frameborder="0"
-									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-									allowfullscreen
-								></iframe>
-							</div>
-						))}
+						{videos.map((src) => {
+							const id = src.includes('v=') ? src.split('v=')[1].split('&')[0] : src.split('/').pop();
+							return (
+								<div class="carousel-item" role="listitem">
+									<iframe
+										width="200"
+										height="315"
+										src={`https://www.youtube-nocookie.com/embed/${id}`}
+										title="YouTube video player"
+										frameborder="0"
+										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+										allowfullscreen
+									></iframe>
+								</div>
+							);
+						})}
 					</div>
 					<button class="car-btn next" aria-label="Suivant">›</button>
 				</div>
@@ -75,7 +78,7 @@ import Layout from "../layouts/header.astro";
 				<div class="tab-card-body">
 					<h3>Tablatures</h3>
 					<p class="muted">Envie de jouer ces morceaux ? J'ai rassemblé des tablatures simplifiées pour commencer rapidement.</p>
-					<a class="tab-btn" href="https://drive.google.com/drive/folders/1X1YJH1kTgk3v2Yk3lKXJHjKXJHjKXJHj?usp=sharing" target="_blank" rel="noopener noreferrer">Accéder aux tablatures</a>
+					<a class="tab-btn" href="https://docs.google.com/document/d/1lzav6pmo0A10RGYKqbtwUIGk8aWnmJpQV9uYpebnV2Q/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Accéder aux tablatures</a>
 				</div>
 			</div>
 		</section>
