@@ -1,5 +1,36 @@
 ---
 import "../styles/layout.css";
+
+const {
+	title = "Nabil Chebili",
+	description =
+		"Portfolio de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
+	image = "/LogoRond.svg",
+	ogType = "website",
+} = Astro.props;
+
+const siteUrl = Astro.site ?? new URL("https://www.nabilchebili.fr");
+const canonicalUrl = Astro.url && siteUrl ? new URL(Astro.url.pathname, siteUrl).href : undefined;
+const ogImageUrl = siteUrl ? new URL(image, siteUrl).href : image;
+
+const fullTitle = String(title).includes("Nabil Chebili") ? String(title) : `${title} — Nabil Chebili`;
+
+const schemaPerson = {
+	"@context": "https://schema.org",
+	"@type": "Person",
+	name: "Nabil Chebili",
+	url: siteUrl?.href,
+	image: ogImageUrl,
+	jobTitle: "Ingénieur Cloud / DevOps",
+	sameAs: ["https://www.linkedin.com/in/chebili-nabil/"],
+};
+
+const schemaWebsite = {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	name: "Nabil Chebili",
+	url: siteUrl?.href,
+};
 ---
 
 <!doctype html>
@@ -9,7 +40,25 @@ import "../styles/layout.css";
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/LogoRond.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title> Nabil Chebili</title>
+		<title>{fullTitle}</title>
+		<meta name="description" content={description} />
+		<meta name="robots" content="index,follow" />
+		{canonicalUrl ? <link rel="canonical" href={canonicalUrl} /> : null}
+
+		<meta property="og:site_name" content="Nabil Chebili" />
+		<meta property="og:title" content={fullTitle} />
+		<meta property="og:description" content={description} />
+		{canonicalUrl ? <meta property="og:url" content={canonicalUrl} /> : null}
+		<meta property="og:type" content={ogType} />
+		<meta property="og:image" content={ogImageUrl} />
+
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={fullTitle} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImageUrl} />
+
+		<script type="application/ld+json">{JSON.stringify(schemaPerson)}</script>
+		<script type="application/ld+json">{JSON.stringify(schemaWebsite)}</script>
 	</head>
 	<body>
 		<header class="site-header">
@@ -55,10 +104,10 @@ import "../styles/layout.css";
 				const btn = document.querySelector('.nav-toggle');
 				const nav = document.getElementById('site-nav');
 				const wrap = document.querySelector('.nav-wrap');
-				if (!btn || !nav) return;
-				btn.addEventListener('click', function () {
-					const expanded = this.getAttribute('aria-expanded') === 'true';
-					this.setAttribute('aria-expanded', String(!expanded));
+				if (!btn || !nav || !wrap) return;
+				btn.addEventListener('click', () => {
+					const expanded = btn.getAttribute('aria-expanded') === 'true';
+					btn.setAttribute('aria-expanded', String(!expanded));
 					nav.classList.toggle('open');
 					wrap.classList.toggle('open');
 				});
