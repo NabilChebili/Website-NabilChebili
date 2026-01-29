@@ -27,6 +27,7 @@
 }
 
 .cd-paragraph {
+    text-align: justify;
 	margin-top: 10px;
 }
 
@@ -282,18 +283,6 @@
 	padding: 14px 14px;
 	box-shadow: 0 14px 34px rgba(2,6,23,0.05);
 	position: relative;
-}
-
-.cd-tl-card::before {
-	content: "";
-	position: absolute;
-	left: -10px;
-	top: 20px;
-	width: 8px;
-	height: 8px;
-	border-radius: 999px;
-	background: #111;
-	box-shadow: 0 0 0 6px rgba(0,0,0,0.06);
 }
 
 .cd-bullets {
