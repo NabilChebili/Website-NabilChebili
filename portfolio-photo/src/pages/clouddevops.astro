@@ -2,17 +2,290 @@
 import "../styles/global.css";
 import "../styles/layout.css";
 import "../styles/index.css";
+import "../styles/clouddevops.css";
 import Layout from "../layouts/header.astro";
+
+const profile = {
+  title: "Cloud DevOps",
+  subtitle:
+    "Ingénieur Cloud / DevOps spécialisé Azure, IaC et DevSecOps — j’aide les équipes à livrer plus vite, plus proprement, et avec une posture sécurité solide.",
+  stats: [
+    { k: "Expérience", v: "+4/5 ans" },
+    { k: "Spécialités", v: "Azure · CI/CD · IaC" },
+    { k: "Approche", v: "Agile (Scrum/SAFe)" },
+  ],
+};
+
+const expertise = [
+  {
+    title: "Cloud Azure (IaaS/PaaS)",
+    desc: "Landing zones, réseau, services applicatifs, observabilité et standards de déploiement.",
+    tags: ["VNet", "Hub & Spoke", "Firewall", "APIM", "WebApp", "Log Analytics"],
+  },
+  {
+    title: "DevOps & IaC",
+    desc: "Industrialisation CI/CD, templates, gouvernance et infrastructure as code au service de la productivité.",
+    tags: ["Terraform", "Azure DevOps", "GitHub Actions", "GitLab", "YAML"],
+  },
+  {
+    title: "DevSecOps",
+    desc: "Sécurisation de la supply chain: scan code/dépendances, secrets, contrôles d’accès et politiques.",
+    tags: ["GHAS", "CodeQL", "Secret scanning", "Azure Policy", "Entra ID"],
+  },
+  {
+    title: "Scripting & automatisation",
+    desc: "Automatisation pragmatique pour réduire le temps perdu sur les tâches répétitives et fiabiliser les opérations.",
+    tags: ["PowerShell", "Bash", "ARM", "Python"],
+  },
+];
+
+const certifications = [
+  { name: "AZ-700", detail: "Designing and Implementing Microsoft Azure Networking Solutions (2025)" },
+  { name: "GitHub Actions", detail: "GitHub Actions Certification (2025)" },
+  { name: "AZ-400", detail: "Designing and Implementing Microsoft DevOps Solutions (2021)" },
+  { name: "AZ-104", detail: "Azure Administrator Associate (2021)" },
+  { name: "AZ-900", detail: "Azure Fundamentals (2021)" },
+];
+
+const missions = [
+  {
+    period: "2025 · 1 mois (mission active)",
+    client: "RTE",
+    clientLogo: "/company_logo/RTE.png",
+    role: "Cloud Engineer DevOps — Azure DevOps & Azure",
+    summary:
+      "Conception, sécurisation et industrialisation d’environnements Azure: landing zones via AVM/Terraform, gouvernance Azure Policy et structuration AZDO.",
+    bullets: [
+      "Participation à la mise en place de landing zones (Terraform + Azure Verified Modules)",
+      "Structuration de projets Azure DevOps: bonnes pratiques CI/CD, permissions, templates",
+      "Déploiement/ajustement d’Azure Policies pour sécurité et conformité",
+    ],
+    stack: ["Azure", "Terraform", "AVM", "Azure DevOps", "Azure Policy", "DevSecOps"],
+  },
+  {
+    period: "2025 · 5 mois",
+    client: "Ardian",
+    clientLogo: "/company_logo/Ardian.png",
+    role: "Cloud Engineer DevOps — GitHub & Azure",
+    summary:
+      "Modernisation DevOps autour de GitHub Advanced Security et migration progressive d’Azure DevOps vers GitHub Actions, avec un focus DevSecOps.",
+    bullets: [
+      "Mise en place & exploitation GHAS (CodeQL, secret scanning, dépendances, alerting)",
+      "Migration de pipelines Azure DevOps vers GitHub Actions + accompagnement des équipes",
+      "Standards et mécanismes de sécurité intégrés aux workflows CI/CD",
+    ],
+    stack: ["GitHub", "GitHub Actions", "GHAS", "Azure", "Azure DevOps", "Agile"],
+  },
+  {
+    period: "2025 · 7 mois",
+    client: "Lemonway",
+    clientLogo: "/company_logo/Lemonway.png",
+    role: "Consultant Cloud Engineer & DevOps — Azure",
+    summary:
+      "Déploiement d’une infra data (incl. Databricks) via Terraform, durcissement CI/CD et conformité (PCI DSS), refonte de composants legacy.",
+    bullets: [
+      "Déploiement infrastructure data sur Azure (Databricks) en IaC",
+      "Architecture réseau Hub & Spoke + firewall Azure (IaC)",
+      "Sécurisation GitLab: runners, permissions, stratégies de branches, pipelines complexes",
+    ],
+    stack: ["Azure", "AWS", "GitLab", "Terraform", "Databricks", "Réseau Cloud"],
+  },
+  {
+    period: "2024–2025 · 9 mois",
+    client: "SUEZ (One Forge)",
+    clientLogo: "/company_logo/Suez.png",
+    role: "Consultant Cloud Engineer & DevOps — Azure",
+    summary:
+      "Expertise Azure DevOps pour livrer des projets ADO prêts à l’emploi: standardisation, automatisation, support et amélioration continue.",
+    bullets: [
+      "Livraison automatisée de projets Azure DevOps adaptés aux clients",
+      "Support/formation, accompagnement des équipes et amélioration continue du produit",
+      "Mise en place/optimisation de pipelines CI/CD avec contraintes sécurité",
+    ],
+    stack: ["Azure", "Azure DevOps", "Terraform", "PowerShell", "Kubernetes", "ServiceNow"],
+  },
+  {
+    period: "2022–2024 · 2 ans",
+    client: "Société Générale (Skynet)",
+    clientLogo: "/company_logo/SG.png",
+    role: "Cloud & DevOps Engineer — Team Lead & PO",
+    summary:
+      "Pilotage produit et delivery d’un socle de sécurité Azure: gouvernance, automatisation, conformité et exploitation.",
+    bullets: [
+      "Gestion d’équipe (développement PowerShell), organisation et suivi",
+      "Déploiement des règles de sécurité Azure (Policy, Entra ID, Automation Account, Log Analytics…)",
+      "Supervision/optimisation de l’infrastructure et gestion Agile",
+    ],
+    stack: ["Azure", "PowerShell", "Terraform", "Jenkins", "JIRA", "CMMI"],
+  },
+  {
+    period: "2021–2022 · 6 mois",
+    client: "Devoteam (Alfun)",
+    role: "Cloud & DevOps Engineer — Azure",
+    summary:
+      "Automatisation de tâches récurrentes (gain de temps, fiabilité), intégration des contraintes sécurité et pont M365 ↔ Azure.",
+    bullets: [
+      "Scripts/outils d’automatisation (réduction des tâches manuelles)",
+      "Sécurité dès la conception + conformité aux politiques internes",
+      "Intégration M365 (SharePoint, Teams, OneDrive) avec Azure",
+    ],
+    stack: ["Azure", "PowerShell", "Azure DevOps", "JIRA", "Git", "M365"],
+  },
+];
+
+const other = {
+  languages: [{ k: "Anglais", v: "Courant (TOEIC 830)" }],
+  notes: [
+    "J’aime les environnements complexes et la qualité d’exécution (clarté, standards, sécurité).",
+    "Je privilégie la documentation courte, utile, et des templates réutilisables pour accélérer les équipes.",
+  ],
+};
 ---
 
 <Layout>
   <main class="page">
-    <h1 class="page-title fade-in">Cloud DevOps</h1>
-    <p class="paragraph-center fade-in">Travail en cours — cette page est en construction. Revenez bientôt pour des projets et retours d'expérience autour du Cloud et du DevOps.</p>
+    <section class="cd-hero fade-in">
+      <div class="container cd-hero-inner">
+        <div class="cd-hero-copy">
+          <h1 class="page-title">{profile.title}</h1>
+          <p class="cd-lead">{profile.subtitle}</p>
+          <div class="cd-stats" role="list">
+            {profile.stats.map((s) => (
+              <div class="cd-stat" role="listitem">
+                <div class="cd-stat-k">{s.k}</div>
+                <div class="cd-stat-v">{s.v}</div>
+              </div>
+            ))}
+          </div>
 
-    <section class="section fade-in">
+          <div class="cd-ctas">
+            <a class="btn" href="#missions">Voir mes missions</a>
+            <a class="btn btn-outline" href="/">Me contacter</a>
+          </div>
+        </div>
+
+        <div class="cd-hero-media" aria-hidden="true">
+          <div class="cd-orbit" aria-hidden="true">
+            <div class="cd-orbit-track">
+              <div class="cd-orbit-item"><img src="/devops_images/azure.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/terraform.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/kube.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/docker.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/git.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/ado.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/vscode.png" alt="" loading="eager" /></div>
+
+              {/* duplicate for seamless loop */}
+              <div class="cd-orbit-item"><img src="/devops_images/azure.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/terraform.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/kube.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/docker.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/git.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/ado.png" alt="" loading="eager" /></div>
+              <div class="cd-orbit-item"><img src="/devops_images/vscode.png" alt="" loading="eager" /></div>
+            </div>
+          </div>
+          <div class="cd-hero-glass">
+            <div class="cd-hero-pill">Azure</div>
+            <div class="cd-hero-pill">Terraform</div>
+            <div class="cd-hero-pill">PowerShell</div>
+            <div class="cd-hero-pill">GitHub / AZDO</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade-in cd-section">
       <div class="container">
-        <p style="text-align:center; margin-top:18px;">En attendant, explorez la section <a href="/photo">Photographie</a> ou contactez-moi via la section Contact.</p>
+        <h2 class="cd-h2">Ce que j’apporte</h2>
+        <p class="paragraph-center cd-paragraph">
+          Je conçois et j’industrialise des plateformes cloud sécurisées, en mettant l’accent sur la fiabilité, la gouvernance et la
+          fluidité des livraisons. Mon objectif est simple&nbsp;: permettre aux équipes de construire et déployer en confiance, avec des standards clairs.
+        </p>
+
+        <div class="cd-grid">
+          {expertise.map((x) => (
+            <article class="cd-card">
+              <h3 class="cd-h3">{x.title}</h3>
+              <p class="cd-muted">{x.desc}</p>
+              <div class="cd-tags" aria-label="Compétences">
+                {x.tags.map((t) => (
+                  <span class="cd-tag">{t}</span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section id="missions" class="section fade-in cd-section">
+      <div class="container">
+        <div class="cd-headline">
+          <h2 class="cd-h2">Missions (sélection)</h2>
+          <p class="cd-muted">Une lecture “produit + delivery”, avec une attention forte à la sécurité et à l’industrialisation.</p>
+        </div>
+
+        <div class="cd-timeline" role="list">
+          {missions.map((m) => (
+            <article class="cd-tl-item" role="listitem">
+              <div class="cd-tl-meta">
+                <div class="cd-tl-period">{m.period}</div>
+                <div class="cd-tl-client">{m.client}</div>
+                {m.clientLogo ? (
+                  <img class="cd-company-logo" src={m.clientLogo} alt={`Logo ${m.client}`} loading="lazy" />
+                ) : null}
+              </div>
+
+              <div class="cd-tl-card">
+                <h3 class="cd-h3">{m.role}</h3>
+                <p class="cd-muted">{m.summary}</p>
+                <ul class="cd-bullets">
+                  {m.bullets.map((b) => (
+                    <li>{b}</li>
+                  ))}
+                </ul>
+                <div class="cd-tags" aria-label="Stack">
+                  {m.stack.map((t) => (
+                    <span class="cd-tag">{t}</span>
+                  ))}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade-in cd-section">
+      <div class="container cd-two-col">
+        <div>
+          <h2 class="cd-h2">Certifications</h2>
+          <div class="cd-cert-grid" role="list">
+            {certifications.map((c) => (
+              <div class="cd-cert" role="listitem">
+                <div class="cd-cert-badge">{c.name}</div>
+                <div class="cd-cert-detail">{c.detail}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h2 class="cd-h2">Quelques repères</h2>
+          <div class="cd-note">
+            <ul class="cd-bullets">
+              {other.languages.map((l) => (
+                <li>
+                  <strong>{l.k} :</strong> {l.v}
+                </li>
+              ))}
+              {other.notes.map((n) => (
+                <li>{n}</li>
+              ))}
+            </ul>
+          </div>
+          
+        </div>
       </div>
     </section>
 
