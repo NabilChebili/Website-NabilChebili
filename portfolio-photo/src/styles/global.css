@@ -1,6 +1,9 @@
 :root {
-  /* Background: subtle dark gradient for a photography portfolio */
-  --bg: linear-gradient(180deg, #ffffff 0%, #f5f6f7 100%);
+  /* Flat background — a gradient here would stretch across the full page
+     height, so its color at any given scroll position depends on how long
+     the page is rather than on the content, making pages look inconsistently
+     grayer or whiter for no reason. */
+  --bg: #f5f6f7;
   --bg-accents: radial-gradient(
       circle at 10% 8%,
       rgba(255, 255, 255, 0.02),
