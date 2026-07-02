@@ -7,7 +7,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
   <div class="photo-grid-cards">
     {items.map((p, i) => (
       <figure class="photo-card fade-img" style={`--i:${i}`}>
-        <img src={p.url} alt="" loading="lazy" tabindex="0" />
+        <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
         {p.caption ? <figcaption>{p.caption}</figcaption> : null}
       </figure>
     ))}
