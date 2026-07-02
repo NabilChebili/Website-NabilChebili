@@ -1,0 +1,20 @@
+# Copier ce fichier en terraform.tfvars et adapter les valeurs si besoin.
+
+project_name = "nabilchebili"
+environment  = "production"
+location     = "francecentral"
+
+# Laisser vide pour générer automatiquement un nom unique
+resource_group_name = ""
+static_web_app_name  = ""
+
+static_web_app_sku_tier = "Free"
+
+# Renseigner pour rattacher www.nabilchebili.fr (nécessite ensuite de créer
+# l'enregistrement DNS CNAME/TXT indiqué par Azure après le premier apply)
+custom_domain = ""
+
+storage_account_tier             = "Standard"
+storage_account_replication_type = "LRS"
+photos_container_name            = "photos"
+photos_container_access_type     = "blob"
