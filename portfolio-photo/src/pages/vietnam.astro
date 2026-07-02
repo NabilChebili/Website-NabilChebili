@@ -1,0 +1,95 @@
+---
+import "../styles/global.css";
+import "../styles/photo.css";
+import Layout from "../layouts/header.astro";
+import Gallery from "../components/Gallery.astro";
+import PostStory from "../components/PostStory.astro";
+import vietnam from "../data/vietnam.json";
+import { listGalleries } from "../lib/blobList.js";
+
+const fallback = [
+  "/photos/A7401177.jpg",
+  "/photos/A7401113.jpg",
+  "/photos/A7401167.jpg",
+  "/photos/A7401181.jpg",
+];
+
+const photosByKey = await listGalleries(vietnam.galleries, fallback);
+
+const labels = {
+  "ba-na": "Bà Nà",
+  "da-nang": "Đà Nẵng",
+  "festival-saigon": "Festival Saigon",
+  gaming: "Gaming",
+  "nha-trang": "Nha Trang",
+  "phu-yen": "Phú Yên",
+  "quy-nhon": "Quy Nhơn",
+  saigon: "Saigon",
+  tet: "Têt",
+};
+---
+
+<Layout
+  title="Vietnam"
+  description="Récit photo d'un voyage au Vietnam : Saigon, Đà Nẵng, Nha Trang, Phú Yên et plus."
+>
+  <main class="page">
+    <h1 class="page-title fade-in">Vietnam</h1>
+    <p class="paragraph-center fade-in page-intro">
+      Un mois à travers le Vietnam, du sud au centre, entre grandes villes bouillonnantes,
+      côtes sauvages et fêtes du Têt.
+    </p>
+
+    <PostStory photos={vietnam.post} />
+
+    <h2 class="page-title fade-in" style="text-align:center; margin-top: 20px;">Les galeries</h2>
+
+    <nav class="gallery-toggle fade-in" role="tablist" aria-label="Galeries Vietnam">
+      {Object.keys(vietnam.galleries).map((key, i) => (
+        <button class:list={["toggle-btn", { active: i === 0 }]} data-target={key} type="button">
+          {labels[key] ?? key}
+        </button>
+      ))}
+    </nav>
+
+    {Object.keys(vietnam.galleries).map((key) => (
+      <Gallery id={key} title={labels[key] ?? key} photos={photosByKey[key]} />
+    ))}
+
+    <script>
+      (function () {
+        const sections = Array.from(document.querySelectorAll('.gallery-section'));
+        const buttons = Array.from(document.querySelectorAll('.toggle-btn'));
+
+        function showSection(id) {
+          sections.forEach((s) => {
+            if (s.id === id) {
+              s.style.display = '';
+              setTimeout(() => s.classList.add('is-visible'), 120);
+            } else {
+              s.style.display = 'none';
+              s.classList.remove('is-visible');
+            }
+          });
+          buttons.forEach((b) => b.classList.toggle('active', b.dataset.target === id));
+        }
+
+        if (sections.length) {
+          sections.forEach((s, i) => {
+            s.style.display = i === 0 ? '' : 'none';
+            if (i === 0) setTimeout(() => s.classList.add('is-visible'), 200);
+          });
+        }
+
+        buttons.forEach((btn) => btn.addEventListener('click', () => showSection(btn.dataset.target)));
+
+        document.addEventListener('DOMContentLoaded', () => {
+          const title = document.querySelector('.page-title');
+          const intro = document.querySelector('.page-intro');
+          if (title) setTimeout(() => title.classList.add('is-visible'), 120);
+          if (intro) setTimeout(() => intro.classList.add('is-visible'), 420);
+        });
+      })();
+    </script>
+  </main>
+</Layout>

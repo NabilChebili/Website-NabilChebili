@@ -4,6 +4,7 @@ import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
 import Gallery from "../components/Gallery.astro";
 import galleries from "../data/galleries.json";
+import { listGalleries } from "../lib/blobList.js";
 
 // Local fallbacks (kept from original test images) used if remote listing fails
 const fallback = [
@@ -13,73 +14,7 @@ const fallback = [
   "/photos/A7401181.jpg",
 ];
 
-async function listBlobsFromPublicContainer(containerUrl) {
-  try {
-    const u = new URL(containerUrl);
-    const origin = u.origin; // e.g. https://nchphoto.blob.core.windows.net
-    const parts = u.pathname.split("/").filter(Boolean); // ['photopublic','GR1-1']
-    const container = parts[0] || "";
-    const prefix = parts.slice(1).join("/");
-
-    if (!container) return [];
-
-    // Azure list blobs API for public containers
-    let listUrl = `${origin}/${container}?restype=container&comp=list`;
-    if (prefix) {
-      // ensure prefix ends with slash to list folder-like paths
-      const p = prefix.endsWith("/") ? prefix : prefix + "/";
-      listUrl += `&prefix=${encodeURIComponent(p)}`;
-    }
-
-    const res = await fetch(listUrl);
-    if (!res.ok) return [];
-    const xml = await res.text();
-
-    // Simple XML parse to extract <Name> elements (looks like: <Name>GR1-1/photo.jpg</Name>)
-    const names = Array.from(xml.matchAll(/<Name>([^<]+)<\/Name>/g)).map((m) => m[1]);
-    if (!names.length) return [];
-
-    // Build full public URLs for each blob
-    return names.map((name) => `${origin}/${container}/${name}`);
-  } catch (err) {
-    return [];
-  }
-}
-
-const illumination = await (async () => {
-  const list = galleries.illumination ? await listBlobsFromPublicContainer(galleries.illumination) : [];
-  return list.length ? list : fallback;
-})();
-
-const londres = await (async () => {
-  const list = galleries.londres ? await listBlobsFromPublicContainer(galleries.londres) : [];
-  return list.length ? list : fallback;
-})();
-
-const paris = await (async () => {
-  const list = galleries.paris ? await listBlobsFromPublicContainer(galleries.paris) : [];
-  return list.length ? list : fallback;
-})();
-
-const mariage = await (async () => {
-  const list = galleries.mariage ? await listBlobsFromPublicContainer(galleries.mariage) : [];
-  return list.length ? list : fallback;
-})();
-
-const GR3 = await (async () => {
-  const list = galleries.GR3 ? await listBlobsFromPublicContainer(galleries.GR3) : [];
-  return list.length ? list : fallback;
-})();
-
-const croatie = await (async () => {
-  const list = galleries.croatie ? await listBlobsFromPublicContainer(galleries.croatie) : [];
-  return list.length ? list : fallback;
-})();
-
-const GR1_2 = await (async () => {
-  const list = galleries.GR1_2 ? await listBlobsFromPublicContainer(galleries.GR1_2) : [];
-  return list.length ? list : fallback;
-})();
+const photosByKey = await listGalleries(galleries, fallback);
 ---
 
 <Layout
@@ -89,15 +24,18 @@ const GR1_2 = await (async () => {
   <main class="page">
     <h1 class="page-title fade-in">Photographie</h1>
     <p class="paragraph-center fade-in page-intro">
-      Bienvenue dans ma sélection photographique : un aperçu de voyages, moments et instants précieux. 
+      Bienvenue dans ma sélection photographique : un aperçu de voyages, moments et instants précieux.
       <br><br>
-      
+
       A travers le design et la recherche d’esthétique dans les détails, la photographie s’est rapidement imposée comme un moyen d’expression naturel.
 
-      Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main. 
+      Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main.
       Chaque déplacement est devenu une occasion de raconter une histoire, de figer une ambiance, un regard, un instant.
-      
+
       Les images qui suivent sont des fragments de ces voyages, entre lieux traversés et moments vécus.
+      <br><br>
+
+      Deux récits complets sont disponibles pour le <a href="/vietnam">Vietnam</a> et l'<a href="/indonesie">Indonésie</a>.
       <br><br>
 
       Petit conseil : mettez vous en WI-FI ou 4G avant de cliquer sur une galerie (les images peuvent être lourdes à charger en 3G).
@@ -117,13 +55,13 @@ const GR1_2 = await (async () => {
       <button class="toggle-btn" data-target="croatie" type="button">Croatie</button>
     </nav>
 
-    <Gallery id="illumination" title="Illumination" photos={illumination} />
-    <Gallery id="londres" title="Londres" photos={londres} />
-    <Gallery id="paris" title="Paris" photos={paris} />
-    <Gallery id="GR1_2" title="GR1-2" photos={GR1_2} />
-    <Gallery id="GR3" title="GR1-3" photos={GR3} />
-    <Gallery id="mariage" title="Mariage" photos={mariage} />
-    <Gallery id="croatie" title="Croatie" photos={croatie} />
+    <Gallery id="illumination" title="Illumination" photos={photosByKey.illumination} />
+    <Gallery id="londres" title="Londres" photos={photosByKey.londres} />
+    <Gallery id="paris" title="Paris" photos={photosByKey.paris} />
+    <Gallery id="GR1_2" title="GR1-2" photos={photosByKey.GR1_2} />
+    <Gallery id="GR3" title="GR1-3" photos={photosByKey.GR3} />
+    <Gallery id="mariage" title="Mariage" photos={photosByKey.mariage} />
+    <Gallery id="croatie" title="Croatie" photos={photosByKey.croatie} />
 
     <script>
       (function () {
@@ -174,6 +112,6 @@ const GR1_2 = await (async () => {
         if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(staggerShow, 20);
       })();
     </script>
-	
+
   </main>
 </Layout>

@@ -1,0 +1,170 @@
+---
+const { photos = [] } = Astro.props;
+---
+
+<section class="post-story" aria-label="Récit photo">
+  <div class="post-story-inner">
+    <div class="post-story-sticky" aria-hidden="true">
+      <div class="post-story-images">
+        {photos.map((p, i) => (
+          <img
+            class="story-img"
+            class:list={[{ active: i === 0 }]}
+            data-index={i}
+            src={p.url}
+            alt=""
+            loading={i === 0 ? "eager" : "lazy"}
+          />
+        ))}
+      </div>
+    </div>
+
+    <div class="post-story-steps">
+      {photos.map((p, i) => (
+        <div class="story-step" class:list={[{ active: i === 0 }]} data-index={i}>
+          <img class="story-step-img" src={p.url} alt="" loading="lazy" />
+          <p class="story-step-text">{p.caption}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const stories = Array.from(document.querySelectorAll(".post-story"));
+    stories.forEach((story) => {
+      const steps = Array.from(story.querySelectorAll(".story-step"));
+      const images = Array.from(story.querySelectorAll(".story-img"));
+      if (!steps.length || !images.length) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const index = entry.target.getAttribute("data-index");
+            if (entry.isIntersecting) {
+              steps.forEach((s) => s.classList.remove("active"));
+              images.forEach((img) => img.classList.remove("active"));
+              entry.target.classList.add("active");
+              const img = images.find((im) => im.getAttribute("data-index") === index);
+              if (img) img.classList.add("active");
+            }
+          });
+        },
+        { threshold: 0.55 }
+      );
+
+      steps.forEach((step) => observer.observe(step));
+    });
+  })();
+</script>
+
+<style>
+  .post-story {
+    padding: 40px 0 60px;
+  }
+
+  .post-story-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .post-story-sticky {
+    position: sticky;
+    top: 90px;
+    height: 72vh;
+    align-self: start;
+  }
+
+  .post-story-images {
+    position: relative;
+    height: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(17, 24, 39, 0.15);
+  }
+
+  .story-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .story-img.active {
+    opacity: 1;
+  }
+
+  .post-story-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 20vh;
+    padding: 10vh 0;
+  }
+
+  .story-step {
+    min-height: 30vh;
+    display: flex;
+    align-items: center;
+    opacity: 0.35;
+    transition: opacity 0.4s ease;
+  }
+  .story-step.active {
+    opacity: 1;
+  }
+
+  .story-step-img {
+    display: none;
+  }
+
+  .story-step-text {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #1f2430;
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .post-story-inner {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 0 16px;
+    }
+
+    .post-story-sticky {
+      display: none;
+    }
+
+    .post-story-steps {
+      gap: 36px;
+      padding: 0;
+    }
+
+    .story-step {
+      flex-direction: column;
+      align-items: stretch;
+      min-height: 0;
+      opacity: 1;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .story-step-img {
+      display: block;
+      width: 100%;
+      border-radius: 16px;
+      object-fit: cover;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.12);
+    }
+
+    .story-step-text {
+      font-size: 1.02rem;
+    }
+  }
+</style>
