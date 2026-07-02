@@ -1,8 +1,9 @@
 # Copier ce fichier en terraform.tfvars et adapter les valeurs si besoin.
 
-project_name = "nabilchebili"
+project_name = "nch"
 environment  = "production"
-location     = "francecentral"
+# westeurope : Azure Static Web Apps n'est pas disponible en francecentral.
+location = "westeurope"
 
 # Laisser vide pour générer automatiquement un nom unique
 resource_group_name = ""
@@ -10,9 +11,9 @@ static_web_app_name  = ""
 
 static_web_app_sku_tier = "Free"
 
-# Renseigner pour rattacher www.nabilchebili.fr (nécessite ensuite de créer
-# l'enregistrement DNS CNAME/TXT indiqué par Azure après le premier apply)
-custom_domain = ""
+# Renseigner pour rattacher www.nabilchebili.fr. Nécessite d'avoir créé au préalable
+# le CNAME www -> <static_web_app_default_host_name> chez IONOS (voir terraform/README.md).
+custom_domain = "www.nabilchebili.fr"
 
 storage_account_tier             = "Standard"
 storage_account_replication_type = "LRS"
