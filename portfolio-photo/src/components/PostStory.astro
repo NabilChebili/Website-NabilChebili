@@ -2,169 +2,86 @@
 const { photos = [] } = Astro.props;
 ---
 
-<section class="post-story" aria-label="Récit photo">
-  <div class="post-story-inner">
-    <div class="post-story-sticky" aria-hidden="true">
-      <div class="post-story-images">
-        {photos.map((p, i) => (
-          <img
-            class="story-img"
-            class:list={[{ active: i === 0 }]}
-            data-index={i}
-            src={p.url}
-            alt=""
-            loading={i === 0 ? "eager" : "lazy"}
-          />
-        ))}
-      </div>
-    </div>
-
-    <div class="post-story-steps">
-      {photos.map((p, i) => (
-        <div class="story-step" class:list={[{ active: i === 0 }]} data-index={i}>
-          <img class="story-step-img" src={p.url} alt="" loading="lazy" />
-          <p class="story-step-text">{p.caption}</p>
-        </div>
-      ))}
-    </div>
+<section class="post-grid" aria-label="Photos marquantes">
+  <div class="post-grid-cards">
+    {photos.map((p, i) => (
+      <figure class="post-card fade-img" style={`--i:${i}`}>
+        <img src={p.url} alt="" loading="lazy" />
+        <figcaption>{p.caption}</figcaption>
+      </figure>
+    ))}
   </div>
 </section>
 
 <script>
   (function () {
-    const stories = Array.from(document.querySelectorAll(".post-story"));
-    stories.forEach((story) => {
-      const steps = Array.from(story.querySelectorAll(".story-step"));
-      const images = Array.from(story.querySelectorAll(".story-img"));
-      if (!steps.length || !images.length) return;
-
+    const grids = Array.from(document.querySelectorAll(".post-grid"));
+    grids.forEach((grid) => {
+      const cards = Array.from(grid.querySelectorAll(".post-card"));
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            const index = entry.target.getAttribute("data-index");
             if (entry.isIntersecting) {
-              steps.forEach((s) => s.classList.remove("active"));
-              images.forEach((img) => img.classList.remove("active"));
-              entry.target.classList.add("active");
-              const img = images.find((im) => im.getAttribute("data-index") === index);
-              if (img) img.classList.add("active");
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
             }
           });
         },
-        { threshold: 0.55 }
+        { threshold: 0.15 }
       );
-
-      steps.forEach((step) => observer.observe(step));
+      cards.forEach((card) => observer.observe(card));
     });
   })();
 </script>
 
 <style>
-  .post-story {
-    padding: 40px 0 60px;
+  .post-grid {
+    padding: 20px 0 40px;
   }
 
-  .post-story-inner {
+  .post-grid-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
   }
 
-  .post-story-sticky {
-    position: sticky;
-    top: 90px;
-    height: 72vh;
-    align-self: start;
-  }
-
-  .post-story-images {
-    position: relative;
-    height: 100%;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(17, 24, 39, 0.15);
-  }
-
-  .story-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: opacity 0.6s ease;
-  }
-  .story-img.active {
-    opacity: 1;
-  }
-
-  .post-story-steps {
+  .post-card {
+    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 20vh;
-    padding: 10vh 0;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition-delay: calc(var(--i, 0) * 60ms);
   }
-
-  .story-step {
-    min-height: 30vh;
-    display: flex;
-    align-items: center;
-    opacity: 0.35;
-    transition: opacity 0.4s ease;
-  }
-  .story-step.active {
+  .post-card.is-visible {
     opacity: 1;
+    transform: none;
   }
 
-  .story-step-img {
-    display: none;
+  .post-card img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(17, 24, 39, 0.12);
   }
 
-  .story-step-text {
-    font-size: 1.15rem;
-    line-height: 1.7;
+  .post-card figcaption {
+    font-size: 0.95rem;
+    line-height: 1.5;
     color: #1f2430;
-    margin: 0;
   }
 
-  @media (max-width: 900px) {
-    .post-story-inner {
-      grid-template-columns: 1fr;
-      gap: 0;
+  @media (max-width: 600px) {
+    .post-grid-cards {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
       padding: 0 16px;
-    }
-
-    .post-story-sticky {
-      display: none;
-    }
-
-    .post-story-steps {
-      gap: 36px;
-      padding: 0;
-    }
-
-    .story-step {
-      flex-direction: column;
-      align-items: stretch;
-      min-height: 0;
-      opacity: 1;
-      gap: 16px;
-      margin-bottom: 8px;
-    }
-
-    .story-step-img {
-      display: block;
-      width: 100%;
-      border-radius: 16px;
-      object-fit: cover;
-      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.12);
-    }
-
-    .story-step-text {
-      font-size: 1.02rem;
     }
   }
 </style>
