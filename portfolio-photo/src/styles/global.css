@@ -1,9 +1,9 @@
 :root {
-  /* Flat background — a gradient here would stretch across the full page
+  /* Flat white — a gradient here would stretch across the full page
      height, so its color at any given scroll position depends on how long
      the page is rather than on the content, making pages look inconsistently
      grayer or whiter for no reason. */
-  --bg: #f5f6f7;
+  --bg: #ffffff;
   --bg-accents: radial-gradient(
       circle at 10% 8%,
       rgba(255, 255, 255, 0.02),
@@ -42,16 +42,6 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-}
-
-/* Header overrides */
-.site-header {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.75),
-    rgba(255, 255, 255, 0.5)
-  );
-  border-bottom: 1px solid #f3f4f6;
 }
 
 /* Intro paragraph under page title */

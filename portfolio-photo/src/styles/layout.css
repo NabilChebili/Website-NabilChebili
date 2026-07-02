@@ -21,8 +21,8 @@ body {
   right: 0;
   height: 64px;
   z-index: 1000;
-  background: rgba(255,255,255,0.6);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 .header-inner {
   display: flex;
@@ -74,7 +74,7 @@ body {
 }
 
 /* hide mobile toggle by default */
-.nav-toggle { display: none; }
+.nav-toggle { display: none; color: var(--muted); }
 .site-footer {
   color: var(--muted);
   padding: 36px 0;
