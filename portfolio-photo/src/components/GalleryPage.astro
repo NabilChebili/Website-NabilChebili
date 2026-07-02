@@ -1,0 +1,36 @@
+---
+import "../styles/global.css";
+import "../styles/photo.css";
+import Layout from "../layouts/header.astro";
+import PhotoGrid from "./PhotoGrid.astro";
+import { listBlobsFromPublicContainer } from "../lib/blobList.js";
+
+const {
+  title,
+  description = `Galerie photo : ${title}.`,
+  intro = "",
+  galleryUrl = "",
+  fallback = ["/photos/A7401177.jpg", "/photos/A7401113.jpg", "/photos/A7401167.jpg", "/photos/A7401181.jpg"],
+} = Astro.props;
+
+const listed = galleryUrl ? await listBlobsFromPublicContainer(galleryUrl) : [];
+const photos = listed.length ? listed : fallback;
+---
+
+<Layout title={title} description={description}>
+  <main class="page">
+    <h1 class="page-title fade-in">{title}</h1>
+    {intro ? <p class="paragraph-center fade-in page-intro">{intro}</p> : null}
+
+    <PhotoGrid photos={photos} />
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const title = document.querySelector(".page-title");
+        const intro = document.querySelector(".page-intro");
+        if (title) setTimeout(() => title.classList.add("is-visible"), 120);
+        if (intro) setTimeout(() => intro.classList.add("is-visible"), 420);
+      });
+    </script>
+  </main>
+</Layout>

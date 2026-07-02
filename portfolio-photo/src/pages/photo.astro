@@ -2,19 +2,30 @@
 import "../styles/global.css";
 import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
-import Gallery from "../components/Gallery.astro";
 import galleries from "../data/galleries.json";
-import { listGalleries } from "../lib/blobList.js";
+import vietnam from "../data/vietnam.json";
+import indonesie from "../data/indonesie.json";
+import { listBlobsFromPublicContainer } from "../lib/blobList.js";
 
-// Local fallbacks (kept from original test images) used if remote listing fails
-const fallback = [
-  "/photos/A7401177.jpg",
-  "/photos/A7401113.jpg",
-  "/photos/A7401167.jpg",
-  "/photos/A7401181.jpg",
+const fallbackCover = "/photos/A7401177.jpg";
+
+async function firstPhoto(url) {
+  if (!url) return fallbackCover;
+  const list = await listBlobsFromPublicContainer(url);
+  return list[0] || fallbackCover;
+}
+
+const destinations = [
+  { slug: "vietnam", title: "Vietnam", cover: vietnam.post[0]?.url },
+  { slug: "indonesie", title: "Indonésie", cover: indonesie.post[0]?.url },
+  { slug: "illumination", title: "Illumination", cover: await firstPhoto(galleries.illumination) },
+  { slug: "londres", title: "Londres", cover: await firstPhoto(galleries.londres) },
+  { slug: "gr1-1", title: "GR1 (1)", cover: await firstPhoto(galleries.paris) },
+  { slug: "gr1-2", title: "GR1 (2)", cover: await firstPhoto(galleries.GR1_2) },
+  { slug: "gr1-3", title: "GR1 (3)", cover: await firstPhoto(galleries.GR3) },
+  { slug: "mariage", title: "Mariage", cover: await firstPhoto(galleries.mariage) },
+  { slug: "croatie", title: "Croatie", cover: await firstPhoto(galleries.croatie) },
 ];
-
-const photosByKey = await listGalleries(galleries, fallback);
 ---
 
 <Layout
@@ -32,86 +43,97 @@ const photosByKey = await listGalleries(galleries, fallback);
       Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main.
       Chaque déplacement est devenu une occasion de raconter une histoire, de figer une ambiance, un regard, un instant.
 
-      Les images qui suivent sont des fragments de ces voyages, entre lieux traversés et moments vécus.
       <br><br>
 
-      Deux récits complets sont disponibles pour le <a href="/vietnam">Vietnam</a> et l'<a href="/indonesie">Indonésie</a>.
-      <br><br>
-
-      Petit conseil : mettez vous en WI-FI ou 4G avant de cliquer sur une galerie (les images peuvent être lourdes à charger en 3G).
-
-      <br><br>
-
-      Cliquez sur une catégorie pour afficher sa galerie.
+      Cliquez sur une destination pour découvrir sa galerie complète.
     </p>
 
-    <nav class="gallery-toggle fade-in" role="tablist" aria-label="Galeries">
-      <button class="toggle-btn active" data-target="illumination" type="button">Illumination</button>
-      <button class="toggle-btn" data-target="londres" type="button">Londres</button>
-      <button class="toggle-btn" data-target="paris" type="button">GR1 (1)</button>
-      <button class="toggle-btn" data-target="GR1_2" type="button">GR1 (2)</button>
-      <button class="toggle-btn" data-target="GR3" type="button">GR1 (3)</button>
-      <button class="toggle-btn" data-target="mariage" type="button" style="">Mariage</button>
-      <button class="toggle-btn" data-target="croatie" type="button">Croatie</button>
-    </nav>
-
-    <Gallery id="illumination" title="Illumination" photos={photosByKey.illumination} />
-    <Gallery id="londres" title="Londres" photos={photosByKey.londres} />
-    <Gallery id="paris" title="Paris" photos={photosByKey.paris} />
-    <Gallery id="GR1_2" title="GR1-2" photos={photosByKey.GR1_2} />
-    <Gallery id="GR3" title="GR1-3" photos={photosByKey.GR3} />
-    <Gallery id="mariage" title="Mariage" photos={photosByKey.mariage} />
-    <Gallery id="croatie" title="Croatie" photos={photosByKey.croatie} />
+    <div class="destination-grid fade-in">
+      {destinations.map((d) => (
+        <a class="destination-card" href={`/${d.slug}`}>
+          <img src={d.cover} alt="" loading="lazy" />
+          <span class="destination-title">{d.title}</span>
+        </a>
+      ))}
+    </div>
 
     <script>
-      (function () {
-        const sections = Array.from(document.querySelectorAll('.gallery-section'));
-        const buttons = Array.from(document.querySelectorAll('.toggle-btn'));
-        const title = document.querySelector('.page-title');
-        const intro = document.querySelector('.page-intro');
-        const nav = document.querySelector('.gallery-toggle');
-
-        function staggerShow() {
-          // H1 first
-          if (title) setTimeout(() => title.classList.add('is-visible'), 120);
-          // intro second
-          if (intro) setTimeout(() => intro.classList.add('is-visible'), 520);
-          // nav third
-          if (nav) setTimeout(() => nav.classList.add('is-visible'), 840);
-          // sections last (each delayed)
-          sections.forEach((sec, idx) => {
-            setTimeout(() => sec.classList.add('is-visible'), 1200 + idx * 420);
-          });
-        }
-
-        function showSection(id) {
-          sections.forEach((s) => {
-            if (s.id === id) {
-              s.style.display = '';
-              // add visible class so section container reveals; images reveal when loaded
-              setTimeout(() => s.classList.add('is-visible'), 120);
-            } else {
-              s.style.display = 'none';
-              s.classList.remove('is-visible');
-            }
-          });
-          buttons.forEach((b) => b.classList.toggle('active', b.dataset.target === id));
-        }
-
-        // Initial: hide all sections then show first
-        if (sections.length) {
-          sections.forEach((s, i) => {
-            s.style.display = i === 0 ? '' : 'none';
-            if (i === 0) setTimeout(() => s.classList.add('is-visible'), 600);
-          });
-        }
-
-        buttons.forEach((btn) => btn.addEventListener('click', () => showSection(btn.dataset.target)));
-
-        document.addEventListener('DOMContentLoaded', staggerShow);
-        if (document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(staggerShow, 20);
-      })();
+      document.addEventListener("DOMContentLoaded", () => {
+        const title = document.querySelector(".page-title");
+        const intro = document.querySelector(".page-intro");
+        const grid = document.querySelector(".destination-grid");
+        if (title) setTimeout(() => title.classList.add("is-visible"), 120);
+        if (intro) setTimeout(() => intro.classList.add("is-visible"), 420);
+        if (grid) setTimeout(() => grid.classList.add("is-visible"), 700);
+      });
     </script>
-
   </main>
 </Layout>
+
+<style>
+  .destination-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 32px auto 40px;
+    padding: 0 24px;
+  }
+
+  .destination-card {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(17, 24, 39, 0.14);
+    text-decoration: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .destination-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 44px rgba(17, 24, 39, 0.22);
+  }
+
+  .destination-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .destination-card:hover img {
+    transform: scale(1.06);
+  }
+
+  .destination-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.65) 100%);
+  }
+
+  .destination-title {
+    position: absolute;
+    left: 18px;
+    bottom: 16px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.15rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    z-index: 1;
+  }
+
+  @media (max-width: 600px) {
+    .destination-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      padding: 0 16px;
+    }
+    .destination-title {
+      font-size: 1rem;
+      left: 12px;
+      bottom: 10px;
+    }
+  }
+</style>
