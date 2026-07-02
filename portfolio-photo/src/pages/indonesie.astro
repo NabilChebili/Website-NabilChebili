@@ -2,8 +2,8 @@
 import "../styles/global.css";
 import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
-import Gallery from "../components/Gallery.astro";
-import PostStory from "../components/PostStory.astro";
+import PhotoGrid from "../components/PhotoGrid.astro";
+import AccordionSection from "../components/AccordionSection.astro";
 import indonesie from "../data/indonesie.json";
 import { listGalleries } from "../lib/blobList.js";
 
@@ -42,56 +42,23 @@ const labels = {
       face à l'océan.
     </p>
 
-    <PostStory photos={indonesie.post} />
+    <PhotoGrid photos={indonesie.post} />
 
-    <h2 class="page-title fade-in" style="text-align:center; margin-top: 20px;">Les galeries</h2>
-
-    <nav class="gallery-toggle fade-in" role="tablist" aria-label="Galeries Indonésie">
-      {Object.keys(indonesie.galleries).map((key, i) => (
-        <button class:list={["toggle-btn", { active: i === 0 }]} data-target={key} type="button">
-          {labels[key] ?? key}
-        </button>
-      ))}
-    </nav>
+    <h2 class="page-title fade-in" style="text-align:center; margin: 20px 0 24px; font-size: 1.4rem;">
+      Les étapes du voyage
+    </h2>
 
     {Object.keys(indonesie.galleries).map((key) => (
-      <Gallery id={key} title={labels[key] ?? key} photos={photosByKey[key]} />
+      <AccordionSection id={key} title={labels[key] ?? key} photos={photosByKey[key]} />
     ))}
 
     <script>
-      (function () {
-        const sections = Array.from(document.querySelectorAll('.gallery-section'));
-        const buttons = Array.from(document.querySelectorAll('.toggle-btn'));
-
-        function showSection(id) {
-          sections.forEach((s) => {
-            if (s.id === id) {
-              s.style.display = '';
-              setTimeout(() => s.classList.add('is-visible'), 120);
-            } else {
-              s.style.display = 'none';
-              s.classList.remove('is-visible');
-            }
-          });
-          buttons.forEach((b) => b.classList.toggle('active', b.dataset.target === id));
-        }
-
-        if (sections.length) {
-          sections.forEach((s, i) => {
-            s.style.display = i === 0 ? '' : 'none';
-            if (i === 0) setTimeout(() => s.classList.add('is-visible'), 200);
-          });
-        }
-
-        buttons.forEach((btn) => btn.addEventListener('click', () => showSection(btn.dataset.target)));
-
-        document.addEventListener('DOMContentLoaded', () => {
-          const title = document.querySelector('.page-title');
-          const intro = document.querySelector('.page-intro');
-          if (title) setTimeout(() => title.classList.add('is-visible'), 120);
-          if (intro) setTimeout(() => intro.classList.add('is-visible'), 420);
-        });
-      })();
+      document.addEventListener('DOMContentLoaded', () => {
+        const title = document.querySelector('.page-title');
+        const intro = document.querySelector('.page-intro');
+        if (title) setTimeout(() => title.classList.add('is-visible'), 120);
+        if (intro) setTimeout(() => intro.classList.add('is-visible'), 420);
+      });
     </script>
   </main>
 </Layout>

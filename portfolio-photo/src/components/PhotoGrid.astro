@@ -1,13 +1,14 @@
 ---
 const { photos = [] } = Astro.props;
+const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null } : p));
 ---
 
-<section class="post-grid" aria-label="Photos marquantes">
-  <div class="post-grid-cards">
-    {photos.map((p, i) => (
-      <figure class="post-card fade-img" style={`--i:${i}`}>
+<div class="photo-grid">
+  <div class="photo-grid-cards">
+    {items.map((p, i) => (
+      <figure class="photo-card fade-img" style={`--i:${i}`}>
         <img src={p.url} alt="" loading="lazy" tabindex="0" />
-        <figcaption>{p.caption}</figcaption>
+        {p.caption ? <figcaption>{p.caption}</figcaption> : null}
       </figure>
     ))}
   </div>
@@ -22,13 +23,16 @@ const { photos = [] } = Astro.props;
       </div>
     </div>
   </div>
-</section>
+</div>
 
 <script>
   (function () {
-    const grids = Array.from(document.querySelectorAll(".post-grid"));
+    const grids = Array.from(document.querySelectorAll(".photo-grid"));
     grids.forEach((grid) => {
-      const cards = Array.from(grid.querySelectorAll(".post-card"));
+      if (grid.dataset.wired === "true") return;
+      grid.dataset.wired = "true";
+
+      const cards = Array.from(grid.querySelectorAll(".photo-card"));
 
       const observer = new IntersectionObserver(
         (entries) => {
@@ -43,7 +47,7 @@ const { photos = [] } = Astro.props;
       );
       cards.forEach((card) => observer.observe(card));
 
-      // Lightbox (same behavior as the classic galleries below)
+      // Lightbox (same behavior as the classic galleries)
       const images = cards.map((card) => card.querySelector("img")).filter(Boolean);
       const lightbox = grid.querySelector(".lightbox");
       const lbImg = lightbox.querySelector("img");
@@ -282,11 +286,11 @@ const { photos = [] } = Astro.props;
 </script>
 
 <style>
-  .post-grid {
+  .photo-grid {
     padding: 20px 0 40px;
   }
 
-  .post-grid-cards {
+  .photo-grid-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 24px;
@@ -295,7 +299,7 @@ const { photos = [] } = Astro.props;
     padding: 0 24px;
   }
 
-  .post-card {
+  .photo-card {
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -305,12 +309,12 @@ const { photos = [] } = Astro.props;
     transition: opacity 0.5s ease, transform 0.5s ease;
     transition-delay: calc(var(--i, 0) * 60ms);
   }
-  .post-card.is-visible {
+  .photo-card.is-visible {
     opacity: 1;
     transform: none;
   }
 
-  .post-card img {
+  .photo-card img {
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
@@ -319,27 +323,27 @@ const { photos = [] } = Astro.props;
     cursor: zoom-in;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
   }
-  .post-card img:hover {
+  .photo-card img:hover {
     transform: translateY(-6px);
     box-shadow: 0 18px 40px rgba(17, 24, 39, 0.18);
   }
 
-  .post-card figcaption {
+  .photo-card figcaption {
     font-size: 0.95rem;
     line-height: 1.5;
     color: #1f2430;
   }
 
   @media (max-width: 600px) {
-    .post-grid-cards {
+    .photo-grid-cards {
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 18px;
       padding: 0 16px;
     }
   }
 
-  /* Lightbox — same look as the classic galleries */
-  .post-grid .lightbox {
+  /* Lightbox — same look across the site */
+  .photo-grid .lightbox {
     position: fixed;
     inset: 0;
     display: flex;
@@ -351,20 +355,20 @@ const { photos = [] } = Astro.props;
     transition: opacity 0.18s ease;
     z-index: 2000;
   }
-  .post-grid .lightbox.active {
+  .photo-grid .lightbox.active {
     opacity: 1;
     pointer-events: auto;
   }
-  .post-grid .lightbox .lb-inner {
+  .photo-grid .lightbox .lb-inner {
     transform: scale(0.98);
     opacity: 0;
     transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.18s ease;
   }
-  .post-grid .lightbox.active .lb-inner {
+  .photo-grid .lightbox.active .lb-inner {
     transform: scale(1);
     opacity: 1;
   }
-  .post-grid .lightbox img {
+  .photo-grid .lightbox img {
     max-width: 94vw;
     max-height: 94vh;
     border-radius: 8px;
@@ -375,7 +379,7 @@ const { photos = [] } = Astro.props;
     user-select: none;
     -webkit-user-drag: none;
   }
-  .post-grid .lb-controls {
+  .photo-grid .lb-controls {
     position: absolute;
     right: 18px;
     top: 18px;
@@ -383,7 +387,7 @@ const { photos = [] } = Astro.props;
     gap: 8px;
     align-items: center;
   }
-  .post-grid .lb-controls button {
+  .photo-grid .lb-controls button {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.06);
     color: #fff;
@@ -393,10 +397,10 @@ const { photos = [] } = Astro.props;
     backdrop-filter: blur(6px);
     cursor: pointer;
   }
-  .post-grid .lb-controls button:hover {
+  .photo-grid .lb-controls button:hover {
     background: rgba(255, 255, 255, 0.12);
   }
-  .post-grid .lb-close {
+  .photo-grid .lb-close {
     font-size: 14px;
     padding: 6px 8px;
   }

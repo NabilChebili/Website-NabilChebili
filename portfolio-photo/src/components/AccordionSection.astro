@@ -1,0 +1,111 @@
+---
+import PhotoGrid from "./PhotoGrid.astro";
+
+const { id = "section", title = "", photos = [] } = Astro.props;
+const previewPhotos = photos.slice(0, 4);
+---
+
+<details class="accordion-section" id={id}>
+  <summary class="accordion-summary">
+    <div class="accordion-summary-left">
+      <span class="accordion-chevron" aria-hidden="true">›</span>
+      <h3 class="accordion-title">{title}</h3>
+      <span class="accordion-count">{photos.length} photos</span>
+    </div>
+    <div class="accordion-preview" aria-hidden="true">
+      {previewPhotos.map((p) => <img src={p} alt="" loading="lazy" />)}
+    </div>
+  </summary>
+  <div class="accordion-body">
+    <PhotoGrid photos={photos} />
+  </div>
+</details>
+
+<style>
+  .accordion-section {
+    max-width: 1200px;
+    margin: 0 auto 16px;
+    padding: 0 24px;
+  }
+
+  .accordion-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(250, 250, 252, 0.75));
+    border: 1px solid rgba(2, 6, 23, 0.06);
+    border-radius: 14px;
+    cursor: pointer;
+    list-style: none;
+    box-shadow: 0 4px 18px rgba(2, 6, 23, 0.04);
+    transition: box-shadow 0.2s ease;
+  }
+  .accordion-summary::-webkit-details-marker {
+    display: none;
+  }
+  .accordion-summary:hover {
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+  }
+
+  .accordion-summary-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .accordion-chevron {
+    font-size: 1.3rem;
+    line-height: 1;
+    transition: transform 0.25s ease;
+    color: var(--accent, #0b1220);
+  }
+  .accordion-section[open] .accordion-chevron {
+    transform: rotate(90deg);
+  }
+
+  .accordion-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    color: #0b1220;
+    white-space: nowrap;
+  }
+
+  .accordion-count {
+    font-size: 0.85rem;
+    color: #6b7280;
+    white-space: nowrap;
+  }
+
+  .accordion-preview {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .accordion-preview img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.1);
+  }
+  .accordion-section[open] .accordion-preview {
+    display: none;
+  }
+
+  .accordion-body {
+    padding-top: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .accordion-section {
+      padding: 0 16px;
+    }
+    .accordion-preview img:nth-child(n + 3) {
+      display: none;
+    }
+  }
+</style>
