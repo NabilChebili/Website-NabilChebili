@@ -11,6 +11,7 @@ const {
   intro = "",
   galleryUrl = "",
   fallback = ["/photos/A7401177.jpg", "/photos/A7401113.jpg", "/photos/A7401167.jpg", "/photos/A7401181.jpg"],
+  password = null,
 } = Astro.props;
 
 const listed = galleryUrl ? await listBlobsFromPublicContainer(galleryUrl) : [];
@@ -19,10 +20,23 @@ const photos = listed.length ? listed : fallback;
 
 <Layout title={title} description={description}>
   <main class="page">
-    <h1 class="page-title fade-in">{title}</h1>
-    {intro ? <p class="paragraph-center fade-in page-intro">{intro}</p> : null}
+    {password ? (
+      <div class="password-gate" id="password-gate">
+        <div class="password-gate-box">
+          <p>Cette galerie est temporairement protégée.</p>
+          <input type="password" id="password-gate-input" placeholder="Mot de passe" autocomplete="off" />
+          <button id="password-gate-submit" type="button">Voir les photos</button>
+          <p class="password-gate-error" id="password-gate-error" hidden>Mot de passe incorrect.</p>
+        </div>
+      </div>
+    ) : null}
 
-    <PhotoGrid photos={photos} name={title} />
+    <div class:list={["gated-content", { "is-locked": password }]} id="gated-content">
+      <h1 class="page-title fade-in">{title}</h1>
+      {intro ? <p class="paragraph-center fade-in page-intro">{intro}</p> : null}
+
+      <PhotoGrid photos={photos} name={title} />
+    </div>
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
@@ -32,5 +46,106 @@ const photos = listed.length ? listed : fallback;
         if (intro) setTimeout(() => intro.classList.add("is-visible"), 420);
       });
     </script>
+
+    {password ? (
+      <script define:vars={{ password, storageKey: `gate_unlocked_${title}` }}>
+        (function () {
+          const gate = document.getElementById("password-gate");
+          const content = document.getElementById("gated-content");
+          const input = document.getElementById("password-gate-input");
+          const submit = document.getElementById("password-gate-submit");
+          const error = document.getElementById("password-gate-error");
+          if (!gate || !content || !input || !submit) return;
+
+          function unlock() {
+            gate.style.display = "none";
+            content.classList.remove("is-locked");
+            try {
+              localStorage.setItem(storageKey, "1");
+            } catch (e) {}
+          }
+
+          try {
+            if (localStorage.getItem(storageKey) === "1") unlock();
+          } catch (e) {}
+
+          function tryUnlock() {
+            if (input.value === password) {
+              unlock();
+            } else {
+              error.hidden = false;
+              input.value = "";
+              input.focus();
+            }
+          }
+
+          submit.addEventListener("click", tryUnlock);
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") tryUnlock();
+          });
+        })();
+      </script>
+    ) : null}
   </main>
 </Layout>
+
+<style>
+  .gated-content.is-locked {
+    filter: blur(22px);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .password-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(2px);
+  }
+
+  .password-gate-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: 0 20px 60px rgba(2, 6, 23, 0.2);
+    text-align: center;
+    max-width: 320px;
+  }
+
+  .password-gate-box p {
+    margin: 0 0 14px;
+    color: var(--muted, #6b7280);
+    font-size: 0.95rem;
+  }
+
+  .password-gate-box input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    font-size: 1rem;
+    margin-bottom: 12px;
+    box-sizing: border-box;
+  }
+
+  .password-gate-box button {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent, #000);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .password-gate-error {
+    color: #c0392b;
+    font-size: 0.85rem;
+    margin: 10px 0 0;
+  }
+</style>
