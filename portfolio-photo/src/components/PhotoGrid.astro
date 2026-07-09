@@ -1,9 +1,12 @@
 ---
-const { photos = [] } = Astro.props;
+const { photos = [], name = "photos" } = Astro.props;
 const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null } : p));
 ---
 
-<div class="photo-grid">
+<div class="photo-grid" data-zip-name={name}>
+  <div class="photo-grid-head">
+    <button class="download-all-btn" type="button" aria-label={`Télécharger toutes les photos de ${name}`}>Télécharger tout</button>
+  </div>
   <div class="photo-grid-cards">
     {items.map((p, i) => (
       <figure class="photo-card fade-img" style={`--i:${i}`}>
@@ -281,6 +284,67 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && lightbox.classList.contains("active")) closeLightbox();
       });
+
+      // Download all: zip every image in this grid using JSZip (loaded from CDN on demand)
+      const downloadAllBtn = grid.querySelector(".download-all-btn");
+      async function loadJSZip() {
+        return new Promise((resolve, reject) => {
+          if (window.JSZip) return resolve(window.JSZip);
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
+          s.onload = () => resolve(window.JSZip);
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
+      async function downloadAll() {
+        if (!downloadAllBtn) return;
+        const urls = images.map((img) => img.currentSrc || img.src).filter(Boolean);
+        if (!urls.length) return;
+        downloadAllBtn.disabled = true;
+        const originalText = downloadAllBtn.textContent;
+        downloadAllBtn.textContent = "Préparation...";
+        try {
+          const JSZip = await loadJSZip();
+          const zip = new JSZip();
+          for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
+            downloadAllBtn.textContent = `Téléchargement ${i + 1}/${urls.length}`;
+            try {
+              const res = await fetch(url);
+              if (!res.ok) throw new Error("Fetch failed");
+              const blob = await res.blob();
+              const name = url.split("/").pop().split("?")[0] || `image-${i + 1}.jpg`;
+              zip.file(name, blob);
+            } catch (err) {
+              console.warn("Failed to fetch", url, err);
+            }
+          }
+          downloadAllBtn.textContent = "Création archive...";
+          const content = await zip.generateAsync({ type: "blob" }, (meta) => {
+            const pct = Math.round(meta.percent || 0);
+            downloadAllBtn.textContent = `Compression ${pct}%`;
+          });
+          const zipName = `${grid.dataset.zipName || "photos"}.zip`;
+          const blobUrl = URL.createObjectURL(content);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = zipName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+          console.error(err);
+          alert("Impossible de créer l'archive. Réessayez ou téléchargez les images individuellement.");
+        } finally {
+          downloadAllBtn.disabled = false;
+          downloadAllBtn.textContent = originalText;
+        }
+      }
+
+      if (downloadAllBtn) downloadAllBtn.addEventListener("click", downloadAll);
     });
   })();
 </script>
@@ -288,6 +352,36 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
 <style>
   .photo-grid {
     padding: 20px 0 40px;
+  }
+
+  .photo-grid-head {
+    display: flex;
+    justify-content: flex-end;
+    max-width: 1200px;
+    margin: 0 auto 16px;
+    padding: 0 24px;
+  }
+
+  .download-all-btn {
+    background: var(--ui-bg, #ffffff);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--accent, #000);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
+  }
+  .download-all-btn[disabled] {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  @media (max-width: 600px) {
+    .photo-grid-head {
+      padding: 0 16px;
+    }
   }
 
   .photo-grid-cards {

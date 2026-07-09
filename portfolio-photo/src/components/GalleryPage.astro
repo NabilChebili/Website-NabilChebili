@@ -22,7 +22,7 @@ const photos = listed.length ? listed : fallback;
     <h1 class="page-title fade-in">{title}</h1>
     {intro ? <p class="paragraph-center fade-in page-intro">{intro}</p> : null}
 
-    <PhotoGrid photos={photos} />
+    <PhotoGrid photos={photos} name={title} />
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
