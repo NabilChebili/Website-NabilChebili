@@ -15,11 +15,16 @@ async function firstPhoto(url) {
   return list[0] || fallbackCover;
 }
 
+// Couverture choisie a la main pour la carte Event Databricks : photo portrait, elle tient dans
+// le cadre 4:5 des cartes sans recadrage agressif (les vues larges de l'auditorium se font
+// couper en plein milieu par object-fit: cover).
+const eventDatabricksCover = `${galleries.eventDatabricks}A7405030.jpg`;
+
 const destinations = [
-  { slug: "event-databricks", title: "Event Databricks I-Shane", cover: await firstPhoto(galleries.eventDatabricks) },
-  { slug: "supersonic", title: "SuperSonic", cover: await firstPhoto(galleries.superSonic) },
-  { slug: "vietnam", title: "Vietnam", cover: vietnam.post[0]?.url },
   { slug: "indonesie", title: "Indonésie", cover: indonesie.post[0]?.url },
+  { slug: "vietnam", title: "Vietnam", cover: vietnam.post[0]?.url },
+  { slug: "supersonic", title: "SuperSonic", cover: await firstPhoto(galleries.superSonic) },
+  { slug: "event-databricks", title: "Event Databricks I-Shane", cover: eventDatabricksCover },
   { slug: "illumination", title: "Illumination", cover: await firstPhoto(galleries.illumination) },
   { slug: "londres", title: "Londres", cover: await firstPhoto(galleries.londres) },
   { slug: "gr1-1", title: "GR1 (1)", cover: await firstPhoto(galleries.paris) },
