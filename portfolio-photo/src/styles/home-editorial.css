@@ -189,21 +189,6 @@ main > section:nth-child(even) {
   white-space: nowrap;
 }
 
-/* Le titre se decouvre au chargement : le bloc monte depuis sa ligne de base,
-   sous le masque du h1. Animation CSS pure — elle tourne sans JavaScript et se
-   termine toujours, donc le titre n'est jamais masque durablement. */
-.mega span {
-  display: block;
-  animation: decouvreTitre var(--duree-longue) var(--sortie) both;
-}
-@keyframes decouvreTitre {
-  from {
-    transform: translateY(92%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
 
 /* Sous le titre : une seule ligne, la phrase d'intention a gauche et le lien
    vers la suite a droite. L'ouverture ne porte plus ni portrait ni liste de
@@ -478,37 +463,7 @@ main > section:nth-child(even) {
 
 /* ------------------------------------------- animations liees au scroll --- */
 
-@supports (animation-timeline: view()) {
-  /* Le cadre se decouvre par le bas quand il entre dans le viewport. Aucune
-     opacite dans les etapes : une image a zero d'opacite, c'est du contenu
-     masque. */
-  .activite-visuel {
-    animation: reveleCadre linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 40%;
-  }
-  /* Cascade. Les quatre cartes d'une meme rangee partagent la meme progression
-     de defilement : un decalage temporel n'aurait aucun effet. On decale leur
-     plage d'entree de 5 % chacune, ce qui produit la vague. */
-  .activite:nth-child(2) .activite-visuel {
-    animation-range: entry 30% cover 46%;
-  }
-  .activite:nth-child(3) .activite-visuel {
-    animation-range: entry 60% cover 52%;
-  }
-  .activite:nth-child(4) .activite-visuel {
-    animation-range: entry 90% cover 58%;
-  }
-}
 
-@keyframes reveleCadre {
-  from {
-    clip-path: inset(38% 0 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
 
 /* ------------------------------------------------------------ responsive --- */
 
@@ -564,208 +519,218 @@ main > section:nth-child(even) {
 
 
 /* ============================================================================
-   Motion — deux gestes, reutilises partout.
+   Motion — mecanique unique, calquee sur le standard du domaine.
 
-   Une page paraît tenue quand tous ses elements partagent le meme vocabulaire,
-   pas quand chacun a son effet. D'ou seulement :
+   AOS et Motion font tous deux la meme chose : opacite 0 vers 1 combinee a une
+   translation, declenchee par IntersectionObserver, et surtout `once: true` —
+   la revelation n'a lieu qu'une fois et n'est jamais annulee.
 
-     monte      — un bloc de texte remonte de 14px. TRANSLATION SEULE, jamais
-                  d'opacite : un texte a zero d'opacite est un texte masque.
-     decouvre   — une image se devoile par le bas, sous un masque.
-     trace      — un filet se dessine de gauche a droite.
+   C'est ce dernier point qui rend l'opacite sur du texte acceptable ici, alors
+   qu'elle etait dangereuse avec une timeline de defilement : une timeline
+   ramene l'element a son etat initial des qu'il sort de la plage, donc le texte
+   redevenait invisible. Un observateur qui retire sa surveillance apres le
+   premier passage ne peut pas re-masquer quoi que ce soit.
 
-   Les durees et la courbe viennent des tokens : 240ms pour une interaction,
-   560ms pour une entree, deceleration cubic-bezier(0.2, 0, 0, 1).
+   Valeurs reprises d'AOS : 400ms de duree, declenchement quand l'element est a
+   120px dans l'ecran. Cascade de 80ms, dans la fourchette 40-120 du domaine.
+
+   Repli : les etats masques ne s'appliquent que sous `.reveal-ok`, classe posee
+   par un script en tete de page. Sans JavaScript, rien n'est jamais masque.
    ========================================================================= */
 
-/* Le clic sur « Explorer ↓ » glisse au lieu de teleporter. Une ligne, aucun JS. */
 html {
   scroll-behavior: smooth;
 }
 
-/* --- entree de la manchette au chargement, en cascade de 90ms --- */
-.meta-row,
-.opening-foot {
-  animation: monte var(--duree-longue) var(--sortie) both;
+.reveal-ok [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
 }
-.meta-row {
-  animation-delay: 60ms;
+[data-reveal] {
+  transition: opacity 400ms var(--sortie), transform 400ms var(--sortie);
 }
-.opening-foot {
-  animation-delay: 240ms;
+[data-reveal].vu {
+  opacity: 1;
+  transform: none;
 }
 
-/* --- soulignement qui se trace, sur tout ce qui est cliquable --- */
+/* --- soulignement qui se trace, en degrade de fond --- */
+
+/* Volontairement pas en ::after : la nav utilise deja ::before et ::after pour
+   ses crochets [ ], et une regle de soulignement les effacait. Un degrade dont
+   la largeur s'anime ne consomme aucun pseudo-element. */
 .site-nav a,
 .nav-home,
 .brand a,
 .footer-nav nav a,
 .jump,
-.colophon-links a,
-.activite-lien {
-  position: relative;
+.activite-lien,
+.colophon-links a {
   text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size var(--duree) var(--sortie);
 }
-.site-nav a::after,
-.nav-home::after,
-.brand a::after,
-.footer-nav nav a::after,
-.jump::after,
-.activite-lien::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -3px;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: 0 50%;
-  transition: transform var(--duree) var(--sortie);
-}
-.site-nav a:hover::after,
-.site-nav a:focus-visible::after,
-.nav-home:hover::after,
-.brand a:hover::after,
-.footer-nav nav a:hover::after,
-.jump:hover::after,
-.activite:hover .activite-lien::after,
-.activite:focus-visible .activite-lien::after {
-  transform: scaleX(1);
-}
-/* le soulignement remplace la decoration : on retire celle d'avant */
 .site-nav a:hover,
+.site-nav a:focus-visible,
 .nav-home:hover,
 .brand a:hover,
 .footer-nav nav a:hover,
 .jump:hover,
+.colophon-links a:hover,
 .activite:hover .activite-lien,
-.colophon-links a:hover {
-  text-decoration: none;
+.activite:focus-visible .activite-lien {
+  background-size: 100% 1px;
 }
 
-@keyframes monte {
+/* --------------------------------------------------- mouvement reduit --- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal-ok [data-reveal],
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .mega span {
+    animation: none !important;
+    transform: none !important;
+  }
+  .site-nav a,
+  .nav-home,
+  .brand a,
+  .footer-nav nav a,
+  .jump,
+  .activite-lien,
+  .colophon-links a,
+  .colophon-links i,
+  .activite-lien i {
+    transition: none;
+  }
+}
+
+/* ============================================================================
+   Gestes creatifs — un seul motif decline : la ligne et le masque.
+   ========================================================================= */
+
+/* --- le titre entre lettre par lettre, chacune sous son propre masque --- */
+.mega {
+  display: flex;
+  flex-wrap: nowrap;
+}
+.mega-lettre {
+  display: inline-block;
+  /* le masque, c'est le h1 lui-meme qui a overflow: clip ; chaque lettre monte
+     depuis sa ligne de base avec 40ms d'ecart sur la precedente */
+  animation: monteLettre 720ms var(--sortie) both;
+  animation-delay: calc(var(--i) * 40ms);
+  will-change: transform;
+}
+@keyframes monteLettre {
   from {
-    transform: translateY(14px);
+    transform: translateY(102%);
   }
   to {
     transform: translateY(0);
   }
 }
-@keyframes trace {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
+
+/* --- les filets de section se tracent quand la section se revele --- */
+.about,
+.colophon {
+  border-top-color: transparent;
+}
+.section-head {
+  border-bottom-color: transparent;
+}
+.about::before,
+.section-head::after,
+.colophon::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 680ms var(--sortie);
+}
+.about,
+.section-head,
+.colophon {
+  position: relative;
+}
+.about::before,
+.colophon::before {
+  top: -1px;
+}
+.section-head::after {
+  bottom: -1px;
+}
+.about:has([data-reveal].vu)::before,
+.section-head.vu::after,
+.colophon:has([data-reveal].vu)::before {
+  transform: scaleX(1);
 }
 
-@supports (animation-timeline: view()) {
-  /* --- les blocs de texte montent a leur entree, en cascade dans leur groupe --- */
-  .about-title,
-  .about-text,
-  .section-head span,
-  .activite-titre,
-  .activite-note,
-  .colophon h2,
-  .colophon p,
-  .colophon-links {
-    animation: monte linear both;
-    animation-timeline: view();
-    animation-range: entry 10% cover 26%;
-  }
-  .about-text,
-  .colophon p {
-    animation-range: entry 16% cover 32%;
-  }
-  .activite-note {
-    animation-range: entry 16% cover 30%;
-  }
-
-  /* --- le portrait se decouvre comme les cartes --- */
-  .about-media {
-    animation: reveleCadre linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 38%;
-  }
-
-  /* --- les filets se tracent --- */
-  .about,
-  .section-head,
-  .colophon {
-    position: relative;
-  }
-  .about::before,
-  .section-head::after,
-  .colophon::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--ink);
-    transform-origin: 0 50%;
-    animation: trace linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 18%;
-  }
-  .about::before,
-  .colophon::before {
-    top: -1px;
-  }
-  .section-head::after {
-    bottom: -1px;
-  }
-  /* le filet statique cede la place a celui qui se trace */
-  .about,
-  .colophon {
-    border-top-color: transparent;
-  }
-  .section-head {
-    border-bottom-color: transparent;
-  }
+/* --- l'image s'ouvre comme un obturateur, depuis son centre --- */
+.reveal-ok [data-reveal] .activite-visuel img,
+.reveal-ok [data-reveal].about-media img {
+  clip-path: inset(46% 0 46% 0);
+  transition: clip-path 760ms var(--sortie);
+  transition-delay: 120ms;
+}
+[data-reveal].vu .activite-visuel img,
+[data-reveal].about-media.vu img {
+  clip-path: inset(0 0 0 0);
 }
 
-/* --------------------------------------------------- mouvement reduit --- */
+/* --- la ligne que tu aimes, portee a toute la largeur du cadre au survol --- */
+.activite-visuel {
+  position: relative;
+}
+.activite-visuel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--paper);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 520ms var(--sortie);
+  z-index: 2;
+}
+.activite:hover .activite-visuel::after,
+.activite:focus-visible .activite-visuel::after {
+  transform: scaleX(1);
+}
 
-/* Tout se pose immediatement, et rien ne reste decale ni masque. */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .mega span,
-  .meta-row,
-  .opening-foot,
-  .about-title,
-  .about-text,
-  .section-head span,
-  .activite-titre,
-  .activite-note,
-  .colophon h2,
-  .colophon p,
-  .colophon-links,
-  .about-media,
-  .activite-visuel,
-  .about::before,
-  .section-head::after,
-  .colophon::before {
+  .mega-lettre {
     animation: none !important;
     transform: none !important;
+  }
+  .about::before,
+  .section-head::after,
+  .colophon::before,
+  .activite-visuel::after {
+    transition: none !important;
+    transform: scaleX(1) !important;
+  }
+  .activite-visuel::after {
+    transform: scaleX(0) !important;
+  }
+  .reveal-ok [data-reveal] .activite-visuel img,
+  .reveal-ok [data-reveal].about-media img {
     clip-path: none !important;
-    opacity: 1 !important;
-  }
-  .about,
-  .colophon {
-    border-top-color: var(--ink);
-  }
-  .section-head {
-    border-bottom-color: var(--ink);
-  }
-  .site-nav a::after,
-  .activite-lien::after,
-  .colophon-links i,
-  .activite-lien i {
-    transition: none;
+    transition: none !important;
   }
 }

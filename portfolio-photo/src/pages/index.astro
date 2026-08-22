@@ -52,16 +52,28 @@ const univers = [
   description="Site personnel de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries."
   webfont={true}
 >
+  <script is:inline>
+    document.documentElement.classList.add("reveal-ok");
+  </script>
+
   <main class="page home">
     <section class="opening">
-      <div class="meta-row">
+      <div class="meta-row" data-reveal data-groupe="manchette">
         <span><b>958</b> photographies &middot; <b>11</b> galeries</span>
         <span>Ingénieur Cloud &amp; DevOps &middot; <b>+4</b> ans</span>
       </div>
 
-      <h1 class="mega"><span>Nabil Chebili</span></h1>
+      <h1 class="mega">
+        {
+          "Nabil Chebili".split("").map((c, i) => (
+            <span class="mega-lettre" style={`--i:${i}`}>
+              {c === " " ? " " : c}
+            </span>
+          ))
+        }
+      </h1>
 
-      <div class="opening-foot">
+      <div class="opening-foot" data-reveal data-groupe="manchette">
         <p>
           Cloud &amp; DevOps, photographie et musique — projets, galeries et
           inspirations.
@@ -72,8 +84,8 @@ const univers = [
 
     <section class="about">
       <div>
-        <h2 class="about-title">Vous vous demandez sûrement qui je suis ?</h2>
-        <p class="about-text">
+        <h2 class="about-title" data-reveal data-groupe="apropos">Vous vous demandez sûrement qui je suis ?</h2>
+        <p class="about-text" data-reveal data-groupe="apropos">
         Je suis quelqu’un de curieux, attiré par les choses que l’on construit et
         que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et
         reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
@@ -83,7 +95,7 @@ const univers = [
         </p>
       </div>
 
-      <figure class="about-media">
+      <figure class="about-media" data-reveal data-groupe="apropos">
         <img
           src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg"
           alt="Portrait de Nabil Chebili"
@@ -96,14 +108,14 @@ const univers = [
     </section>
 
     <section id="explorer">
-      <div class="section-head">
+      <div class="section-head" data-reveal data-groupe="explorer">
         <span>Explorer</span>
         <span>({univers.length})</span>
       </div>
       <div class="activites">
         {
           univers.map((u) => (
-            <a class="activite" href={u.href}>
+            <a class="activite" href={u.href} data-reveal data-groupe="cartes">
               <span class="activite-visuel">
                 <img
                   src={u.img}
@@ -127,7 +139,7 @@ const univers = [
     </section>
 
     <section class="colophon">
-      <div>
+      <div data-reveal data-groupe="contact">
         <h2>Contact</h2>
         <p class="fine">
           Pour toute question, collaboration ou prise de contact rapide —
@@ -138,7 +150,7 @@ const univers = [
         </p>
       </div>
 
-      <div class="colophon-links">
+      <div class="colophon-links" data-reveal data-groupe="contact">
         <a href="mailto:nabilchebili1999@gmail.com">
           Envoyer un email
           <i aria-hidden="true">&#8594;</i>
@@ -154,4 +166,49 @@ const univers = [
       </div>
     </section>
   </main>
+
+  <script>
+    // Revelation au premier passage, jamais annulee. C'est le motif d'AOS et de
+    // Motion : `once: true`. Une timeline de defilement, elle, remet l'element
+    // dans son etat initial des qu'il sort de la plage — donc le texte
+    // redevenait invisible. Ici l'observateur retire sa surveillance apres le
+    // premier passage : plus rien ne peut re-masquer un contenu.
+    (function () {
+      const cibles = Array.from(document.querySelectorAll("[data-reveal]"));
+      if (!cibles.length) return;
+
+      const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const montre = (el) => el.classList.add("vu");
+
+      if (reduit || !("IntersectionObserver" in window)) {
+        cibles.forEach(montre);
+        return;
+      }
+
+      // Cascade de 80ms a l'interieur d'un meme groupe, plafonnee : une liste
+      // longue avec un decalage cumulatif finirait par durer plusieurs secondes.
+      const rangs = new Map();
+      const rang = (el) => {
+        const g = el.dataset.groupe || "seul";
+        const n = rangs.get(g) || 0;
+        rangs.set(g, n + 1);
+        return Math.min(n, 5);
+      };
+
+      const io = new IntersectionObserver(
+        (entrees) => {
+          entrees.forEach((e) => {
+            if (!e.isIntersecting) return;
+            io.unobserve(e.target);
+            e.target.style.transitionDelay = rang(e.target) * 80 + "ms";
+            montre(e.target);
+          });
+        },
+        // 120px d'avance avant de declencher, la valeur par defaut d'AOS
+        { rootMargin: "0px 0px -120px 0px", threshold: 0 }
+      );
+
+      cibles.forEach((el) => io.observe(el));
+    })();
+  </script>
 </Layout>
