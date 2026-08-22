@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
 import galleries from "../data/galleries.json";
 import vietnam from "../data/vietnam.json";
@@ -38,109 +37,43 @@ const destinations = [
 <Layout
   title="Photographie"
   description="Galeries photo : voyages, villes, portraits et instantanés."
+  mainClass="page editorial"
 >
-  <main class="page">
-    <h1 class="page-title fade-in">Photographie</h1>
-    <p class="paragraph-center fade-in page-intro">
-      Bienvenue dans ma sélection photographique : un aperçu de voyages, moments et instants précieux.
-      <br><br>
-
-      A travers le design et la recherche d’esthétique dans les détails, la photographie s’est rapidement imposée comme un moyen d’expression naturel.
-
-      Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main.
-      Chaque déplacement est devenu une occasion de raconter une histoire, de figer une ambiance, un regard, un instant.
-
-      <br><br>
-
-      Cliquez sur une destination pour découvrir sa galerie complète.
-    </p>
-
-    <div class="destination-grid fade-in">
-      {destinations.map((d) => (
-        <a class="destination-card" href={`/${d.slug}`}>
-          <img src={d.cover} alt="" loading="lazy" />
-          <span class="destination-title">{d.title}</span>
-        </a>
-      ))}
+  <section class="tete-page">
+    <h1 class="titre-page" data-reveal data-groupe="tete">Photographie</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p>
+        Bienvenue dans ma sélection photographique : un aperçu de voyages,
+        moments et instants précieux.
+      </p>
+      <p>
+        À travers le design et la recherche d’esthétique dans les détails, la
+        photographie s’est rapidement imposée comme un moyen d’expression
+        naturel. Avec le temps, l’envie de capturer le réel m’a poussé à
+        acheter mon premier appareil photo et à voyager, appareil en main.
+        Chaque déplacement est devenu une occasion de raconter une histoire, de
+        figer une ambiance, un regard, un instant.
+      </p>
+      <p>Cliquez sur une destination pour découvrir sa galerie complète.</p>
     </div>
+  </section>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const title = document.querySelector(".page-title");
-        const intro = document.querySelector(".page-intro");
-        const grid = document.querySelector(".destination-grid");
-        if (title) setTimeout(() => title.classList.add("is-visible"), 120);
-        if (intro) setTimeout(() => intro.classList.add("is-visible"), 420);
-        if (grid) setTimeout(() => grid.classList.add("is-visible"), 700);
-      });
-    </script>
-  </main>
+  <section>
+    <div class="section-head" data-reveal data-groupe="galeries">
+      <span>Galeries</span>
+      <span>({destinations.length})</span>
+    </div>
+    <div class="vignettes">
+      {
+        destinations.map((d) => (
+          <a class="vignette" href={`/${d.slug}`} data-reveal data-groupe="vignettes">
+            <span class="vignette-visuel">
+              <img src={d.cover} alt="" loading="lazy" decoding="async" />
+            </span>
+            <span class="vignette-titre">{d.title}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
 </Layout>
-
-<style>
-  .destination-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: 32px auto 40px;
-    padding: 0 24px;
-  }
-
-  .destination-card {
-    position: relative;
-    display: block;
-    aspect-ratio: 4 / 5;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 12px 30px rgba(17, 24, 39, 0.14);
-    text-decoration: none;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-  .destination-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 44px rgba(17, 24, 39, 0.22);
-  }
-
-  .destination-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s ease;
-  }
-  .destination-card:hover img {
-    transform: scale(1.06);
-  }
-
-  .destination-card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.65) 100%);
-  }
-
-  .destination-title {
-    position: absolute;
-    left: 18px;
-    bottom: 16px;
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.15rem;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-    z-index: 1;
-  }
-
-  @media (max-width: 600px) {
-    .destination-grid {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
-      padding: 0 16px;
-    }
-    .destination-title {
-      font-size: 1rem;
-      left: 12px;
-      bottom: 10px;
-    }
-  }
-</style>

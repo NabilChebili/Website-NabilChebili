@@ -350,57 +350,62 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
 </script>
 
 <style>
+  /* Vernis editorial. Aucun coin arrondi, aucune ombre portee, aucun soulevement
+     au survol : le cadre 4:5 et le curseur de zoom disent deja que la photo
+     s'ouvre. La grille ne se centre plus dans 1200px — elle court d'un bord a
+     l'autre, la section parente portant le retrait --edge. */
   .photo-grid {
-    padding: 20px 0 40px;
+    padding: var(--pas-3) 0 var(--pas-10);
   }
 
   .photo-grid-head {
     display: flex;
     justify-content: flex-end;
-    max-width: 1200px;
-    margin: 0 auto 16px;
-    padding: 0 24px;
+    margin: 0 0 var(--pas-3);
   }
 
   .download-all-btn {
-    background: var(--ui-bg, #ffffff);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    color: var(--accent, #000);
-    padding: 8px 14px;
-    border-radius: 10px;
+    padding: 9px 14px;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 11px;
     font-weight: 700;
-    font-size: 0.9rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
+    transition: background var(--duree) var(--sortie), color var(--duree) var(--sortie);
+  }
+  .download-all-btn:hover {
+    background: var(--ink);
+    color: var(--paper);
   }
   .download-all-btn[disabled] {
-    opacity: 0.6;
+    opacity: 0.45;
     cursor: progress;
   }
-
-  @media (max-width: 600px) {
-    .photo-grid-head {
-      padding: 0 16px;
-    }
+  .download-all-btn[disabled]:hover {
+    background: transparent;
+    color: var(--ink);
   }
 
   .photo-grid-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--pas-3) 20px;
   }
 
   .photo-card {
-    margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    margin: 0;
     opacity: 0;
     transform: translateY(12px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity var(--duree-longue) var(--sortie),
+      transform var(--duree-longue) var(--sortie);
     transition-delay: calc(var(--i, 0) * 60ms);
   }
   .photo-card.is-visible {
@@ -409,44 +414,40 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
   }
 
   .photo-card img {
+    display: block;
     width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
-    border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(17, 24, 39, 0.12);
+    background: var(--block);
     cursor: zoom-in;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-  .photo-card img:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 40px rgba(17, 24, 39, 0.18);
   }
 
   .photo-card figcaption {
-    font-size: 0.95rem;
-    line-height: 1.5;
-    color: #1f2430;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-55);
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     .photo-grid-cards {
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-      padding: 0 16px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: var(--pas-3) 12px;
     }
   }
 
-  /* Lightbox — same look across the site */
+  /* La visionneuse est un autre mode : le fond sombre y est deliberement
+     conserve, c'est ce qui fait exister la photo. Seuls le rayon et l'ombre
+     partent. */
   .photo-grid .lightbox {
     position: fixed;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.92);
+    background: rgba(10, 10, 10, 0.94);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.18s ease;
+    transition: opacity 180ms var(--sortie);
     z-index: 2000;
   }
   .photo-grid .lightbox.active {
@@ -456,7 +457,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
   .photo-grid .lightbox .lb-inner {
     transform: scale(0.98);
     opacity: 0;
-    transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.18s ease;
+    transition: transform var(--duree) var(--sortie), opacity 180ms var(--sortie);
   }
   .photo-grid .lightbox.active .lb-inner {
     transform: scale(1);
@@ -465,37 +466,40 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
   .photo-grid .lightbox img {
     max-width: 94vw;
     max-height: 94vh;
-    border-radius: 8px;
-    box-shadow: 0 30px 80px rgba(2, 6, 23, 0.6);
     cursor: zoom-in;
-    transition: transform 0.08s ease-out;
+    transition: transform 80ms ease-out;
     transform-origin: center center;
     user-select: none;
     -webkit-user-drag: none;
   }
   .photo-grid .lb-controls {
     position: absolute;
-    right: 18px;
+    right: var(--edge);
     top: 18px;
     display: flex;
     gap: 8px;
     align-items: center;
   }
   .photo-grid .lb-controls button {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #fff;
-    padding: 8px 10px;
-    border-radius: 10px;
-    font-weight: 600;
-    backdrop-filter: blur(6px);
+    padding: 9px 12px;
+    border: 1px solid rgba(244, 244, 242, 0.35);
+    border-radius: 0;
+    background: transparent;
+    color: var(--paper);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
     cursor: pointer;
+    transition: background var(--duree) var(--sortie), color var(--duree) var(--sortie);
   }
   .photo-grid .lb-controls button:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--paper);
+    color: var(--ink);
   }
   .photo-grid .lb-close {
-    font-size: 14px;
-    padding: 6px 8px;
+    font-size: 13px;
+    padding: 8px 11px;
   }
 </style>

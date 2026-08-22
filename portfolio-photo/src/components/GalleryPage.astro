@@ -1,9 +1,14 @@
 ---
 import "../styles/global.css";
-import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
 import PhotoGrid from "./PhotoGrid.astro";
 import { listBlobsFromPublicContainer } from "../lib/blobList.js";
+
+// photo.css n'est plus importee ici : PhotoGrid style lui-meme la grille, les
+// cartes, la visionneuse et le bouton de telechargement. Ce qui restait dans
+// photo.css etait soit mort, soit nuisible — un `.section-head` qui entrait en
+// collision avec celui du systeme editorial, et un `.fade-img { opacity: 0 }`
+// qui ne se levait que sous un ancetre `.gallery-section` absent d'ici.
 
 const {
   title,
@@ -18,84 +23,94 @@ const listed = galleryUrl ? await listBlobsFromPublicContainer(galleryUrl) : [];
 const photos = listed.length ? listed : fallback;
 ---
 
-<Layout title={title} description={description}>
-  <main class="page">
-    {password ? (
-      <div class="password-gate" id="password-gate">
-        <div class="password-gate-box">
-          <p>Cette galerie est temporairement protégée.</p>
-          <input type="password" id="password-gate-input" placeholder="Mot de passe" autocomplete="off" />
-          <button id="password-gate-submit" type="button">Voir les photos</button>
-          <p class="password-gate-error" id="password-gate-error" hidden>Mot de passe incorrect.</p>
-        </div>
+<Layout title={title} description={description} mainClass="page editorial">
+  {password ? (
+    <div class="password-gate" id="password-gate">
+      <div class="password-gate-box">
+        <p>Cette galerie est temporairement protégée.</p>
+        <input type="password" id="password-gate-input" placeholder="Mot de passe" autocomplete="off" />
+        <button id="password-gate-submit" type="button">Voir les photos</button>
+        <p class="password-gate-error" id="password-gate-error" hidden>Mot de passe incorrect.</p>
       </div>
-    ) : null}
-
-    <div class:list={["gated-content", { "is-locked": password }]} id="gated-content">
-      <h1 class="page-title fade-in">{title}</h1>
-      {intro ? <p class="paragraph-center fade-in page-intro">{intro}</p> : null}
-
-      <PhotoGrid photos={photos} name={title} />
     </div>
+  ) : null}
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const title = document.querySelector(".page-title");
-        const intro = document.querySelector(".page-intro");
-        if (title) setTimeout(() => title.classList.add("is-visible"), 120);
-        if (intro) setTimeout(() => intro.classList.add("is-visible"), 420);
-      });
-    </script>
+  <div class:list={["gated-content", { "is-locked": password }]} id="gated-content">
+    <section class="tete-page">
+      <a class="retour" href="/photo">← Toutes les galeries</a>
+      <h1 class="titre-page" data-reveal data-groupe="tete">{title}</h1>
+      {intro ? (
+        <div class="prose" data-reveal data-groupe="tete">
+          <p>{intro}</p>
+        </div>
+      ) : null}
+    </section>
 
-    {password ? (
-      <script define:vars={{ password, storageKey: `gate_unlocked_${title}` }}>
-        (function () {
-          const gate = document.getElementById("password-gate");
-          const content = document.getElementById("gated-content");
-          const input = document.getElementById("password-gate-input");
-          const submit = document.getElementById("password-gate-submit");
-          const error = document.getElementById("password-gate-error");
-          if (!gate || !content || !input || !submit) return;
+    <section>
+      <div class="section-head" data-reveal data-groupe="galerie">
+        <span>Photographies</span>
+        <span>({photos.length})</span>
+      </div>
+      <div class="galerie">
+        <PhotoGrid photos={photos} name={title} />
+      </div>
+    </section>
+  </div>
 
-          function unlock() {
-            gate.style.display = "none";
-            content.classList.remove("is-locked");
-            try {
-              localStorage.setItem(storageKey, "1");
-            } catch (e) {}
-          }
+  {password ? (
+    <script define:vars={{ password, storageKey: `gate_unlocked_${title}` }}>
+      (function () {
+        const gate = document.getElementById("password-gate");
+        const content = document.getElementById("gated-content");
+        const input = document.getElementById("password-gate-input");
+        const submit = document.getElementById("password-gate-submit");
+        const error = document.getElementById("password-gate-error");
+        if (!gate || !content || !input || !submit) return;
 
+        function unlock() {
+          gate.style.display = "none";
+          content.classList.remove("is-locked");
           try {
-            if (localStorage.getItem(storageKey) === "1") unlock();
+            localStorage.setItem(storageKey, "1");
           } catch (e) {}
+        }
 
-          function tryUnlock() {
-            if (input.value === password) {
-              unlock();
-            } else {
-              error.hidden = false;
-              input.value = "";
-              input.focus();
-            }
+        try {
+          if (localStorage.getItem(storageKey) === "1") unlock();
+        } catch (e) {}
+
+        function tryUnlock() {
+          if (input.value === password) {
+            unlock();
+          } else {
+            error.hidden = false;
+            input.value = "";
+            input.focus();
           }
+        }
 
-          submit.addEventListener("click", tryUnlock);
-          input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") tryUnlock();
-          });
-        })();
-      </script>
-    ) : null}
-  </main>
+        submit.addEventListener("click", tryUnlock);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") tryUnlock();
+        });
+      })();
+    </script>
+  ) : null}
 </Layout>
 
 <style>
+  .galerie {
+    padding: 0 var(--edge);
+  }
+
   .gated-content.is-locked {
     filter: blur(22px);
     pointer-events: none;
     user-select: none;
   }
 
+  /* Le voile reprend le vocabulaire du systeme : fond papier, filet a l'encre,
+     aucun coin arrondi ni ombre portee. */
   .password-gate {
     position: fixed;
     inset: 0;
@@ -103,49 +118,60 @@ const photos = listed.length ? listed : fallback;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(2px);
+    background: rgba(244, 244, 242, 0.82);
   }
 
   .password-gate-box {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 28px 32px;
-    box-shadow: 0 20px 60px rgba(2, 6, 23, 0.2);
-    text-align: center;
-    max-width: 320px;
+    width: min(360px, calc(100vw - 2 * var(--edge)));
+    padding: var(--pas-3);
+    background: var(--paper);
+    border: 1px solid var(--ink);
   }
 
   .password-gate-box p {
     margin: 0 0 14px;
-    color: var(--muted, #6b7280);
-    font-size: 0.95rem;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-55);
   }
 
   .password-gate-box input {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    font-size: 1rem;
-    margin-bottom: 12px;
     box-sizing: border-box;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    background: var(--paper);
+    font: inherit;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .password-gate-box input:focus-visible {
+    outline: none;
+    border-color: var(--ink);
   }
 
   .password-gate-box button {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 11px 12px;
     border: none;
-    background: var(--accent, #000);
-    color: #fff;
+    border-radius: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font: inherit;
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
     cursor: pointer;
   }
 
   .password-gate-error {
-    color: #c0392b;
-    font-size: 0.85rem;
     margin: 10px 0 0;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 </style>
