@@ -311,17 +311,29 @@ main > section:nth-child(even) {
   margin: 0;
   padding: 0 var(--edge) 84px;
 }
+/* Grille FIXE, pas 'auto 1fr auto'. Avec une premiere colonne en auto, chaque
+   note demarrait juste apres son titre, donc a une abscisse differente d'une
+   ligne a l'autre — c'est ce qui rendait l'arrangement bancal. Ici les quatre
+   colonnes tombent au meme endroit sur les quatre lignes, et l'apercu a son
+   propre emplacement reserve : rien ne se superpose, rien ne se decale. */
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 32ch) 120px 30px;
   align-items: center;
-  gap: 28px;
+  gap: 30px;
   padding: 20px 0 18px;
   border-bottom: 1px solid var(--rule);
   text-decoration: none;
   color: var(--ink);
   isolation: isolate;
+}
+/* Tous les enfants sur la meme ligne de grille. Sans cela, la fleche etant en
+   colonne 4 avant l'apercu en colonne 3 dans le markup, le placement ne
+   revenait pas en arriere et poussait l'apercu sur une deuxieme ligne
+   implicite : la ligne passait de 112 a 242px. */
+.row > * {
+  grid-row: 1;
 }
 .row-title {
   position: relative;
@@ -336,10 +348,10 @@ main > section:nth-child(even) {
   font-size: 12px;
   line-height: 1.45;
   color: var(--ink-55);
-  max-width: 40ch;
-  justify-self: start;
 }
 .row-go {
+  grid-column: 4;
+  justify-self: end;
   font-size: 13px;
   font-weight: 500;
   color: var(--ink);
@@ -348,22 +360,16 @@ main > section:nth-child(even) {
 
 /* L'image se pose au survol, calee a droite du titre. Elle est en dehors du
    flux, donc la hauteur des lignes ne bouge pas quand elle apparait. */
-/* Bornee par la hauteur de la ligne (top/bottom au lieu d'une largeur fixe) :
-   l'apercu reste a l'interieur de ce qu'on survole au lieu de flotter par-dessus
-   les lignes voisines. Decalee de la fleche pour ne pas la recouvrir. */
 .row-media {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  right: 52px;
-  width: auto;
+  grid-column: 3;
+  width: 100%;
   aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--block);
+  align-self: center;
   pointer-events: none;
   opacity: 0;
-  transform: translateX(10px);
-  transition: opacity 260ms ease, transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 260ms ease;
 }
 .row-media img {
   width: 100%;
@@ -374,7 +380,6 @@ main > section:nth-child(even) {
 .row:hover .row-media,
 .row:focus-visible .row-media {
   opacity: 1;
-  transform: translateX(0);
 }
 /* Le titre reste immobile. C'est l'apercu et la fleche qui signalent la ligne
    active — trois elements en mouvement simultane donnaient une impression de
