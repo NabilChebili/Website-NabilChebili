@@ -40,6 +40,9 @@
   --rule: #c9c9c4;
   --block: #e6e6e2;
   --edge: 22px;
+  --pas-3: 24px;
+  --pas-8: 64px;
+  --pas-10: 80px;
 }
 
 html,
@@ -129,9 +132,16 @@ body {
 
 /* L'en-tete est fixe : sans cette marge, une ancre place le haut de la section
    sous la barre et le titre disparait. */
-#explorer,
+/* L'en-tete est fixe : sans cette marge, une ancre place le haut de la section
+   sous la barre. Ecrite sur une seule ligne a dessein — sur deux lignes, un
+   outil qui cherche le bloc ".about {" tombait sur celui-ci. */
+#explorer, .about { scroll-margin-top: 72px; }
 .about {
+  margin: var(--pas-10) 0 0;
+  padding: var(--pas-3) var(--edge) 0;
   scroll-margin-top: 72px;
+  margin: var(--pas-10) 0 0;
+  padding: var(--pas-3) var(--edge) 0;
 }
 main > section,
 main > section:nth-child(even) {
@@ -155,7 +165,7 @@ main > section:nth-child(even) {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-55);
-  padding-bottom: 10px;
+  padding-bottom: 0;
 }
 .meta-row b {
   color: var(--ink);
@@ -165,7 +175,7 @@ main > section:nth-child(even) {
 /* L'unique moment display. Bord a bord : la taille est pilotee par la largeur
    du viewport, pas par une echelle de pas. */
 .mega {
-  margin: 0;
+  margin: 26px 0 0;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
   font-size: clamp(44px, 19.6vw, 420px);
   font-weight: 800;
@@ -191,9 +201,10 @@ main > section:nth-child(even) {
 .opening-foot p {
   margin: 0;
   max-width: 52ch;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   color: var(--ink-55);
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
 }
 .jump {
   flex: none;
@@ -248,13 +259,14 @@ main > section:nth-child(even) {
 .about-text {
   margin: 0;
   /* 15px, interlignage 145 %, ligne sous 90 signes : les seuils de Butterick. */
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 16px;
+  line-height: 1.5;
   color: var(--ink);
   max-width: 72ch;
   text-align: left;
   text-indent: 0;
   hyphens: manual;
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ------------------------------------------------------------- univers --- */
@@ -264,7 +276,7 @@ main > section:nth-child(even) {
   justify-content: space-between;
   align-items: baseline;
   gap: 20px;
-  margin: 86px 0 0;
+  margin: var(--pas-10) 0 0;
   padding: 0 var(--edge) 9px;
   border-bottom: 1px solid var(--ink);
   font-size: 11px;
@@ -281,82 +293,81 @@ main > section:nth-child(even) {
    haut, puis titre, description et lien. Seul le style change — pas d'ombre
    portee, pas de fond de carte, pas de coins arrondis, pas de zoom au survol.
    Un filet sous l'image tient la structure, comme le reste de la page. */
-.cards {
+.activites {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  padding: 24px var(--edge) 84px;
+  gap: 24px;
+  padding: var(--pas-3) var(--edge) var(--pas-10);
 }
-.card {
+.activite {
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: var(--ink);
 }
-.card-frame {
+.activite-visuel {
   display: block;
   overflow: hidden;
   background: var(--block);
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 4 / 5;
 }
-.card-frame img {
+.activite-visuel img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: grayscale(1) contrast(1.02);
-  transition: filter 420ms ease;
+  transition: filter 520ms ease;
+  filter: grayscale(1) contrast(1.04);
 }
 /* La couleur revient au survol : l'image reste en place, seul son rendu change.
    Plus discret qu'un agrandissement, et ca signale la carte active sans bouger
    la mise en page. */
-.card:hover .card-frame img,
-.card:focus-visible .card-frame img {
+.activite:hover .activite-visuel img,
+.activite:focus-visible .activite-visuel img {
   filter: grayscale(0) contrast(1);
 }
-.card-title {
-  margin: 11px 0 0;
-  padding-bottom: 9px;
-  border-bottom: 1px solid var(--ink);
+.activite-titre {
+  margin: 14px 0 0;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-  font-size: clamp(20px, 1.9vw, 27px);
+  font-size: clamp(19px, 1.7vw, 24px);
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.01em;
   text-transform: uppercase;
 }
-.card-note {
-  margin: 10px 0 14px;
+.activite-note {
+  margin: 7px 0 12px;
   flex: 1;
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--ink-55);
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
 }
-.card-go {
+.activite-lien {
   display: inline-flex;
   align-items: baseline;
   gap: 9px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--ink-55);
 }
-.card-go i {
+.activite-lien i {
   font-style: normal;
   font-weight: 500;
   transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.card:hover .card-go,
-.card:focus-visible .card-go {
+.activite:hover .activite-lien,
+.activite:focus-visible .activite-lien {
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.card:hover .card-go i,
-.card:focus-visible .card-go i {
+.activite:hover .activite-lien i,
+.activite:focus-visible .activite-lien i {
   transform: translateX(6px);
 }
-.card:focus-visible {
+.activite:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 4px;
 }
@@ -366,8 +377,8 @@ main > section:nth-child(even) {
 .colophon {
   display: grid;
   grid-template-columns: 1fr 1.15fr;
-  gap: 60px;
-  padding: 46px var(--edge) 58px;
+  gap: var(--pas-8);
+  padding: var(--pas-8) var(--edge);
   border-top: 1px solid var(--ink);
 }
 .colophon h2 {
@@ -382,13 +393,14 @@ main > section:nth-child(even) {
   margin: 0 0 12px;
   /* 15px, interlignage 145 %, ligne sous 90 caracteres : les trois seuils de
      Butterick pour un texte courant. */
-  font-size: 15px;
-  line-height: 1.45;
+  font-size: 16px;
+  line-height: 1.5;
   color: var(--ink);
   max-width: 74ch;
   text-align: left;
   text-indent: 0;
   hyphens: manual;
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
 }
 .colophon .fine {
   font-size: 12px;
@@ -436,42 +448,29 @@ main > section:nth-child(even) {
 @supports (animation-timeline: view()) {
   /* Revelation par volet, du bas vers le haut : le tirage apparait. Une seule
      propriete animee par planche. */
-  .card-frame img {
-    animation: entryIn linear both;
+  /* L'image se decouvre par le bas. Aucune opacite dans les etapes : une image
+     a zero d'opacite, c'est du contenu masque. Et la plage s'arrete des que
+     l'element est entierement entre, donc rien ne reste en cours de route. */
+  .activite-visuel img {
+    animation: reveleImage linear both;
     animation-timeline: view();
-    animation-range: entry 4% cover 30%;
-  }
-  .card-title,
-  .card-note {
-    animation: noteIn linear both;
-    animation-timeline: view();
-    animation-range: entry 10% cover 34%;
+    animation-range: entry 0% entry 100%;
   }
 }
 
-@keyframes entryIn {
+@keyframes reveleImage {
   from {
-    opacity: 0;
-    transform: translateY(18px);
+    clip-path: inset(16% 0 0 0);
   }
   to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes noteIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+    clip-path: inset(0 0 0 0);
   }
 }
 
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 1100px) {
-  .cards {
+  .activites {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -502,18 +501,21 @@ main > section:nth-child(even) {
   .section-head {
     margin-top: 56px;
   }
-  .cards {
+  .activites {
     grid-template-columns: 1fr;
     gap: 30px;
+  }
+  /* Quatre portraits 4:5 pleine largeur donnaient une page de 3879px : beaucoup
+     de defilement pour quatre entrees. Le 3:2 raccourcit sans rien couper. */
+  .activite-visuel {
+    aspect-ratio: 3 / 2;
   }
 }
 
 /* --------------------------------------------------- mouvement reduit --- */
 
 @media (prefers-reduced-motion: reduce) {
-  .card-frame img,
-  .card-title,
-  .card-note {
+  .activite-visuel img {
     animation: none !important;
     clip-path: none !important;
     opacity: 1 !important;

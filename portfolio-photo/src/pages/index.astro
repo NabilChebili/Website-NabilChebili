@@ -100,11 +100,11 @@ const univers = [
         <span>Explorer</span>
         <span>({univers.length})</span>
       </div>
-      <div class="cards">
+      <div class="activites">
         {
           univers.map((u) => (
-            <a class="card" href={u.href}>
-              <span class="card-frame">
+            <a class="activite" href={u.href}>
+              <span class="activite-visuel">
                 <img
                   src={u.img}
                   alt={u.alt}
@@ -114,9 +114,9 @@ const univers = [
                   decoding="async"
                 />
               </span>
-              <span class="card-title">{u.titre}</span>
-              <span class="card-note">{u.note}</span>
-              <span class="card-go">
+              <span class="activite-titre">{u.titre}</span>
+              <span class="activite-note">{u.note}</span>
+              <span class="activite-lien">
                 Voir
                 <i aria-hidden="true">&#8594;</i>
               </span>
