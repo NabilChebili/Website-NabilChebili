@@ -243,6 +243,10 @@ main > section:nth-child(even) {
   height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+  /* Le sujet est a 45 % de la largeur dans la photo d'origine, et le recadrage
+     4:3 rogne 11 % de la largeur — a position centree il tombait a 44 %. En
+     decalant la fenetre a 8 %, le visage revient a 49,6 % du cadre. */
+  object-position: 8% 50%;
 }
 .about-title {
   margin: 0 0 18px;
