@@ -5,6 +5,26 @@ import "../styles/index.css";
 import "../styles/home-apple.css";
 import Layout from "../layouts/header.astro";
 
+const blob = "https://stnchvlqvproduction.blob.core.windows.net/photos";
+
+// Deux bandeaux en plein cadre. Le premier est un panorama natif en 2.98:1,
+// donc il tient dans le cadre 2.39:1 sans perdre grand-chose ; le second est un
+// 3:2 recadre par object-fit.
+const bandeaux = {
+  batur: {
+    src: `${blob}/Indonesie/batur/A7404548.jpg`,
+    alt: "Nabil Chebili à l'heure bleue au-dessus du mont Batur, en Indonésie",
+    width: 2200,
+    height: 738,
+  },
+  lave: {
+    src: `${blob}/Indonesie/black-lava/A7404598.jpg`,
+    alt: "Champ de lave noire au pied du mont Batur, avec des 4x4 à l'arrêt",
+    width: 2200,
+    height: 1067,
+  },
+};
+
 const universes = [
   {
     title: "Cloud & DevOps",
@@ -51,7 +71,7 @@ const universes = [
 >
   <main class="page home">
     <section class="hero apple-hero">
-      <div class="container apple-hero-inner">
+      <div class="container">
         <p class="apple-eyebrow">Ingénieur Cloud &amp; DevOps</p>
         <h1 class="apple-title">Nabil Chebili</h1>
         <p class="apple-lead">
@@ -67,12 +87,26 @@ const universes = [
       </div>
     </section>
 
+    <section class="section band-section">
+      <figure class="band band-pano opens">
+        <img
+          src={bandeaux.batur.src}
+          alt={bandeaux.batur.alt}
+          width={bandeaux.batur.width}
+          height={bandeaux.batur.height}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </figure>
+    </section>
+
     <section class="section apple-section section-tinted two-col reverse">
       <div class="container two-col-inner">
         <div class="media">
           <img
             class="settle"
-            src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg"
+            src={`${blob}/Indonesie/post/A7404480.jpg`}
             alt="Portrait de Nabil Chebili"
             width="2200"
             height="1467"
@@ -92,6 +126,19 @@ const universes = [
           </p>
         </div>
       </div>
+    </section>
+
+    <section class="section band-section">
+      <figure class="band drift opens">
+        <img
+          src={bandeaux.lave.src}
+          alt={bandeaux.lave.alt}
+          width={bandeaux.lave.width}
+          height={bandeaux.lave.height}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
     </section>
 
     <section class="section apple-section cards-overview">
@@ -121,9 +168,7 @@ const universes = [
       </div>
     </section>
 
-    <section
-      class="section apple-section section-tinted contact apple-contact"
-    >
+    <section class="section apple-section section-tinted contact apple-contact">
       <div class="container">
         <div class="contact-card rise">
           <h2 class="apple-h2">Contact</h2>

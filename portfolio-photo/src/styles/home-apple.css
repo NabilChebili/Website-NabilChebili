@@ -1,33 +1,34 @@
 /* ============================================================================
-   Home — affinage dans le registre sobre du site (proche des regles apple.com).
+   Home — registre sobre du site, a l'echelle d'une page produit.
 
-   Importee uniquement par src/pages/index.astro, donc limitee au bundle CSS de
-   la home, et placee en dernier pour reprendre les valeurs de global.css /
-   layout.css / index.css sans les modifier a la source.
+   Importee uniquement par src/pages/index.astro (donc limitee au bundle CSS de
+   la home) et placee en dernier pour reprendre les valeurs claires codees en
+   dur dans global.css / layout.css / index.css sans les modifier a la source.
 
-   Les valeurs ne sont pas inventees : elles reprennent le systeme documente
-   d'apple.com — encre #1d1d1f, surface alternee #f5f5f7, accent unique
-   #0066cc, corps a 17px / 1.47 / -0.374px, titre display a 56px / 600 /
-   -0.28px, echelle d'espacement sur base 8 (24 / 48 / 80), rayons 8 / 18 /
-   pill, et l'echelle de graisses 300-400-600-700 (il n'y a pas de 500).
+   Valeurs reprises du systeme documente d'apple.com : encre #1d1d1f, surface
+   alternee #f5f5f7, accent unique #0066cc, corps 17px / 1.47 / -0.374px,
+   echelle d'espacement base 8, rayons 8 / 18 / pill, graisses 300-400-600-700
+   (il n'y a pas de 500). Deux ecarts assumes, notes sur place.
 
-   Trois regles structurantes de ce systeme, tenues ici :
-     1. aucun degrade decoratif — l'atmosphere vient des photos seules ;
-     2. pas d'ombre sur le chrome, seule l'imagerie en porte une ;
-     3. le changement de surface (blanc <-> #f5f5f7) remplace les bordures
-        de separation entre sections.
+   Ce qui fait le caractere cinematographique ici n'est pas une couleur sombre
+   mais l'ECHELLE : bandeaux d'images en plein cadre au format 2.39:1, hauteurs
+   de section genereuses, et le geste d'ouverture — l'image entre encadree et
+   arrondie puis s'ouvre en plein cadre au fil du defilement.
 
-   Cote animation : tout passe par `animation-timeline: view()` dans un
-   @supports. Un navigateur qui ne gere pas affiche le contenu en place, donc
-   aucun contenu ne peut rester masque. Aucun JavaScript.
+   Regles structurantes tenues : aucun degrade decoratif, aucune ombre sur le
+   chrome (seule l'imagerie en porte une), et le changement de surface remplace
+   les filets de separation.
+
+   Animations : uniquement `animation-timeline: view()` dans un @supports. Sans
+   support, le contenu s'affiche en place — rien ne peut rester masque. Aucun
+   JavaScript.
    ========================================================================= */
 
 :root {
   --ink: #1d1d1f;
   --ink-80: #333333;
-  /* #7a7a7a du systeme echoue le seuil AA sur nos deux fonds (3,94:1 sur
-     #f5f5f7 et 4,29:1 sur blanc). #6e6e73, le gris secondaire de la meme
-     famille, passe : 4,66:1 et 5,07:1. */
+  /* Ecart assume : le #7a7a7a du systeme echoue le seuil AA sur nos deux fonds
+     (3,94:1 sur #f5f5f7 et 4,29:1 sur blanc). #6e6e73 passe : 4,66 et 5,07. */
   --ink-48: #6e6e73;
   --surface: #ffffff;
   --surface-alt: #f5f5f7;
@@ -41,14 +42,14 @@ body {
   background: var(--surface);
   color: var(--ink);
 }
-
 body {
   font-size: 17px;
   line-height: 1.47;
   letter-spacing: -0.374px;
 }
 
-/* Barre de nav : la valeur de flou du systeme est saturate(180%) blur(20px). */
+/* ---------------------------------------------------------------- chrome --- */
+
 .site-header {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: saturate(180%) blur(20px);
@@ -71,7 +72,6 @@ body {
   font-weight: 400;
 }
 
-/* Le rythme vient de l'alternance de surface, pas d'un filet. */
 .home {
   padding: 0;
 }
@@ -84,60 +84,46 @@ main > section:nth-child(even) {
 main > section.section-tinted {
   background: var(--surface-alt);
 }
-.apple-section {
-  padding: 80px 0;
-}
-@media (max-width: 833px) {
-  .apple-section {
-    padding: 48px 0;
-  }
-}
-@media (max-width: 640px) {
-  .apple-section {
-    padding: 24px 0 48px;
-  }
-}
 
-/* Largeur de lecture du systeme : 980px pour le texte. */
+.apple-section {
+  padding: 120px 0;
+}
 .container {
   max-width: 980px;
-}
-.container-wide {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 24px;
 }
 
 /* ------------------------------------------------------------------ hero --- */
 
-/* Hero purement typographique : pas d'image de fond derriere le texte. Le
-   systeme ne met une image que comme sujet, jamais comme decor sous du texte. */
 .apple-hero {
-  padding: 140px 0 96px;
+  padding: 150px 0 110px;
   text-align: center;
 }
 .apple-eyebrow {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font-size: 21px;
   font-weight: 400;
   line-height: 1.19;
   letter-spacing: 0.231px;
   color: var(--ink-48);
-  /* volontairement pas de capitales trackees : un kicker en majuscules
-     espacees est justement le motif a eviter */
+  /* pas de capitales trackees : le kicker en majuscules espacees est
+     precisement le motif a eviter */
   text-transform: none;
 }
+/* Selecteur aligne sur `.hero h1` d'index.css (clamp 2rem-3rem), qui gagnait
+   sinon et ramenait le titre a 48px. Ecart assume : 56px est la valeur des
+   pages de store, les pages produit montent plus haut — on vise 72px au large
+   pour tenir l'echelle des bandeaux qui suivent. */
 .hero h1.apple-title {
   margin: 0;
-  font-size: 56px;
+  font-size: clamp(40px, 5vw, 72px);
   font-weight: 600;
-  line-height: 1.07;
-  letter-spacing: -0.28px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   color: var(--ink);
   text-transform: none;
 }
 .apple-lead {
-  margin: 18px auto 0;
+  margin: 20px auto 0;
   max-width: 34ch;
   font-size: 28px;
   font-weight: 400;
@@ -146,16 +132,12 @@ main > section.section-tinted {
   color: var(--ink-80);
   text-align: center;
 }
-
-/* Liens du hero facon apple.com : libelle + chevron, en accent unique.
-   Remplace quatre boutons contournes identiques, sans rien retirer au
-   contenu : les quatre destinations sont toujours la. */
 .apple-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px 32px;
-  margin-top: 32px;
+  margin-top: 36px;
   padding: 0;
 }
 .apple-link {
@@ -181,43 +163,96 @@ main > section.section-tinted {
   transform: translateX(3px);
 }
 
-/* -------------------------------------------------------------- sections --- */
+/* ------------------------------------------------ bandeaux plein cadre --- */
+
+/* Le bandeau est enfant direct de la section, sans conteneur : il occupe donc
+   la largeur de la page sans recourir a 100vw, qui deborderait de la largeur
+   de la barre de defilement. */
+.band-section {
+  padding: 0;
+}
+.band {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  /* 2.39:1, le format large du cinema. Le panorama du Batur est natif a
+     2.98:1, les autres photos sont recadrees par object-fit. */
+  aspect-ratio: 2.39 / 1;
+  background: var(--surface-alt);
+  transform-origin: 50% 50%;
+}
+.band img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.band figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.43;
+  letter-spacing: -0.224px;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.6);
+}
+@media (max-width: 833px) {
+  .band {
+    /* Un 3:2 recadre en 4/3 ne perd presque rien, et le bandeau reste lisible
+       sur un ecran etroit. */
+    aspect-ratio: 4 / 3;
+  }
+  .band-pano {
+    /* Sauf pour un panorama : le recadrer en 4/3 ne laisserait qu'un fragment
+       du sujet. Un cadre large sur petit ecran donne une bande fine, et c'est
+       la nature meme d'un cinemascope. */
+    aspect-ratio: 2 / 1;
+  }
+}
+
+/* ------------------------------------------------------------- sections --- */
 
 .apple-h2 {
-  margin: 0 0 20px;
-  font-size: 40px;
+  margin: 0 0 24px;
+  font-size: clamp(32px, 3.4vw, 48px);
   font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: 0;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
   color: var(--ink);
 }
-/* Selecteur volontairement plus specifique que `.content p` d'index.css, qui
-   justifie et met un alinea : a specificite egale c'est index.css qui gagnait. */
+/* Plus specifique que `.content p` d'index.css, qui justifie et met un alinea :
+   a specificite egale c'est index.css qui gagnait. Le corps passe a 21px, la
+   valeur de lead du systeme — a cette echelle de page, 17px decroche. */
 .content p.apple-body {
-  font-size: 17px;
+  font-size: 21px;
   font-weight: 400;
-  line-height: 1.47;
-  letter-spacing: -0.374px;
+  line-height: 1.48;
+  letter-spacing: 0;
   color: var(--ink-80);
-  max-width: 60ch;
-  /* index.css justifie ce paragraphe et lui met un alinea : sur une colonne
-     etroite en francais ca creuse des rivieres de blanc. */
+  max-width: 62ch;
   text-align: left;
   text-indent: 0;
   hyphens: manual;
 }
 
-/* Les attributs width/height du markup servent a reserver la place avant le
-   chargement (CLS). Sans `height: auto`, c'est la hauteur de l'attribut qui
-   s'applique et l'image part etiree sur toute sa hauteur intrinseque. */
+/* Les attributs width/height du markup reservent la place avant chargement
+   (CLS). Sans `height: auto`, c'est la hauteur de l'attribut qui s'applique et
+   l'image part etiree sur toute sa hauteur intrinseque. */
 .two-col .media img,
 .apple-tile img {
   height: auto;
-  box-shadow: none;
 }
 .two-col .media img {
+  width: 100%;
+  max-width: none;
   border-radius: 18px;
   box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+}
+.two-col-inner {
+  gap: 56px;
 }
 
 /* --------------------------------------------------------------- tuiles --- */
@@ -235,28 +270,28 @@ main > section.section-tinted {
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  /* Pas d'ombre, pas de lift au survol, pas de zoom d'image : le systeme
-     signale l'interaction par la couleur du lien, pas par du mouvement. */
+  /* Pas d'ombre, pas de lift, pas de zoom d'image au survol : l'interaction se
+     signale par la couleur du lien. */
 }
 .apple-tile img {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
 }
 .apple-tile-body {
-  padding: 32px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   flex: 1;
 }
 .apple-tile h3 {
   margin: 0;
-  font-size: 34px;
+  font-size: 40px;
   font-weight: 600;
-  line-height: 1.14;
-  letter-spacing: -0.374px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   color: var(--ink);
 }
 .apple-tile p {
@@ -292,8 +327,10 @@ main > section.section-tinted {
 .apple-contact .contact-lead {
   margin: 0 auto 8px;
   max-width: 46ch;
-  font-size: 21px;
-  line-height: 1.38;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: 0;
   color: var(--ink-80);
 }
 .apple-contact .contact-note {
@@ -308,11 +345,8 @@ main > section.section-tinted {
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin: 32px 0 20px;
+  margin: 36px 0 22px;
 }
-
-/* Boutons pilule du systeme : accent unique, 11px 22px, et l'etat presse a
-   scale(0.95) qui est la micro-interaction generale. */
 .apple-contact .btn,
 .apple-contact .btn.btn-outline {
   font-size: 17px;
@@ -351,42 +385,48 @@ main > section.section-tinted {
 
 /* ------------------------------------------- animations liees au scroll --- */
 
-/* Le geste signature de ces pages produit : l'image se pose. Elle entre
-   legerement agrandie et retrouve son echelle exacte au fil du defilement,
-   pendant que le bloc de texte remonte. C'est ample mais ca reste sobre —
-   une seule propriete anime, sur une courbe lineaire pilotee par le scroll. */
 @supports (animation-timeline: view()) {
-  .settle {
-    animation: settleIn linear both;
+  /* Le geste d'ouverture : le bandeau entre encadre et arrondi puis atteint le
+     plein cadre. C'est le moment le plus ample de la page, et il ne coute
+     qu'une transformation composee. */
+  .opens {
+    animation: openUp linear both;
     animation-timeline: view();
-    animation-range: entry 0% cover 40%;
+    animation-range: entry 15% cover 55%;
   }
   .rise {
     animation: riseIn linear both;
     animation-timeline: view();
-    animation-range: entry 8% cover 36%;
+    animation-range: entry 10% cover 26%;
   }
-  /* Le hero se retire doucement quand on quitte le haut de page. */
-  .apple-hero-inner {
-    animation: heroExit linear both;
+  /* L'image se pose : elle entre legerement agrandie et retrouve son echelle. */
+  .settle {
+    animation: settleIn linear both;
     animation-timeline: view();
-    animation-range: exit 0% exit 100%;
+    animation-range: entry 0% cover 38%;
+  }
+  /* Derive lente dans le cadre du bandeau sur toute la traversee : l'image
+     n'est jamais tout a fait fixe pendant qu'on la depasse. */
+  .band.drift img {
+    animation: bandDrift linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
   }
 }
 
-@keyframes settleIn {
+@keyframes openUp {
   from {
-    transform: scale(1.12);
-    opacity: 0.6;
+    transform: scale(0.74);
+    border-radius: 28px;
   }
   to {
     transform: scale(1);
-    opacity: 1;
+    border-radius: 0;
   }
 }
 @keyframes riseIn {
   from {
-    transform: translateY(28px);
+    transform: translateY(30px);
     opacity: 0;
   }
   to {
@@ -394,27 +434,35 @@ main > section.section-tinted {
     opacity: 1;
   }
 }
-@keyframes heroExit {
+@keyframes settleIn {
+  from {
+    transform: scale(1.1);
+    opacity: 0.55;
+  }
   to {
-    transform: translateY(-40px) scale(0.97);
-    opacity: 0;
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes bandDrift {
+  from {
+    transform: scale(1.14) translateY(2.5%);
+  }
+  to {
+    transform: scale(1.14) translateY(-2.5%);
   }
 }
 
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 1023px) {
-  .hero h1.apple-title {
-    font-size: 40px;
-  }
   .apple-lead {
     font-size: 24px;
     font-weight: 300;
     line-height: 1.5;
   }
-  .apple-h2,
-  .apple-tile h3 {
-    font-size: 34px;
+  .apple-section {
+    padding: 88px 0;
   }
 }
 @media (max-width: 833px) {
@@ -422,23 +470,29 @@ main > section.section-tinted {
     grid-template-columns: 1fr;
   }
   .apple-hero {
-    padding: 112px 0 64px;
+    padding: 116px 0 72px;
+  }
+  .apple-section {
+    padding: 64px 0;
+  }
+  .two-col-inner {
+    gap: 32px;
+  }
+  .apple-tile h3 {
+    font-size: 34px;
+  }
+  .apple-tile-body {
+    padding: 28px;
+  }
+  .content p.apple-body {
+    font-size: 19px;
   }
 }
 @media (max-width: 640px) {
-  .hero h1.apple-title {
-    font-size: 34px;
+  .apple-section {
+    padding: 48px 0;
   }
-  .apple-h2,
   .apple-tile h3 {
-    font-size: 28px;
-  }
-  .apple-tile-body {
-    padding: 24px;
-  }
-}
-@media (max-width: 419px) {
-  .hero h1.apple-title {
     font-size: 28px;
   }
 }
@@ -446,12 +500,14 @@ main > section.section-tinted {
 /* --------------------------------------------------- mouvement reduit --- */
 
 @media (prefers-reduced-motion: reduce) {
-  .settle,
+  .opens,
   .rise,
-  .apple-hero-inner {
+  .settle,
+  .band.drift img {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+    border-radius: 0 !important;
   }
   .apple-link::after,
   .apple-contact .btn {
