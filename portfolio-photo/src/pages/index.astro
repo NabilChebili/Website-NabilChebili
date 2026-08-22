@@ -4,6 +4,15 @@ import "../styles/layout.css";
 import "../styles/index.css";
 import "../styles/home-editorial.css";
 import Layout from "../layouts/header.astro";
+import { Image } from "astro:assets";
+
+// Visuels importes depuis src/assets : Astro les redimensionne et les convertit
+// en WebP a la construction. En public/ ils partaient bruts — 2,4 / 2,0 / 2,7 Mo
+// pour des vignettes affichees en 322px de large.
+import visuelCloud from "../assets/nabil-ishane.jpg";
+import visuelPhoto from "../assets/A7401833.jpg";
+import visuelMusique from "../assets/image.png";
+import visuelGaming from "../assets/twitch.png";
 
 // Les quatre activites de la page d'origine : memes titres, memes descriptions,
 // memes images, memes destinations.
@@ -12,37 +21,29 @@ const univers = [
     titre: "Cloud & DevOps",
     note: "Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.",
     href: "/clouddevops",
-    img: "/nabil-ishane.jpg",
+    img: visuelCloud,
     alt: "Nabil Chebili chez I-Shane",
-    width: 800,
-    height: 408,
   },
   {
     titre: "Photographie",
     note: "Galeries & séries photographiques : voyages, portraits et instantanés.",
     href: "/photo",
-    img: "/A7401833.jpg",
+    img: visuelPhoto,
     alt: "Photographie",
-    width: 2062,
-    height: 1430,
   },
   {
     titre: "Musique",
     note: "Petites avancées dans le monde la guitare (autodidacte)",
     href: "/musique",
-    img: "/image.png",
+    img: visuelMusique,
     alt: "Musique",
-    width: 1914,
-    height: 1077,
   },
   {
     titre: "Gaming",
     note: "Twitch, streaming et jeux vidéo.",
     href: "/gaming",
-    img: "/twitch.png",
+    img: visuelGaming,
     alt: "Gaming",
-    width: 2544,
-    height: 1435,
   },
 ];
 ---
@@ -117,11 +118,11 @@ const univers = [
           univers.map((u) => (
             <a class="activite" href={u.href} data-reveal data-groupe="cartes">
               <span class="activite-visuel">
-                <img
+                <Image
                   src={u.img}
                   alt={u.alt}
-                  width={u.width}
-                  height={u.height}
+                  widths={[400, 800]}
+                  sizes="(max-width: 700px) 100vw, 25vw"
                   loading="lazy"
                   decoding="async"
                 />
@@ -129,7 +130,7 @@ const univers = [
               <span class="activite-titre">{u.titre}</span>
               <span class="activite-note">{u.note}</span>
               <span class="activite-lien">
-                Voir
+                <span>Voir</span>
                 <i aria-hidden="true">&#8594;</i>
               </span>
             </a>
@@ -152,7 +153,7 @@ const univers = [
 
       <div class="colophon-links" data-reveal data-groupe="contact">
         <a href="mailto:nabilchebili1999@gmail.com">
-          Envoyer un email
+          <span>Envoyer un email</span>
           <i aria-hidden="true">&#8594;</i>
         </a>
         <a
@@ -160,7 +161,7 @@ const univers = [
           target="_blank"
           rel="noopener"
         >
-          LinkedIn
+          <span>LinkedIn</span>
           <i aria-hidden="true">&#8599;</i>
         </a>
       </div>
@@ -201,7 +202,18 @@ const univers = [
             if (!e.isIntersecting) return;
             io.unobserve(e.target);
             e.target.style.transitionDelay = rang(e.target) * 80 + "ms";
+            // Le texte se revele tout de suite : le prendre en otage d'une image
+            // le rendrait invisible pendant tout un chargement lent.
             montre(e.target);
+            // L'obturateur, lui, n'attend que son image. Il ne s'ouvre donc
+            // jamais sur un cadre vide, et une image en echec l'ouvre quand meme
+            // plutot que de laisser un rectangle gris definitif.
+            e.target.querySelectorAll("img").forEach((im) => {
+              const prete = () => e.target.classList.add("img-prete");
+              if (im.complete) return prete();
+              im.addEventListener("load", prete, { once: true });
+              im.addEventListener("error", prete, { once: true });
+            });
           });
         },
         // 120px d'avance avant de declencher, la valeur par defaut d'AOS
