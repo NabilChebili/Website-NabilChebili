@@ -135,8 +135,9 @@ ajustement de mise en forme — plusieurs de ces pièges ont coûté des tours e
 ### En attente
 
 - **Ajustements de mise en forme** — reprise prévue le 24/08/2026.
-- **Push / PR** : 7 commits locaux sur `feat/home-cinematic`, rien poussé. Chaque push déclenche un
-  déploiement réel, donc attendre la demande explicite.
+- **Push / PR** : la branche `feat/home-cinematic` a **37 commits** d'avance sur `origin/main` et
+  n'a pas de branche amont — rien n'a jamais été poussé. Chaque push déclenche un déploiement réel,
+  donc attendre la demande explicite.
 - **TLS de l'apex `nabilchebili.fr`** : diagnostic clos, correctif écrit et parqué. `https://nabilchebili.fr`
   n'a aucun certificat (alerte TLS 80, confirmée en IPv4 et IPv6) ; le certificat de `www` ne porte
   que le SAN `www.nabilchebili.fr`. Correctif retenu : rattacher l'apex à la SWA via un `A` vers
