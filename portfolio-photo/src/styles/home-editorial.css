@@ -136,13 +136,6 @@ body {
    sous la barre. Ecrite sur une seule ligne a dessein — sur deux lignes, un
    outil qui cherche le bloc ".about {" tombait sur celui-ci. */
 #explorer, .about { scroll-margin-top: 72px; }
-.about {
-  margin: var(--pas-10) 0 0;
-  padding: var(--pas-3) var(--edge) 0;
-  scroll-margin-top: 72px;
-  margin: var(--pas-10) 0 0;
-  padding: var(--pas-3) var(--edge) 0;
-}
 main > section,
 main > section:nth-child(even) {
   background: var(--paper);
@@ -226,18 +219,23 @@ main > section:nth-child(even) {
 
 /* Remise a sa place d'origine : juste apres l'ouverture, avant Explorer. */
 .about {
-  margin: 76px 0 0;
-  padding: 26px var(--edge) 0;
+  /* Bord droit rentre pour rapprocher le portrait du centre : la section ne
+     porte que le texte a gauche et l'image a droite, rien d'autre ne bouge. */
+  margin: var(--pas-10) 0 0;
+  padding: var(--pas-3) clamp(40px, 8vw, 150px) 0 var(--edge);
   border-top: 1px solid var(--ink);
   display: grid;
-  grid-template-columns: 1.45fr 0.55fr;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 52px;
   align-items: center;
 }
 .about-media {
+  box-sizing: border-box;
   margin: 0;
   background: var(--block);
   padding: 20px;
+  max-width: 360px;
+  width: 100%;
 }
 .about-media img {
   display: block;
@@ -476,6 +474,12 @@ main > section:nth-child(even) {
   }
 }
 @media (max-width: 700px) {
+  .about {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+  .about-media {
+    margin-right: 0;
+  }
   :root {
     --edge: 20px;
   }
