@@ -35,8 +35,8 @@ pour Azure Static Web Apps). Sitemap généré via `@astrojs/sitemap`.
 - `/vietnam`, `/indonesie` — récit de voyage : quelques photos "Post" en tête (grille + légende
   courte), puis chaque étape du voyage en **accordéon repliable** (mini titre + nombre de photos +
   aperçu miniature, la grille complète s'affiche au clic)
-- `/illumination`, `/londres`, `/gr1-1`, `/gr1-2`, `/gr1-3`, `/mariage`, `/croatie` — une page par
-  galerie classique, chacune une simple grille de photos
+- `/illumination`, `/londres`, `/gr1-1`, `/gr1-2`, `/gr1-3`, `/mariage`, `/croatie`, `/supersonic`,
+  `/event-databricks` — une page par galerie classique, chacune une simple grille de photos
 
 ### Composants photo
 
@@ -47,9 +47,30 @@ pour Azure Static Web Apps). Sitemap généré via `@astrojs/sitemap`.
 - **`AccordionSection.astro`** — enveloppe une `PhotoGrid` dans un `<details>` repliable (titre +
   nombre de photos + 4 miniatures en aperçu quand fermé). Utilisé pour chaque étape des pages
   Vietnam/Indonésie afin de ne pas charger des centaines de photos d'un coup.
-- **`GalleryPage.astro`** — page-type pour une galerie unique (titre + `PhotoGrid`), utilisée par
-  les 7 pages de galeries classiques (`illumination.astro`, `londres.astro`, etc.) qui ne font que
-  lui passer l'URL du container et le titre.
+- **`GalleryPage.astro`** — page-type pour une galerie unique (lien de retour vers `/photo`, titre,
+  intro, en-tête de section avec le nombre de photos, puis `PhotoGrid`), utilisée par les 9 pages de
+  galeries classiques (`illumination.astro`, `londres.astro`, etc.) qui ne font que lui passer l'URL
+  du container et le titre. Accepte aussi `password` pour masquer une galerie derrière un voile —
+  aucune ne l'utilise aujourd'hui.
+- **`Colophon.astro`** — le bloc de contact qui clot les pages intérieures. Ne porte que le
+  balisage, son habillage vient de `editorial.css`.
+
+### Styles
+
+Les 16 pages partagent un seul système visuel, documenté dans **[DESIGN.md](portfolio-photo/DESIGN.md)** :
+jetons, primitives, mécanisme de révélation, recette pour ajouter une page, et les pièges déjà
+rencontrés. Quatre feuilles seulement :
+
+- `editorial.css` — le système, chargé par `header.astro` donc par toutes les pages
+- `home-editorial.css` — ce qui n'existe que sur l'accueil
+- `layout.css` — coque de l'en-tête et nav
+- `global.css` — palette héritée et reset
+
+⚠️ **Une page ne doit importer que `global.css`.** Une feuille importée par la page reprend le
+dessus sur le système — voir §2 de DESIGN.md.
+
+Le `<main>` est porté par `header.astro` et reçoit sa classe par la propriété `mainClass`
+(`mainClass="page editorial"`). Les pages n'émettent pas le leur.
 
 ### Galeries photo — comment ça marche
 
