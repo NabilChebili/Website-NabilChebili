@@ -18,6 +18,17 @@ const ogImageUrl = siteUrl ? new URL(image, siteUrl).href : image;
 
 const fullTitle = String(title).includes("Nabil Chebili") ? String(title) : `${title} — Nabil Chebili`;
 
+// Les crochets de la nav signalent une destination. L'entree de la page ouverte
+// n'en porte donc pas — on y est deja — et ne se souligne pas au survol. La
+// correspondance est exacte : /vietnam ne marque pas /photo comme courant.
+const chemin = (Astro.url?.pathname ?? "/").replace(/\/+$/, "") || "/";
+const sections = [
+	{ href: "/clouddevops", label: "Cloud DevOps" },
+	{ href: "/photo", label: "Photo" },
+	{ href: "/musique", label: "Musique" },
+	{ href: "/gaming", label: "Gaming" },
+];
+
 const schemaPerson = {
 	"@context": "https://schema.org",
 	"@type": "Person",
@@ -83,15 +94,19 @@ const schemaWebsite = {
 					<a href="/">Nabil Chebili</a>
 				</div>
 				<div class="nav-wrap">
-					<a class="nav-home" href="/">Accueil</a>
+					<a class="nav-home" href="/" aria-current={chemin === "/" ? "page" : undefined}>Accueil</a>
 					<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu">
 						<span class="hamburger" aria-hidden="true">☰</span>
 					</button>
 					<nav id="site-nav" class="site-nav" aria-label="Sections">
-						<a href="/clouddevops"><span>Cloud DevOps</span></a>
-						<a href="/photo"><span>Photo</span></a>
-						<a href="/musique"><span>Musique</span></a>
-						<a href="/gaming"><span>Gaming</span></a>
+						{
+							sections.map((s) => (
+								// Aucun blanc entre <a> et <span> : Astro ne le supprime pas,
+								// et il se voit comme un decalage du libelle sur l entree
+								// courante, qui n a pas de crochet pour l absorber.
+								<a href={s.href} aria-current={chemin === s.href ? "page" : undefined}><span>{s.label}</span></a>
+							))
+						}
 					</nav>
 				</div>
 			</div>

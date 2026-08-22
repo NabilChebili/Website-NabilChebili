@@ -98,14 +98,6 @@ body {
   text-transform: uppercase;
   color: var(--ink);
 }
-.site-nav a::before {
-  content: "[ ";
-  color: var(--ink-55);
-}
-.site-nav a::after {
-  content: " ]";
-  color: var(--ink-55);
-}
 .footer-nav,
 .site-footer {
   font-size: 11px;
@@ -705,23 +697,3 @@ html {
   background-size: 100% 1px;
 }
 
-/* Le survol de la nav, c'est la paire de crochets — pas un trait en plus.
-   Deux marqueurs superposes se disputaient le meme mot, et un trait tire de
-   crochet a crochet passe sous les espaces : il encadre les crochets au lieu
-   de souligner le mot, et prend l'allure d'un champ de formulaire.
-   L'espace des crochets reste reserve au repos, donc rien ne se decale.
-   Sur un appareil sans survol ils restent visibles : le marqueur ne serait
-   jamais declenche. */
-@media (hover: hover) {
-  .site-nav a::before,
-  .site-nav a::after {
-    color: transparent;
-    transition: color var(--duree) var(--sortie);
-  }
-  .site-nav a:hover::before,
-  .site-nav a:hover::after,
-  .site-nav a:focus-visible::before,
-  .site-nav a:focus-visible::after {
-    color: var(--ink);
-  }
-}

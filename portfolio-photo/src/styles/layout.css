@@ -69,8 +69,46 @@ body {
   margin-left: 18px;
   font-weight: 600;
 }
-.site-nav a:hover {
-  color: var(--accent);
+
+/* Les crochets encadrent les entrees qui menent ailleurs : ils signalent une
+   destination. L'entree de la page ouverte n'en porte pas — on y est deja — et
+   ne se souligne pas au survol. Les regles vivent ici parce que header.astro
+   importe cette feuille : la nav se comporte donc pareil sur les 16 pages.
+   L'opacite plutot qu'une couleur fixe, pour que les crochets restent en
+   retrait quelle que soit la couleur du lien selon la page. */
+.site-nav a::before {
+  content: "[ ";
+  opacity: 0.55;
+}
+.site-nav a::after {
+  content: " ]";
+  opacity: 0.55;
+}
+.site-nav a[aria-current="page"]::before,
+.site-nav a[aria-current="page"]::after {
+  content: none;
+}
+.site-nav a[aria-current="page"],
+.nav-home[aria-current="page"] {
+  color: var(--ink, #000);
+}
+
+/* Le survol souligne le texte seul. Le degrade est porte par le <span>
+   interieur et non par le lien : sur le lien, sa boite englobe les crochets et
+   leurs espaces, et le trait passait dessous au lieu de souligner le mot. */
+.site-nav a span,
+.nav-home {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+.site-nav a:hover span,
+.site-nav a:focus-visible span,
+.nav-home:hover,
+.nav-home:focus-visible {
+  background-size: 100% 1px;
 }
 
 /* hide mobile toggle by default */
