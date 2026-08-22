@@ -485,25 +485,25 @@ main > section:nth-child(even) {
   .activite-visuel {
     animation: reveleCadre linear both;
     animation-timeline: view();
-    animation-range: entry 0% entry 100%;
+    animation-range: entry 0% cover 40%;
   }
   /* Cascade. Les quatre cartes d'une meme rangee partagent la meme progression
      de defilement : un decalage temporel n'aurait aucun effet. On decale leur
      plage d'entree de 5 % chacune, ce qui produit la vague. */
   .activite:nth-child(2) .activite-visuel {
-    animation-range: entry 5% entry 100%;
+    animation-range: entry 30% cover 46%;
   }
   .activite:nth-child(3) .activite-visuel {
-    animation-range: entry 10% entry 100%;
+    animation-range: entry 60% cover 52%;
   }
   .activite:nth-child(4) .activite-visuel {
-    animation-range: entry 15% entry 100%;
+    animation-range: entry 90% cover 58%;
   }
 }
 
 @keyframes reveleCadre {
   from {
-    clip-path: inset(18% 0 0 0);
+    clip-path: inset(38% 0 0 0);
   }
   to {
     clip-path: inset(0 0 0 0);
@@ -562,16 +562,210 @@ main > section:nth-child(even) {
   }
 }
 
+
+/* ============================================================================
+   Motion — deux gestes, reutilises partout.
+
+   Une page paraît tenue quand tous ses elements partagent le meme vocabulaire,
+   pas quand chacun a son effet. D'ou seulement :
+
+     monte      — un bloc de texte remonte de 14px. TRANSLATION SEULE, jamais
+                  d'opacite : un texte a zero d'opacite est un texte masque.
+     decouvre   — une image se devoile par le bas, sous un masque.
+     trace      — un filet se dessine de gauche a droite.
+
+   Les durees et la courbe viennent des tokens : 240ms pour une interaction,
+   560ms pour une entree, deceleration cubic-bezier(0.2, 0, 0, 1).
+   ========================================================================= */
+
+/* Le clic sur « Explorer ↓ » glisse au lieu de teleporter. Une ligne, aucun JS. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* --- entree de la manchette au chargement, en cascade de 90ms --- */
+.meta-row,
+.opening-foot {
+  animation: monte var(--duree-longue) var(--sortie) both;
+}
+.meta-row {
+  animation-delay: 60ms;
+}
+.opening-foot {
+  animation-delay: 240ms;
+}
+
+/* --- soulignement qui se trace, sur tout ce qui est cliquable --- */
+.site-nav a,
+.nav-home,
+.brand a,
+.footer-nav nav a,
+.jump,
+.colophon-links a,
+.activite-lien {
+  position: relative;
+  text-decoration: none;
+}
+.site-nav a::after,
+.nav-home::after,
+.brand a::after,
+.footer-nav nav a::after,
+.jump::after,
+.activite-lien::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform var(--duree) var(--sortie);
+}
+.site-nav a:hover::after,
+.site-nav a:focus-visible::after,
+.nav-home:hover::after,
+.brand a:hover::after,
+.footer-nav nav a:hover::after,
+.jump:hover::after,
+.activite:hover .activite-lien::after,
+.activite:focus-visible .activite-lien::after {
+  transform: scaleX(1);
+}
+/* le soulignement remplace la decoration : on retire celle d'avant */
+.site-nav a:hover,
+.nav-home:hover,
+.brand a:hover,
+.footer-nav nav a:hover,
+.jump:hover,
+.activite:hover .activite-lien,
+.colophon-links a:hover {
+  text-decoration: none;
+}
+
+@keyframes monte {
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes trace {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  /* --- les blocs de texte montent a leur entree, en cascade dans leur groupe --- */
+  .about-title,
+  .about-text,
+  .section-head span,
+  .activite-titre,
+  .activite-note,
+  .colophon h2,
+  .colophon p,
+  .colophon-links {
+    animation: monte linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 26%;
+  }
+  .about-text,
+  .colophon p {
+    animation-range: entry 16% cover 32%;
+  }
+  .activite-note {
+    animation-range: entry 16% cover 30%;
+  }
+
+  /* --- le portrait se decouvre comme les cartes --- */
+  .about-media {
+    animation: reveleCadre linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 38%;
+  }
+
+  /* --- les filets se tracent --- */
+  .about,
+  .section-head,
+  .colophon {
+    position: relative;
+  }
+  .about::before,
+  .section-head::after,
+  .colophon::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--ink);
+    transform-origin: 0 50%;
+    animation: trace linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 18%;
+  }
+  .about::before,
+  .colophon::before {
+    top: -1px;
+  }
+  .section-head::after {
+    bottom: -1px;
+  }
+  /* le filet statique cede la place a celui qui se trace */
+  .about,
+  .colophon {
+    border-top-color: transparent;
+  }
+  .section-head {
+    border-bottom-color: transparent;
+  }
+}
+
 /* --------------------------------------------------- mouvement reduit --- */
 
+/* Tout se pose immediatement, et rien ne reste decale ni masque. */
 @media (prefers-reduced-motion: reduce) {
-  .activite-visuel {
+  html {
+    scroll-behavior: auto;
+  }
+  .mega span,
+  .meta-row,
+  .opening-foot,
+  .about-title,
+  .about-text,
+  .section-head span,
+  .activite-titre,
+  .activite-note,
+  .colophon h2,
+  .colophon p,
+  .colophon-links,
+  .about-media,
+  .activite-visuel,
+  .about::before,
+  .section-head::after,
+  .colophon::before {
     animation: none !important;
+    transform: none !important;
     clip-path: none !important;
     opacity: 1 !important;
-    transform: none !important;
   }
-  .colophon-links i {
+  .about,
+  .colophon {
+    border-top-color: var(--ink);
+  }
+  .section-head {
+    border-bottom-color: var(--ink);
+  }
+  .site-nav a::after,
+  .activite-lien::after,
+  .colophon-links i,
+  .activite-lien i {
     transition: none;
   }
 }
