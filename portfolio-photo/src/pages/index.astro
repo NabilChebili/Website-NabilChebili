@@ -54,175 +54,114 @@ const univers = [
   title="Nabil Chebili"
   description="Site personnel de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries."
   webfont={true}
+  mainClass="page home editorial"
 >
-  <script is:inline>
-    document.documentElement.classList.add("reveal-ok");
-  </script>
+  <section class="opening">
+    <div class="meta-row" data-reveal data-groupe="manchette">
+      <span><b>958</b> photographies &middot; <b>11</b> galeries</span>
+      <span>Ingénieur Cloud &amp; DevOps &middot; <b>+4</b> ans</span>
+    </div>
 
-  <main class="page home">
-    <section class="opening">
-      <div class="meta-row" data-reveal data-groupe="manchette">
-        <span><b>958</b> photographies &middot; <b>11</b> galeries</span>
-        <span>Ingénieur Cloud &amp; DevOps &middot; <b>+4</b> ans</span>
-      </div>
-
-      <h1 class="mega">
-        {
-          "Nabil Chebili".split("").map((c, i) => (
-            <span class="mega-lettre" style={`--i:${i}`}>
-              {c === " " ? " " : c}
-            </span>
-          ))
-        }
-      </h1>
-
-      <div class="opening-foot" data-reveal data-groupe="manchette">
-        <p>
-          Cloud &amp; DevOps, photographie et musique — projets, galeries et
-          inspirations.
-        </p>
-        <a class="jump" href="#explorer">Explorer &#8595;</a>
-      </div>
-    </section>
-
-    <section class="about">
-      <div>
-        <h2 class="about-title" data-reveal data-groupe="apropos">Vous vous demandez sûrement qui je suis ?</h2>
-        <p class="about-text" data-reveal data-groupe="apropos">
-        Je suis quelqu’un de curieux, attiré par les choses que l’on construit et
-        que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et
-        reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
-        systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est
-        le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à
-          ce que tout fasse sens.
-        </p>
-      </div>
-
-      <figure class="about-media" data-reveal data-groupe="apropos">
-        <img
-          src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg"
-          alt="Portrait de Nabil Chebili"
-          width="2200"
-          height="1467"
-          loading="lazy"
-          decoding="async"
-        />
-      </figure>
-    </section>
-
-    <section id="explorer">
-      <div class="section-head" data-reveal data-groupe="explorer">
-        <span>Explorer</span>
-        <span>({univers.length})</span>
-      </div>
-      <div class="activites">
-        {
-          univers.map((u) => (
-            <a class="activite" href={u.href} data-reveal data-groupe="cartes">
-              <span class="activite-visuel">
-                <Image
-                  src={u.img}
-                  alt={u.alt}
-                  widths={[400, 800]}
-                  sizes="(max-width: 700px) 100vw, 25vw"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-              <span class="activite-titre">{u.titre}</span>
-              <span class="activite-note">{u.note}</span>
-              <span class="activite-lien">
-                <span>Voir</span>
-                <i aria-hidden="true">&#8594;</i>
-              </span>
-            </a>
-          ))
-        }
-      </div>
-    </section>
-
-    <section class="colophon">
-      <div data-reveal data-groupe="contact">
-        <h2>Contact</h2>
-        <p class="fine">
-          Pour toute question, collaboration ou prise de contact rapide —
-          écrivez-moi.
-        </p>
-        <p class="fine fine-after">
-          Je réponds généralement sous quelques heures.
-        </p>
-      </div>
-
-      <div class="colophon-links" data-reveal data-groupe="contact">
-        <a href="mailto:nabilchebili1999@gmail.com">
-          <span>Envoyer un email</span>
-          <i aria-hidden="true">&#8594;</i>
-        </a>
-        <a
-          href="https://www.linkedin.com/in/chebili-nabil/"
-          target="_blank"
-          rel="noopener"
-        >
-          <span>LinkedIn</span>
-          <i aria-hidden="true">&#8599;</i>
-        </a>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    // Revelation au premier passage, jamais annulee. C'est le motif d'AOS et de
-    // Motion : `once: true`. Une timeline de defilement, elle, remet l'element
-    // dans son etat initial des qu'il sort de la plage — donc le texte
-    // redevenait invisible. Ici l'observateur retire sa surveillance apres le
-    // premier passage : plus rien ne peut re-masquer un contenu.
-    (function () {
-      const cibles = Array.from(document.querySelectorAll("[data-reveal]"));
-      if (!cibles.length) return;
-
-      const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const montre = (el) => el.classList.add("vu");
-
-      if (reduit || !("IntersectionObserver" in window)) {
-        cibles.forEach(montre);
-        return;
+    <h1 class="mega">
+      {
+        "Nabil Chebili".split("").map((c, i) => (
+          <span class="mega-lettre" style={`--i:${i}`}>
+            {c === " " ? " " : c}
+          </span>
+        ))
       }
+    </h1>
 
-      // Cascade de 80ms a l'interieur d'un meme groupe, plafonnee : une liste
-      // longue avec un decalage cumulatif finirait par durer plusieurs secondes.
-      const rangs = new Map();
-      const rang = (el) => {
-        const g = el.dataset.groupe || "seul";
-        const n = rangs.get(g) || 0;
-        rangs.set(g, n + 1);
-        return Math.min(n, 5);
-      };
+    <div class="opening-foot" data-reveal data-groupe="manchette">
+      <p>
+        Cloud &amp; DevOps, photographie et musique — projets, galeries et
+        inspirations.
+      </p>
+      <a class="jump" href="#explorer">Explorer &#8595;</a>
+    </div>
+  </section>
 
-      const io = new IntersectionObserver(
-        (entrees) => {
-          entrees.forEach((e) => {
-            if (!e.isIntersecting) return;
-            io.unobserve(e.target);
-            e.target.style.transitionDelay = rang(e.target) * 80 + "ms";
-            // Le texte se revele tout de suite : le prendre en otage d'une image
-            // le rendrait invisible pendant tout un chargement lent.
-            montre(e.target);
-            // L'obturateur, lui, n'attend que son image. Il ne s'ouvre donc
-            // jamais sur un cadre vide, et une image en echec l'ouvre quand meme
-            // plutot que de laisser un rectangle gris definitif.
-            e.target.querySelectorAll("img").forEach((im) => {
-              const prete = () => e.target.classList.add("img-prete");
-              if (im.complete) return prete();
-              im.addEventListener("load", prete, { once: true });
-              im.addEventListener("error", prete, { once: true });
-            });
-          });
-        },
-        // 120px d'avance avant de declencher, la valeur par defaut d'AOS
-        { rootMargin: "0px 0px -120px 0px", threshold: 0 }
-      );
+  <section class="about">
+    <div>
+      <h2 class="about-title" data-reveal data-groupe="apropos">Vous vous demandez sûrement qui je suis ?</h2>
+      <p class="about-text" data-reveal data-groupe="apropos">
+      Je suis quelqu’un de curieux, attiré par les choses que l’on construit et
+      que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et
+      reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
+      systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est
+      le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à
+        ce que tout fasse sens.
+      </p>
+    </div>
 
-      cibles.forEach((el) => io.observe(el));
-    })();
-  </script>
+    <figure class="about-media" data-reveal data-groupe="apropos">
+      <img
+        src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg"
+        alt="Portrait de Nabil Chebili"
+        width="2200"
+        height="1467"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  </section>
+
+  <section id="explorer">
+    <div class="section-head" data-reveal data-groupe="explorer">
+      <span>Explorer</span>
+      <span>({univers.length})</span>
+    </div>
+    <div class="activites">
+      {
+        univers.map((u) => (
+          <a class="activite" href={u.href} data-reveal data-groupe="cartes">
+            <span class="activite-visuel">
+              <Image
+                src={u.img}
+                alt={u.alt}
+                widths={[400, 800]}
+                sizes="(max-width: 700px) 100vw, 25vw"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="activite-titre">{u.titre}</span>
+            <span class="activite-note">{u.note}</span>
+            <span class="activite-lien">
+              <span>Voir</span>
+              <i aria-hidden="true">&#8594;</i>
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="colophon">
+    <div data-reveal data-groupe="contact">
+      <h2>Contact</h2>
+      <p class="fine">
+        Pour toute question, collaboration ou prise de contact rapide —
+        écrivez-moi.
+      </p>
+      <p class="fine fine-after">
+        Je réponds généralement sous quelques heures.
+      </p>
+    </div>
+
+    <div class="colophon-links" data-reveal data-groupe="contact">
+      <a href="mailto:nabilchebili1999@gmail.com">
+        <span>Envoyer un email</span>
+        <i aria-hidden="true">&#8594;</i>
+      </a>
+      <a
+        href="https://www.linkedin.com/in/chebili-nabil/"
+        target="_blank"
+        rel="noopener"
+      >
+        <span>LinkedIn</span>
+        <i aria-hidden="true">&#8599;</i>
+      </a>
+    </div>
+  </section>
 </Layout>

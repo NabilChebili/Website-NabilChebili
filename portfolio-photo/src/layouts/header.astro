@@ -12,6 +12,9 @@ const {
 	// style couvre l'ensemble du site : la pile systeme ne ferait plus le
 	// travail sur aucune page.
 	webfont = true,
+	// Classe portee par le <main>. Les pages n'emettent plus le leur : il y en
+	// avait deux imbriques sur chaque page, ce que le HTML interdit.
+	mainClass = "page",
 } = Astro.props;
 
 const siteUrl = Astro.site ?? new URL("https://www.nabilchebili.fr");
@@ -88,6 +91,11 @@ const schemaWebsite = {
 
 		<script type="application/ld+json">{JSON.stringify(schemaPerson)}</script>
 		<script type="application/ld+json">{JSON.stringify(schemaWebsite)}</script>
+		<script is:inline>
+			// Pose avant le rendu : les elements a reveler ne sont masques que si le
+			// script tourne. Sans JavaScript, rien n'est cache.
+			document.documentElement.classList.add("reveal-ok");
+		</script>
 	</head>
 	<body>
 		<header class="site-header">
@@ -114,7 +122,7 @@ const schemaWebsite = {
 			</div>
 		</header>
 
-		<main>
+		<main class={mainClass}>
 			<slot />
 		</main>
 
@@ -145,6 +153,61 @@ const schemaWebsite = {
 					wrap.classList.toggle('open');
 				});
 			})();
+		</script>
+		<script>
+		// Revelation au premier passage, jamais annulee. C'est le motif d'AOS et de
+		// Motion : `once: true`. Une timeline de defilement, elle, remet l'element
+		// dans son etat initial des qu'il sort de la plage — donc le texte
+		// redevenait invisible. Ici l'observateur retire sa surveillance apres le
+		// premier passage : plus rien ne peut re-masquer un contenu.
+		(function () {
+		const cibles = Array.from(document.querySelectorAll("[data-reveal]"));
+		if (!cibles.length) return;
+
+		const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+		const montre = (el) => el.classList.add("vu");
+
+		if (reduit || !("IntersectionObserver" in window)) {
+		cibles.forEach(montre);
+		return;
+		}
+
+		// Cascade de 80ms a l'interieur d'un meme groupe, plafonnee : une liste
+		// longue avec un decalage cumulatif finirait par durer plusieurs secondes.
+		const rangs = new Map();
+		const rang = (el) => {
+		const g = el.dataset.groupe || "seul";
+		const n = rangs.get(g) || 0;
+		rangs.set(g, n + 1);
+		return Math.min(n, 5);
+		};
+
+		const io = new IntersectionObserver(
+		(entrees) => {
+		entrees.forEach((e) => {
+		if (!e.isIntersecting) return;
+		io.unobserve(e.target);
+		e.target.style.transitionDelay = rang(e.target) * 80 + "ms";
+		// Le texte se revele tout de suite : le prendre en otage d'une image
+		// le rendrait invisible pendant tout un chargement lent.
+		montre(e.target);
+		// L'obturateur, lui, n'attend que son image. Il ne s'ouvre donc
+		// jamais sur un cadre vide, et une image en echec l'ouvre quand meme
+		// plutot que de laisser un rectangle gris definitif.
+		e.target.querySelectorAll("img").forEach((im) => {
+		const prete = () => e.target.classList.add("img-prete");
+		if (im.complete) return prete();
+		im.addEventListener("load", prete, { once: true });
+		im.addEventListener("error", prete, { once: true });
+		});
+		});
+		},
+		// 120px d'avance avant de declencher, la valeur par defaut d'AOS
+		{ rootMargin: "0px 0px -120px 0px", threshold: 0 }
+		);
+
+		cibles.forEach((el) => io.observe(el));
+		})();
 		</script>
 	</body>
 </html>
