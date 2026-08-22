@@ -7,6 +7,9 @@ const {
 		"Portfolio de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
 	image = "/LogoRond.svg",
 	ogType = "website",
+	// Charge la fonte Archivo. Optionnel et desactive par defaut : seule la home
+	// la demande, les autres pages gardent la pile systeme et zero requete.
+	webfont = false,
 } = Astro.props;
 
 const siteUrl = Astro.site ?? new URL("https://www.nabilchebili.fr");
@@ -40,6 +43,19 @@ const schemaWebsite = {
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/LogoRond.svg" />
 		<meta name="generator" content={Astro.generator} />
+
+		{
+			webfont ? (
+				<>
+					<link rel="preconnect" href="https://fonts.googleapis.com" />
+					<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+					<link
+						href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap"
+						rel="stylesheet"
+					/>
+				</>
+			) : null
+		}
 		<title>{fullTitle}</title>
 		<meta name="description" content={description} />
 		<meta name="robots" content="index,follow" />
