@@ -105,31 +105,30 @@ const univers = [
         <span>Explorer</span>
         <span>({univers.length})</span>
       </div>
-      <ul class="rows">
+      <div class="cards">
         {
           univers.map((u) => (
-            <li>
-              <a class="row" href={u.href}>
-                <span class="row-title">{u.titre}</span>
-                <span class="row-note">{u.note}</span>
-                <span class="row-go" aria-hidden="true">
-                  &#8594;
-                </span>
-                <span class="row-media">
-                  <img
-                    src={u.img}
-                    alt={u.alt}
-                    width={u.width}
-                    height={u.height}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </span>
-              </a>
-            </li>
+            <a class="card" href={u.href}>
+              <span class="card-frame">
+                <img
+                  src={u.img}
+                  alt={u.alt}
+                  width={u.width}
+                  height={u.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span class="card-title">{u.titre}</span>
+              <span class="card-note">{u.note}</span>
+              <span class="card-go">
+                Voir
+                <i aria-hidden="true">&#8594;</i>
+              </span>
+            </a>
           ))
         }
-      </ul>
+      </div>
     </section>
 
     <section class="colophon">

@@ -302,132 +302,88 @@ main > section:nth-child(even) {
   font-weight: 500;
 }
 
-/* Les quatre activites en LIGNES, pas en blocs. Quatre blocs cote a cote se
-   lisaient comme quatre cartes interchangeables ; en lignes pleine largeur, le
-   condense passe au premier plan et l'image ne se montre qu'au survol — une
-   seule a la fois, ce qui evite aussi que Musique et Gaming se ressemblent. */
-.rows {
-  list-style: none;
-  margin: 0;
-  padding: 0 var(--edge) 84px;
-}
-/* Grille FIXE, pas 'auto 1fr auto'. Avec une premiere colonne en auto, chaque
-   note demarrait juste apres son titre, donc a une abscisse differente d'une
-   ligne a l'autre — c'est ce qui rendait l'arrangement bancal. Ici les quatre
-   colonnes tombent au meme endroit sur les quatre lignes, et l'apercu a son
-   propre emplacement reserve : rien ne se superpose, rien ne se decale. */
-.row {
-  position: relative;
+/* L'organisation de la page d'origine : quatre cartes sur une rangee, image en
+   haut, puis titre, description et lien. Seul le style change — pas d'ombre
+   portee, pas de fond de carte, pas de coins arrondis, pas de zoom au survol.
+   Un filet sous l'image tient la structure, comme le reste de la page. */
+.cards {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 32ch) 120px 30px;
-  align-items: center;
-  gap: 30px;
-  padding: 20px 0 18px;
-  border-bottom: 1px solid var(--rule);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  padding: 24px var(--edge) 84px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
   text-decoration: none;
   color: var(--ink);
-  isolation: isolate;
 }
-/* Tous les enfants sur la meme ligne de grille. Sans cela, la fleche etant en
-   colonne 4 avant l'apercu en colonne 3 dans le markup, le placement ne
-   revenait pas en arriere et poussait l'apercu sur une deuxieme ligne
-   implicite : la ligne passait de 112 a 242px. */
-.row > * {
-  grid-row: 1;
-}
-.row-title {
-  position: relative;
-  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-  font-size: clamp(30px, 5.4vw, 82px);
-  font-weight: 800;
-  line-height: 0.94;
-  letter-spacing: 0.005em;
-  text-transform: uppercase;
-}
-.row-note {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--ink-55);
-}
-.row-go {
-  grid-column: 4;
-  justify-self: end;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ink);
-  transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* L'image se pose au survol, calee a droite du titre. Elle est en dehors du
-   flux, donc la hauteur des lignes ne bouge pas quand elle apparait. */
-.row-media {
-  grid-column: 3;
-  width: 100%;
-  aspect-ratio: 3 / 2;
+.card-frame {
+  display: block;
   overflow: hidden;
   background: var(--block);
-  align-self: center;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 260ms ease;
+  aspect-ratio: 4 / 3;
 }
-.row-media img {
+.card-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: grayscale(1) contrast(1.02);
+  transition: filter 420ms ease;
 }
-.row:hover .row-media,
-.row:focus-visible .row-media {
-  opacity: 1;
+/* La couleur revient au survol : l'image reste en place, seul son rendu change.
+   Plus discret qu'un agrandissement, et ca signale la carte active sans bouger
+   la mise en page. */
+.card:hover .card-frame img,
+.card:focus-visible .card-frame img {
+  filter: grayscale(0) contrast(1);
 }
-/* Le titre reste immobile. C'est l'apercu et la fleche qui signalent la ligne
-   active — trois elements en mouvement simultane donnaient une impression de
-   sautillement. */
-.row:hover,
-.row:focus-visible {
-  background: linear-gradient(var(--block), var(--block));
+.card-title {
+  margin: 11px 0 0;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--ink);
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(20px, 1.9vw, 27px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
-.row:hover .row-go,
-.row:focus-visible .row-go {
-  transform: translateX(8px);
+.card-note {
+  margin: 10px 0 14px;
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-55);
 }
-.row:focus-visible {
+.card-go {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.card-go i {
+  font-style: normal;
+  font-weight: 500;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card:hover .card-go,
+.card:focus-visible .card-go {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.card:hover .card-go i,
+.card:focus-visible .card-go i {
+  transform: translateX(6px);
+}
+.card:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 4px;
-}
-
-/* Sans survol possible (tactile), l'image ne serait jamais visible : on la
-   sort du survol et on la pose en vignette dans la ligne. */
-@media (hover: none) {
-  .row {
-    grid-template-columns: auto 1fr;
-    grid-template-areas:
-      "media titre"
-      "media note";
-    gap: 14px 16px;
-    align-items: start;
-  }
-  .row-media {
-    position: static;
-    grid-area: media;
-    z-index: auto;
-    opacity: 1;
-    transform: none;
-    width: 92px;
-    aspect-ratio: 1 / 1;
-  }
-  .row-title {
-    grid-area: titre;
-    font-size: clamp(26px, 8vw, 42px);
-  }
-  .row-note {
-    grid-area: note;
-    max-width: none;
-  }
-  .row-go {
-    display: none;
-  }
 }
 
 /* -------------------------------------------------------------- colophon --- */
@@ -505,12 +461,13 @@ main > section:nth-child(even) {
 @supports (animation-timeline: view()) {
   /* Revelation par volet, du bas vers le haut : le tirage apparait. Une seule
      propriete animee par planche. */
-  .row-title {
+  .card-frame img {
     animation: entryIn linear both;
     animation-timeline: view();
     animation-range: entry 4% cover 30%;
   }
-  .row-note {
+  .card-title,
+  .card-note {
     animation: noteIn linear both;
     animation-timeline: view();
     animation-range: entry 10% cover 34%;
@@ -520,7 +477,7 @@ main > section:nth-child(even) {
 @keyframes entryIn {
   from {
     opacity: 0;
-    transform: translateY(26px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -539,6 +496,9 @@ main > section:nth-child(even) {
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 1100px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .opening-body {
     grid-template-columns: 1fr auto;
     gap: 22px;
@@ -554,6 +514,10 @@ main > section:nth-child(even) {
   }
 }
 @media (max-width: 700px) {
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
   :root {
     --edge: 14px;
   }
@@ -590,8 +554,9 @@ main > section:nth-child(even) {
 /* --------------------------------------------------- mouvement reduit --- */
 
 @media (prefers-reduced-motion: reduce) {
-  .row-title,
-  .row-note {
+  .card-frame img,
+  .card-title,
+  .card-note {
     animation: none !important;
     clip-path: none !important;
     opacity: 1 !important;
