@@ -5,8 +5,8 @@ import "../styles/index.css";
 import "../styles/home-editorial.css";
 import Layout from "../layouts/header.astro";
 
-// Les quatre univers de la page d'origine : memes titres, memes descriptions,
-// memes images, memes destinations. Seule la mise en page change.
+// Les quatre activites de la page d'origine : memes titres, memes descriptions,
+// memes images, memes destinations.
 const univers = [
   {
     titre: "Cloud & DevOps",
@@ -88,72 +88,75 @@ const univers = [
       </div>
     </section>
 
+    <section class="about">
+      <h2 class="about-title">Vous vous demandez sûrement qui je suis ?</h2>
+      <p class="about-text">
+        Je suis quelqu’un de curieux, attiré par les choses que l’on construit et
+        que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et
+        reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
+        systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est
+        le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à
+        ce que tout fasse sens.
+      </p>
+    </section>
+
     <section id="explorer">
       <div class="section-head">
         <span>Explorer</span>
         <span>({univers.length})</span>
       </div>
-      <div class="entries">
+      <ul class="rows">
         {
           univers.map((u) => (
-            <a class="entry" href={u.href}>
-              <span class="entry-meta">
-                {u.titre}
-                <i aria-hidden="true">&#8594;</i>
-              </span>
-              <span class="entry-frame">
-                <img
-                  src={u.img}
-                  alt={u.alt}
-                  width={u.width}
-                  height={u.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </span>
-              <span class="entry-note">{u.note}</span>
-            </a>
+            <li>
+              <a class="row" href={u.href}>
+                <span class="row-title">{u.titre}</span>
+                <span class="row-note">{u.note}</span>
+                <span class="row-go" aria-hidden="true">
+                  &#8594;
+                </span>
+                <span class="row-media">
+                  <img
+                    src={u.img}
+                    alt={u.alt}
+                    width={u.width}
+                    height={u.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </span>
+              </a>
+            </li>
           ))
         }
-      </div>
+      </ul>
     </section>
 
     <section class="colophon">
-      <div>
-        <h2>Vous vous demandez sûrement qui je suis ?</h2>
-        <p>
-          Je suis quelqu’un de curieux, attiré par les choses que l’on construit
-          et que l’on comprend avec le temps. J’ai toujours aimé créer, démonter
-          et reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
-          systèmes ou des images. Ce qui m’intéresse autant que le résultat,
-          c’est le chemin pour y arriver : observer, tester, ajuster, simplifier,
-          jusqu’à ce que tout fasse sens.
-        </p>
-      </div>
-
       <div>
         <h2>Contact</h2>
         <p class="fine">
           Pour toute question, collaboration ou prise de contact rapide —
           écrivez-moi.
         </p>
-        <div class="colophon-links">
-          <a href="mailto:nabilchebili1999@gmail.com">
-            Envoyer un email
-            <i aria-hidden="true">&#8594;</i>
-          </a>
-          <a
-            href="https://www.linkedin.com/in/chebili-nabil/"
-            target="_blank"
-            rel="noopener"
-          >
-            LinkedIn
-            <i aria-hidden="true">&#8599;</i>
-          </a>
-        </div>
         <p class="fine fine-after">
           Je réponds généralement sous quelques heures.
         </p>
+      </div>
+
+      <div class="colophon-links">
+        <a href="mailto:nabilchebili1999@gmail.com">
+          Envoyer un email
+          <i aria-hidden="true">&#8594;</i>
+        </a>
+        <a
+          href="https://www.linkedin.com/in/chebili-nabil/"
+          target="_blank"
+          rel="noopener"
+        >
+          LinkedIn
+          <i aria-hidden="true">&#8599;</i>
+        </a>
       </div>
     </section>
   </main>
