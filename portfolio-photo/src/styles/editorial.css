@@ -1,0 +1,434 @@
+/* ============================================================================
+   Le systeme editorial, partage par les 16 pages.
+
+   header.astro importe cette feuille, donc toute page qui utilise le gabarit
+   en herite : jetons, fond, typographie, chrome (en-tete, nav, pieds),
+   rythme des sections, en-tetes de section, bloc de contact, revelations au
+   defilement et soulignements au survol.
+
+   Ce qui reste dans home-editorial.css : uniquement ce qui n'existe que sur
+   l'accueil — le titre geant, le bloc « qui je suis » et les quatre cartes.
+
+   Les choix (echantillon de 24 sites primes, seuils de Butterick, systeme de
+   motion) sont documentes en tete de home-editorial.css.
+   ========================================================================= */
+
+/* ============================================================================
+   Home — composition editoriale sur fond clair.
+
+   Construite sur un echantillon mesure de 24 sites primes Awwwards, restreint
+   ensuite aux laureats a fond CLAIR (choix de l'utilisateur) : olhalazarieva.com,
+   normalisboring.es, snp.agency, formandfun.co, madebynull.com, adcker.com.
+
+   Ce que la mesure a montre sur les 24, et qui gouverne ce fichier :
+
+     - 4 % SEULEMENT utilisent la pile systeme pour le corps. Les autres chargent
+       une vraie fonte : Suisse Intl, Neue Haas Grotesk, Aeonik, Neue Montreal,
+       Favorit, Sofia Sans Condensed... Butterick dit la meme chose : eviter les
+       polices systeme et la plupart des fontes gratuites.
+     - Les tailles de titre sont BIMODALES : soit 12-24px, soit 130-245px.
+       Presque rien entre 40 et 80px — c'est exactement la ou vivent les pages
+       generiques, et c'est la que se situaient mes essais precedents.
+     - Mediane de 36 images dans le DOM. Une home a quatre vignettes n'existe
+       pas dans cet echantillon.
+
+   Pairage typographique, deux familles seulement :
+     - Sofia Sans Condensed 800 pour l'unique moment display. C'est la fonte
+       d'olhalazarieva.com, relevee sur le site, et elle est libre.
+     - JetBrains Mono pour toutes les etiquettes, legendes et le corps. Le
+       registre technique n'est pas un effet de style ici : c'est le metier de
+       la personne dont c'est le site.
+
+   Seuils typographiques respectes (Butterick) : corps a 15px, interlignage a
+   145 % maximum, longueur de ligne sous 90 caracteres, et 8 % d'interlettrage
+   ajoute sur les capitales (la regle donne 5 a 12 %).
+
+   Aucun degrade, aucun grain, aucune lueur, aucune ombre portee. Animations en
+   `animation-timeline: view()` dans un @supports, donc sans support le contenu
+   s'affiche en place. Aucun JavaScript.
+   ========================================================================= */
+:root {
+  --paper: #f4f4f2;
+  --ink: #0a0a0a;
+  --ink-55: #5c5c58;
+  --rule: #c9c9c4;
+  --block: #e6e6e2;
+  --edge: 40px;
+  /* Systeme de motion. Une transition d'interface tient entre 200 et 300ms :
+     au-dela de 500 elle est molle, en dessous de 100 elle est seche. La courbe
+     de deceleration correspond a la physique reelle — depart franc, arrivee
+     posee. */
+  --duree: 240ms;
+  --duree-longue: 560ms;
+  --sortie: cubic-bezier(0.2, 0, 0, 1);
+  --pas-3: 24px;
+  --pas-6: 48px;
+  --pas-8: 64px;
+  --pas-10: 80px;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo,
+    monospace;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- chrome --- */
+
+/* Nav entre crochets, en mono minuscule : le motif releve sur
+   olhalazarieva.com ([ ABOUT ME ] [ WORKS ]). */
+.site-header {
+  background: var(--paper);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+  height: 56px;
+}
+
+.header-inner {
+  height: 56px;
+  padding: 0 var(--edge);
+}
+
+.brand a {
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.nav-home,
+.site-nav a {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.footer-nav,
+.site-footer {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.footer-nav {
+  padding: 0 0 40px;
+}
+
+.footer-nav nav a {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.site-footer {
+  color: var(--ink-55);
+  padding: 0 0 36px;
+}
+
+main > section,
+main > section:nth-child(even) {
+  background: var(--paper);
+}
+
+/* Bandeau de metadonnees : chiffres releves a gauche, fonction a droite. */
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+  padding-bottom: 0;
+}
+
+.meta-row b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.jump {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- univers --- */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  margin: var(--pas-6) 0 0;
+  padding: 0 var(--edge) 9px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.section-head span:last-child {
+  color: var(--ink-55);
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------- colophon --- */
+.colophon {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: var(--pas-8);
+  padding: var(--pas-8) var(--edge);
+  border-top: 1px solid var(--ink);
+}
+
+.colophon h2 {
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+
+.colophon p {
+  margin: 0 0 12px;
+  /* 15px, interlignage 145 %, ligne sous 90 caracteres : les trois seuils de
+     Butterick pour un texte courant. */
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 74ch;
+  text-align: left;
+  text-indent: 0;
+  hyphens: manual;
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.colophon .fine {
+  font-size: 12px;
+  color: var(--ink-55);
+}
+
+.colophon .fine-after {
+  margin-top: 16px;
+}
+
+.colophon-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.colophon-links a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.colophon-links a:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+.colophon-links i {
+  font-style: normal;
+  font-weight: 500;
+  transition: transform var(--duree) var(--sortie);
+}
+
+.colophon-links a:hover i {
+  transform: translateX(6px);
+}
+
+@media (max-width: 700px) {
+:root {
+    --edge: 20px;
+  }
+.section-head {
+    margin-top: 56px;
+  }
+}
+
+/* ============================================================================
+   Motion — mecanique unique, calquee sur le standard du domaine.
+
+   AOS et Motion font tous deux la meme chose : opacite 0 vers 1 combinee a une
+   translation, declenchee par IntersectionObserver, et surtout `once: true` —
+   la revelation n'a lieu qu'une fois et n'est jamais annulee.
+
+   C'est ce dernier point qui rend l'opacite sur du texte acceptable ici, alors
+   qu'elle etait dangereuse avec une timeline de defilement : une timeline
+   ramene l'element a son etat initial des qu'il sort de la plage, donc le texte
+   redevenait invisible. Un observateur qui retire sa surveillance apres le
+   premier passage ne peut pas re-masquer quoi que ce soit.
+
+   Valeurs reprises d'AOS : 400ms de duree, declenchement quand l'element est a
+   120px dans l'ecran. Cascade de 80ms, dans la fourchette 40-120 du domaine.
+
+   Repli : les etats masques ne s'appliquent que sous `.reveal-ok`, classe posee
+   par un script en tete de page. Sans JavaScript, rien n'est jamais masque.
+   ========================================================================= */
+html {
+  scroll-behavior: smooth;
+}
+
+.reveal-ok [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+[data-reveal] {
+  transition: opacity 400ms var(--sortie), transform 400ms var(--sortie);
+}
+
+[data-reveal].vu {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- soulignement qui se trace, en degrade de fond --- */
+
+/* Le degrade souligne LA BOITE, pas le texte. Or ces elements ne sont pas de
+   simples morceaux de texte : la nav porte ses crochets en pseudo-elements
+   (boite de 120px pour 90px de texte, le trait passait sous les crochets) et
+   « Voir » vit dans un conteneur flex large de toute la carte (322px pour 49px
+   de texte, le trait barrait la carte entiere). Le soulignement cible donc un
+   span interieur qui ne contient que les mots.
+
+   Volontairement pas en ::after : la nav utilise deja ::before et ::after. */
+.nav-home,
+.brand a,
+.footer-nav nav a,
+.jump,
+.colophon-links a > span {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size var(--duree) var(--sortie);
+}
+
+.nav-home:hover,
+.brand a:hover,
+.footer-nav nav a:hover,
+.jump:hover,
+.colophon-links a:hover > span {
+  background-size: 100% 1px;
+}
+
+.site-nav a,
+.colophon-links a {
+  text-decoration: none;
+}
+
+/* --------------------------------------------------- mouvement reduit --- */
+@media (prefers-reduced-motion: reduce) {
+html {
+    scroll-behavior: auto;
+  }
+.reveal-ok [data-reveal],
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+.site-nav a span,
+  .nav-home,
+  .brand a,
+  .footer-nav nav a,
+  .jump,
+  .activite-lien > span,
+  .colophon-links a > span,
+  .colophon-links i,
+  .activite-lien i {
+    transition: none;
+  }
+}
+
+.colophon {
+  border-top-color: transparent;
+}
+
+.section-head {
+  border-bottom-color: transparent;
+}
+
+.section-head::after,
+.colophon::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 680ms var(--sortie);
+}
+
+.section-head,
+.colophon {
+  position: relative;
+}
+
+.colophon::before {
+  top: -1px;
+}
+
+.section-head::after {
+  bottom: -1px;
+}
+
+.section-head.vu::after,
+.colophon:has([data-reveal].vu)::before {
+  transform: scaleX(1);
+}
+
+/* --- l'image s'ouvre comme un obturateur, depuis son centre --- */
+.reveal-ok [data-reveal] img {
+  clip-path: inset(46% 0 46% 0);
+  transition: clip-path 760ms var(--sortie);
+  transition-delay: 120ms;
+}
+
+[data-reveal].img-prete img {
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+.reveal-ok [data-reveal] .activite-visuel img,
+  .reveal-ok [data-reveal].about-media img {
+    clip-path: none !important;
+    transition: none !important;
+  }
+}
+

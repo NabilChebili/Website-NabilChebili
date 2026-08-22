@@ -1,5 +1,6 @@
 ---
 import "../styles/layout.css";
+import "../styles/editorial.css";
 
 const {
 	title = "Nabil Chebili",
@@ -7,9 +8,10 @@ const {
 		"Portfolio de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
 	image = "/LogoRond.svg",
 	ogType = "website",
-	// Charge la fonte Archivo. Optionnel et desactive par defaut : seule la home
-	// la demande, les autres pages gardent la pile systeme et zero requete.
-	webfont = false,
+	// Les deux familles du systeme editorial. Chargees partout depuis que le
+	// style couvre l'ensemble du site : la pile systeme ne ferait plus le
+	// travail sur aucune page.
+	webfont = true,
 } = Astro.props;
 
 const siteUrl = Astro.site ?? new URL("https://www.nabilchebili.fr");

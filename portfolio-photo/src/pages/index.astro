@@ -1,7 +1,9 @@
 ---
 import "../styles/global.css";
-import "../styles/layout.css";
-import "../styles/index.css";
+// layout.css et editorial.css viennent de header.astro. index.css est l'ancienne
+// feuille de la home : elle ne definit plus aucune classe utilisee ici, et son
+// `main > section { background: var(--ui-bg) }` ecrasait le fond papier depuis
+// que le systeme partage se charge avant les feuilles de page.
 import "../styles/home-editorial.css";
 import Layout from "../layouts/header.astro";
 import { Image } from "astro:assets";

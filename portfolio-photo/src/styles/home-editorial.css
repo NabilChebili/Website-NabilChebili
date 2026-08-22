@@ -1,5 +1,8 @@
 /* ============================================================================
-   Home — composition editoriale sur fond clair.
+   Home — ce qui n'existe que sur l'accueil.
+
+   Le systeme partage par toutes les pages vit dans editorial.css. Ici : le
+   titre geant, le bloc « qui je suis » et les quatre cartes.
 
    Construite sur un echantillon mesure de 24 sites primes Awwwards, restreint
    ensuite aux laureats a fond CLAIR (choix de l'utilisateur) : olhalazarieva.com,
@@ -33,89 +36,6 @@
    s'affiche en place. Aucun JavaScript.
    ========================================================================= */
 
-:root {
-  --paper: #f4f4f2;
-  --ink: #0a0a0a;
-  --ink-55: #5c5c58;
-  --rule: #c9c9c4;
-  --block: #e6e6e2;
-  --edge: 40px;
-  /* Systeme de motion. Une transition d'interface tient entre 200 et 300ms :
-     au-dela de 500 elle est molle, en dessous de 100 elle est seche. La courbe
-     de deceleration correspond a la physique reelle — depart franc, arrivee
-     posee. */
-  --duree: 240ms;
-  --duree-longue: 560ms;
-  --sortie: cubic-bezier(0.2, 0, 0, 1);
-  --pas-3: 24px;
-  --pas-6: 48px;
-  --pas-8: 64px;
-  --pas-10: 80px;
-}
-
-html,
-body {
-  background: var(--paper);
-  color: var(--ink);
-}
-body {
-  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo,
-    monospace;
-  font-size: 15px;
-  line-height: 1.45;
-  letter-spacing: 0;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ---------------------------------------------------------------- chrome --- */
-
-/* Nav entre crochets, en mono minuscule : le motif releve sur
-   olhalazarieva.com ([ ABOUT ME ] [ WORKS ]). */
-.site-header {
-  background: var(--paper);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom: none;
-  height: 56px;
-}
-.header-inner {
-  height: 56px;
-  padding: 0 var(--edge);
-}
-.brand a {
-  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-.nav-home,
-.site-nav a {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-.footer-nav,
-.site-footer {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.footer-nav {
-  padding: 0 0 40px;
-}
-.footer-nav nav a {
-  color: var(--ink);
-  font-weight: 500;
-}
-.site-footer {
-  color: var(--ink-55);
-  padding: 0 0 36px;
-}
-
 .home {
   padding: 0;
 }
@@ -125,35 +45,13 @@ body {
 /* L'en-tete est fixe : sans cette marge, une ancre place le haut de la section
    sous la barre. Ecrite sur une seule ligne a dessein — sur deux lignes, un
    outil qui cherche le bloc ".about {" tombait sur celui-ci. */
-#explorer, .about { scroll-margin-top: 72px; }
-main > section,
-main > section:nth-child(even) {
-  background: var(--paper);
-}
+#explorer,
+.about { scroll-margin-top: 72px; }
 
 /* ------------------------------------------------------------- ouverture --- */
-
 .opening {
   overflow: clip;
   padding: 8px var(--edge) 0;
-}
-
-/* Bandeau de metadonnees : chiffres releves a gauche, fonction a droite. */
-.meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-55);
-  padding-bottom: 0;
-}
-.meta-row b {
-  color: var(--ink);
-  font-weight: 700;
 }
 
 /* L'unique moment display. Bord a bord : la taille est pilotee par la largeur
@@ -171,7 +69,6 @@ main > section:nth-child(even) {
   white-space: nowrap;
 }
 
-
 /* Sous le titre : une seule ligne, la phrase d'intention a gauche et le lien
    vers la suite a droite. L'ouverture ne porte plus ni portrait ni liste de
    sections — le portrait appartient a "qui je suis", et la liste repetait la
@@ -184,6 +81,7 @@ main > section:nth-child(even) {
   margin-top: 22px;
   padding-bottom: 4px;
 }
+
 .opening-foot p {
   margin: 0;
   max-width: 52ch;
@@ -191,16 +89,6 @@ main > section:nth-child(even) {
   line-height: 1.5;
   color: var(--ink-55);
   font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
-}
-.jump {
-  flex: none;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--ink);
-  text-decoration: none;
-  white-space: nowrap;
 }
 
 /* ------------------------------------------------------------ a propos --- */
@@ -217,6 +105,7 @@ main > section:nth-child(even) {
   gap: 52px;
   align-items: center;
 }
+
 .about-media {
   box-sizing: border-box;
   margin: 0;
@@ -225,6 +114,7 @@ main > section:nth-child(even) {
   max-width: 360px;
   width: 100%;
 }
+
 .about-media img {
   display: block;
   width: 100%;
@@ -236,6 +126,7 @@ main > section:nth-child(even) {
      decalant la fenetre a 8 %, le visage revient a 49,6 % du cadre. */
   object-position: 8% 50%;
 }
+
 .about-title {
   /* balance repartit les deux lignes du titre a longueur egale. */
   margin: 0 0 18px;
@@ -249,6 +140,7 @@ main > section:nth-child(even) {
   max-width: 24ch;
   text-wrap: balance;
 }
+
 .about-text {
   /* Les trois premieres lignes remplissaient 98 a 99 % de la mesure (656, 664
      et 662px sur 668) : un drapeau aussi serre se lit comme une justification
@@ -267,26 +159,6 @@ main > section:nth-child(even) {
   text-wrap: pretty;
 }
 
-/* ------------------------------------------------------------- univers --- */
-
-.section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 20px;
-  margin: var(--pas-6) 0 0;
-  padding: 0 var(--edge) 9px;
-  border-bottom: 1px solid var(--ink);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-.section-head span:last-child {
-  color: var(--ink-55);
-  font-weight: 500;
-}
-
 /* L'organisation de la page d'origine : quatre cartes sur une rangee, image en
    haut, puis titre, description et lien. Seul le style change — pas d'ombre
    portee, pas de fond de carte, pas de coins arrondis, pas de zoom au survol.
@@ -297,12 +169,14 @@ main > section:nth-child(even) {
   gap: 24px;
   padding: var(--pas-3) var(--edge) var(--pas-10);
 }
+
 .activite {
   display: flex;
   flex-direction: column;
   text-decoration: none;
   color: var(--ink);
 }
+
 .activite-visuel {
   display: block;
   overflow: hidden;
@@ -310,18 +184,21 @@ main > section:nth-child(even) {
   aspect-ratio: 3 / 2;
   max-height: 340px;
 }
+
 .activite-visuel img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
+
 /* La couleur revient au survol : l'image reste en place, seul son rendu change.
    Plus discret qu'un agrandissement, et ca signale la carte active sans bouger
    la mise en page. */
 .activite:focus-visible .activite-visuel img {
   filter: grayscale(0) contrast(1);
 }
+
 .activite-titre {
   margin: 14px 0 0;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
@@ -331,6 +208,7 @@ main > section:nth-child(even) {
   letter-spacing: 0.01em;
   text-transform: uppercase;
 }
+
 .activite-note {
   margin: 7px 0 12px;
   flex: 1;
@@ -339,6 +217,7 @@ main > section:nth-child(even) {
   color: var(--ink-55);
   font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
 }
+
 .activite-lien {
   display: inline-flex;
   align-items: baseline;
@@ -349,85 +228,21 @@ main > section:nth-child(even) {
   text-transform: uppercase;
   color: var(--ink-55);
 }
+
 .activite-lien i {
   font-style: normal;
   font-weight: 500;
   transition: transform var(--duree) var(--sortie);
 }
+
 .activite:hover .activite-lien i,
 .activite:focus-visible .activite-lien i {
   transform: translateX(6px);
 }
+
 .activite:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 4px;
-}
-
-/* -------------------------------------------------------------- colophon --- */
-
-.colophon {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: var(--pas-8);
-  padding: var(--pas-8) var(--edge);
-  border-top: 1px solid var(--ink);
-}
-.colophon h2 {
-  margin: 0 0 16px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--ink-55);
-}
-.colophon p {
-  margin: 0 0 12px;
-  /* 15px, interlignage 145 %, ligne sous 90 caracteres : les trois seuils de
-     Butterick pour un texte courant. */
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--ink);
-  max-width: 74ch;
-  text-align: left;
-  text-indent: 0;
-  hyphens: manual;
-  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
-}
-.colophon .fine {
-  font-size: 12px;
-  color: var(--ink-55);
-}
-.colophon .fine-after {
-  margin-top: 16px;
-}
-.colophon-links {
-  display: flex;
-  flex-direction: column;
-}
-.colophon-links a {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 14px 0;
-  border-top: 1px solid var(--rule);
-  text-decoration: none;
-  color: var(--ink);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-.colophon-links a:last-child {
-  border-bottom: 1px solid var(--rule);
-}
-.colophon-links i {
-  font-style: normal;
-  font-weight: 500;
-  transition: transform var(--duree) var(--sortie);
-}
-.colophon-links a:hover i {
-  transform: translateX(6px);
 }
 
 /* ------------------------------------------- animations liees au scroll --- */
@@ -435,155 +250,60 @@ main > section:nth-child(even) {
 
 
 /* ------------------------------------------------------------ responsive --- */
-
 @media (max-width: 1100px) {
-  .activites {
+.activites {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
 @media (max-width: 700px) {
-  .about {
+.about {
     padding: var(--pas-3) var(--edge) 0;
   }
-  .about-media {
+.about-media {
     justify-self: center;
     margin-right: 0;
   }
-  :root {
-    --edge: 20px;
-  }
-  .mega {
+.mega {
     /* Sur un ecran etroit, un nom bord a bord devient illisible : on autorise
        le retour a la ligne et on reduit la casse de l'echelle. */
     white-space: normal;
     font-size: clamp(44px, 17vw, 92px);
     line-height: 0.88;
   }
-  .opening-foot {
+.opening-foot {
     flex-direction: column;
     align-items: flex-start;
     gap: 14px;
   }
-  .about,
+.about,
   .colophon {
     grid-template-columns: 1fr;
     gap: 26px;
   }
-  .about {
+.about {
     margin-top: 56px;
   }
-  .section-head {
-    margin-top: 56px;
-  }
-  .activites {
+.activites {
     grid-template-columns: 1fr;
     gap: 30px;
   }
-  /* Quatre portraits 4:5 pleine largeur donnaient une page de 3879px : beaucoup
+/* Quatre portraits 4:5 pleine largeur donnaient une page de 3879px : beaucoup
      de defilement pour quatre entrees. Le 3:2 raccourcit sans rien couper. */
-  .activite-visuel {
+.activite-visuel {
     aspect-ratio: 3 / 2;
   }
 }
 
-
-/* ============================================================================
-   Motion — mecanique unique, calquee sur le standard du domaine.
-
-   AOS et Motion font tous deux la meme chose : opacite 0 vers 1 combinee a une
-   translation, declenchee par IntersectionObserver, et surtout `once: true` —
-   la revelation n'a lieu qu'une fois et n'est jamais annulee.
-
-   C'est ce dernier point qui rend l'opacite sur du texte acceptable ici, alors
-   qu'elle etait dangereuse avec une timeline de defilement : une timeline
-   ramene l'element a son etat initial des qu'il sort de la plage, donc le texte
-   redevenait invisible. Un observateur qui retire sa surveillance apres le
-   premier passage ne peut pas re-masquer quoi que ce soit.
-
-   Valeurs reprises d'AOS : 400ms de duree, declenchement quand l'element est a
-   120px dans l'ecran. Cascade de 80ms, dans la fourchette 40-120 du domaine.
-
-   Repli : les etats masques ne s'appliquent que sous `.reveal-ok`, classe posee
-   par un script en tete de page. Sans JavaScript, rien n'est jamais masque.
-   ========================================================================= */
-
-html {
-  scroll-behavior: smooth;
-}
-
-.reveal-ok [data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-}
-[data-reveal] {
-  transition: opacity 400ms var(--sortie), transform 400ms var(--sortie);
-}
-[data-reveal].vu {
-  opacity: 1;
-  transform: none;
-}
-
-/* --- soulignement qui se trace, en degrade de fond --- */
-
-/* Le degrade souligne LA BOITE, pas le texte. Or ces elements ne sont pas de
-   simples morceaux de texte : la nav porte ses crochets en pseudo-elements
-   (boite de 120px pour 90px de texte, le trait passait sous les crochets) et
-   « Voir » vit dans un conteneur flex large de toute la carte (322px pour 49px
-   de texte, le trait barrait la carte entiere). Le soulignement cible donc un
-   span interieur qui ne contient que les mots.
-
-   Volontairement pas en ::after : la nav utilise deja ::before et ::after. */
-.nav-home,
-.brand a,
-.footer-nav nav a,
-.jump,
-.colophon-links a > span {
-  text-decoration: none;
-  background-image: linear-gradient(currentColor, currentColor);
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 0% 1px;
-  transition: background-size var(--duree) var(--sortie);
-}
-.nav-home:hover,
-.brand a:hover,
-.footer-nav nav a:hover,
-.jump:hover,
-.colophon-links a:hover > span {
-  background-size: 100% 1px;
-}
-.site-nav a,
-.colophon-links a,
 .activite-lien {
   text-decoration: none;
 }
 
 /* --------------------------------------------------- mouvement reduit --- */
-
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-  .reveal-ok [data-reveal],
-  [data-reveal] {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-  .mega span {
+.mega span {
     animation: none !important;
     transform: none !important;
-  }
-  .site-nav a span,
-  .nav-home,
-  .brand a,
-  .footer-nav nav a,
-  .jump,
-  .activite-lien > span,
-  .colophon-links a > span,
-  .colophon-links i,
-  .activite-lien i {
-    transition: none;
   }
 }
 
@@ -596,6 +316,7 @@ html {
   display: flex;
   flex-wrap: nowrap;
 }
+
 .mega-lettre {
   display: inline-block;
   /* le masque, c'est le h1 lui-meme qui a overflow: clip ; chaque lettre monte
@@ -604,6 +325,7 @@ html {
   animation-delay: calc(var(--i) * 40ms);
   will-change: transform;
 }
+
 @keyframes monteLettre {
   from {
     transform: translateY(102%);
@@ -613,17 +335,11 @@ html {
   }
 }
 
-/* --- les filets de section se tracent quand la section se revele --- */
-.about,
-.colophon {
+.about {
   border-top-color: transparent;
 }
-.section-head {
-  border-bottom-color: transparent;
-}
-.about::before,
-.section-head::after,
-.colophon::before {
+
+.about::before {
   content: "";
   position: absolute;
   left: 0;
@@ -634,51 +350,29 @@ html {
   transform-origin: 0 50%;
   transition: transform 680ms var(--sortie);
 }
-.about,
-.section-head,
-.colophon {
+
+.about {
   position: relative;
 }
-.about::before,
-.colophon::before {
+
+.about::before {
   top: -1px;
 }
-.section-head::after {
-  bottom: -1px;
-}
-.about:has([data-reveal].vu)::before,
-.section-head.vu::after,
-.colophon:has([data-reveal].vu)::before {
+
+.about:has([data-reveal].vu)::before {
   transform: scaleX(1);
 }
 
-/* --- l'image s'ouvre comme un obturateur, depuis son centre --- */
-.reveal-ok [data-reveal] .activite-visuel img,
-.reveal-ok [data-reveal].about-media img {
-  clip-path: inset(46% 0 46% 0);
-  transition: clip-path 760ms var(--sortie);
-  transition-delay: 120ms;
-}
-[data-reveal].img-prete .activite-visuel img,
-[data-reveal].about-media.img-prete img {
-  clip-path: inset(0 0 0 0);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .mega-lettre {
+.mega-lettre {
     animation: none !important;
     transform: none !important;
   }
-  .about::before,
+.about::before,
   .section-head::after,
   .colophon::before {
     transition: none !important;
     transform: scaleX(1) !important;
-  }
-  .reveal-ok [data-reveal] .activite-visuel img,
-  .reveal-ok [data-reveal].about-media img {
-    clip-path: none !important;
-    transition: none !important;
   }
 }
 
@@ -692,6 +386,7 @@ html {
   background-size: 0% 1px;
   transition: background-size var(--duree-longue) var(--sortie);
 }
+
 .activite:hover .activite-lien,
 .activite:focus-visible .activite-lien {
   background-size: 100% 1px;
