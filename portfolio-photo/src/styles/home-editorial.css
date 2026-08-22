@@ -41,6 +41,7 @@
   --block: #e6e6e2;
   --edge: 40px;
   --pas-3: 24px;
+  --pas-6: 48px;
   --pas-8: 64px;
   --pas-10: 80px;
 }
@@ -222,7 +223,7 @@ main > section:nth-child(even) {
   /* Bord droit rentre pour rapprocher le portrait du centre : la section ne
      porte que le texte a gauche et l'image a droite, rien d'autre ne bouge. */
   margin: var(--pas-10) 0 0;
-  padding: var(--pas-3) clamp(40px, 8vw, 150px) 0 var(--edge);
+  padding: var(--pas-6) clamp(40px, 8vw, 150px) 0 var(--edge);
   border-top: 1px solid var(--ink);
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
@@ -279,7 +280,7 @@ main > section:nth-child(even) {
   justify-content: space-between;
   align-items: baseline;
   gap: 20px;
-  margin: var(--pas-10) 0 0;
+  margin: var(--pas-6) 0 0;
   padding: 0 var(--edge) 9px;
   border-bottom: 1px solid var(--ink);
   font-size: 11px;
