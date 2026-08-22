@@ -4,22 +4,46 @@ import "../styles/layout.css";
 import "../styles/index.css";
 import "../styles/home-editorial.css";
 import Layout from "../layouts/header.astro";
-import indonesie from "../data/indonesie.json";
-import vietnam from "../data/vietnam.json";
 
-// Les planches de l'index sont les series "post" : des photos deja
-// selectionnees et legendees dans le repo. Rien n'est choisi ni redige ici.
-const planches = [
-  ...indonesie.post.map((p) => ({ ...p, origine: "Indonésie" })),
-  ...vietnam.post.map((p) => ({ ...p, origine: "Vietnam" })),
-];
-
-// Les quatre univers, en liste a barres obliques.
+// Les quatre univers de la page d'origine : memes titres, memes descriptions,
+// memes images, memes destinations. Seule la mise en page change.
 const univers = [
-  { titre: "Cloud & DevOps", href: "/clouddevops" },
-  { titre: "Photographie", href: "/photo" },
-  { titre: "Musique", href: "/musique" },
-  { titre: "Gaming", href: "/gaming" },
+  {
+    titre: "Cloud & DevOps",
+    note: "Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.",
+    href: "/clouddevops",
+    img: "/nabil-ishane.jpg",
+    alt: "Nabil Chebili chez I-Shane",
+    width: 800,
+    height: 408,
+  },
+  {
+    titre: "Photographie",
+    note: "Galeries & séries photographiques : voyages, portraits et instantanés.",
+    href: "/photo",
+    img: "/A7401833.jpg",
+    alt: "Photographie",
+    width: 2062,
+    height: 1430,
+  },
+  {
+    titre: "Musique",
+    note: "Petites avancées dans le monde la guitare (autodidacte)",
+    href: "/musique",
+    img: "/image.png",
+    alt: "Musique",
+    width: 1914,
+    height: 1077,
+  },
+  {
+    titre: "Gaming",
+    note: "Twitch, streaming et jeux vidéo.",
+    href: "/gaming",
+    img: "/twitch.png",
+    alt: "Gaming",
+    width: 2544,
+    height: 1435,
+  },
 ];
 ---
 
@@ -59,33 +83,36 @@ const univers = [
             Cloud &amp; DevOps, photographie et musique — projets, galeries et
             inspirations.
           </p>
-          <a class="jump" href="#planches">Explorer &#8595;</a>
+          <a class="jump" href="#explorer">Explorer &#8595;</a>
         </div>
       </div>
     </section>
 
-    <section id="planches">
-      <div class="plates-head">
-        <span>Photographies</span>
-        <span>({planches.length})</span>
+    <section id="explorer">
+      <div class="section-head">
+        <span>Explorer</span>
+        <span>({univers.length})</span>
       </div>
-      <div class="plates">
+      <div class="entries">
         {
-          planches.map((p) => (
-            <figure class="plate">
-              <span class="plate-frame">
+          univers.map((u) => (
+            <a class="entry" href={u.href}>
+              <span class="entry-meta">
+                {u.titre}
+                <i aria-hidden="true">&#8594;</i>
+              </span>
+              <span class="entry-frame">
                 <img
-                  src={p.url}
-                  alt={p.caption}
+                  src={u.img}
+                  alt={u.alt}
+                  width={u.width}
+                  height={u.height}
                   loading="lazy"
                   decoding="async"
                 />
               </span>
-              <figcaption>
-                <b>{p.origine}</b>
-                {p.caption}
-              </figcaption>
-            </figure>
+              <span class="entry-note">{u.note}</span>
+            </a>
           ))
         }
       </div>
