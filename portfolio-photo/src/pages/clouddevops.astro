@@ -1,9 +1,7 @@
 ---
 import "../styles/global.css";
-import "../styles/layout.css";
-import "../styles/index.css";
-import "../styles/clouddevops.css";
 import Layout from "../layouts/header.astro";
+import Colophon from "../components/Colophon.astro";
 
 const profile = {
   title: "Cloud DevOps",
@@ -159,166 +157,379 @@ const other = {
 ---
 
 <Layout
-  title="Cloud DevOps"
-  description="Ingénieur Cloud / DevOps spécialisé Azure, IaC et DevSecOps : expertise, missions et certifications."
+  title={profile.title}
+  description={profile.subtitle}
+  mainClass="page editorial"
 >
-  <main class="page">
-    <section class="cd-hero fade-in">
-      <div class="container cd-hero-inner">
-        <div class="cd-hero-copy">
-          <h1 class="page-title">{profile.title}</h1>
-          <p class="cd-lead">{profile.subtitle}</p>
-          <div class="cd-stats" role="list">
-            {profile.stats.map((s) => (
-              <div class="cd-stat" role="listitem">
-                <div class="cd-stat-k">{s.k}</div>
-                <div class="cd-stat-v">{s.v}</div>
-              </div>
-            ))}
-          </div>
+  <section class="tete-page">
+    <h1 class="titre-page" data-reveal data-groupe="tete">{profile.title}</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p>{profile.subtitle}</p>
+    </div>
+  </section>
 
-          <div class="cd-ctas">
-            <a class="btn" href="#missions">Voir mes missions</a>
-            <a class="btn btn-outline" href="/">Me contacter</a>
+  <section class="bandeau">
+    <div class="reperes" data-reveal data-groupe="tete">
+      {
+        profile.stats.map((s) => (
+          <div class="repere">
+            <span class="repere-k">{s.k}</span>
+            <span class="repere-v">{s.v}</span>
           </div>
-        </div>
+        ))
+      }
+    </div>
+    <div class="pile" data-reveal data-groupe="tete">
+      {
+        ["azure", "terraform", "kube", "docker", "git", "ado", "vscode"].map((n) => (
+          <img src={"/devops_images/" + n + ".png"} alt="" loading="lazy" decoding="async" />
+        ))
+      }
+    </div>
+  </section>
 
-        <div class="cd-hero-media" aria-hidden="true">
-          <div class="cd-orbit" aria-hidden="true">
-            <div class="cd-orbit-track">
-              <div class="cd-orbit-item"><img src="/devops_images/azure.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/terraform.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/kube.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/docker.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/git.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/ado.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/vscode.png" alt="" loading="eager" /></div>
-
-              {/* duplicate for seamless loop */}
-              <div class="cd-orbit-item"><img src="/devops_images/azure.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/terraform.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/kube.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/docker.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/git.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/ado.png" alt="" loading="eager" /></div>
-              <div class="cd-orbit-item"><img src="/devops_images/vscode.png" alt="" loading="eager" /></div>
-            </div>
-          </div>
-          <div class="cd-hero-glass">
-            <div class="cd-hero-pill">Azure</div>
-            <div class="cd-hero-pill">Terraform</div>
-            <div class="cd-hero-pill">PowerShell</div>
-            <div class="cd-hero-pill">GitHub / AZDO</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section fade-in cd-section">
-      <div class="container">
-        <h2 class="cd-h2">Ce que j’apporte</h2>
-        <p class=" cd-paragraph">
-          Je conçois et j’industrialise des plateformes cloud sécurisées, en mettant l’accent sur la fiabilité, la gouvernance et la
-          fluidité des livraisons. Mon objectif est simple&nbsp;: permettre aux équipes de construire et déployer en confiance, avec des standards clairs.
+  <section>
+    <div class="section-head" data-reveal data-groupe="apport">
+      <span>Ce que j’apporte</span>
+      <span>({expertise.length})</span>
+    </div>
+    <div class="apport">
+      <div class="prose" data-reveal data-groupe="apport">
+        <p>
+          Je conçois et j’industrialise des plateformes cloud sécurisées, en
+          mettant l’accent sur la fiabilité, la gouvernance et la fluidité des
+          livraisons. Mon objectif est simple&nbsp;: permettre aux équipes de
+          construire et déployer en confiance, avec des standards clairs.
         </p>
-
-        <div class="cd-grid">
-          {expertise.map((x) => (
-            <article class="cd-card">
-              <h3 class="cd-h3">{x.title}</h3>
-              <p class="cd-muted">{x.desc}</p>
-              <div class="cd-tags" aria-label="Compétences">
+      </div>
+      <div class="colonnes">
+        {
+          expertise.map((x) => (
+            <article class="bloc" data-reveal data-groupe="expertise">
+              <h3>{x.title}</h3>
+              <p>{x.desc}</p>
+              <ul class="etiquettes" aria-label="Compétences">
                 {x.tags.map((t) => (
-                  <span class="cd-tag">{t}</span>
+                  <li>{t}</li>
                 ))}
-              </div>
+              </ul>
             </article>
-          ))}
-        </div>
+          ))
+        }
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section id="missions" class="section fade-in cd-section">
-      <div class="container">
-        <div class="cd-headline">
-          <h2 class="cd-h2">Missions</h2>
-        </div>
+  <section id="missions">
+    <div class="section-head" data-reveal data-groupe="missions">
+      <span>Missions</span>
+      <span>({missions.length})</span>
+    </div>
+    <div class="missions">
+      {
+        missions.map((m) => (
+          <article class="mission" data-reveal data-groupe="missions">
+            <div class="mission-meta">
+              <span class="mission-periode">{m.period}</span>
+              <span class="mission-client">{m.client}</span>
+              {m.clientLogo ? (
+                <img class="mission-logo" src={m.clientLogo} alt={"Logo " + m.client} loading="lazy" />
+              ) : null}
+            </div>
+            <div class="mission-corps">
+              <h3>{m.role}</h3>
+              <p>{m.summary}</p>
+              <ul class="puces">
+                {m.bullets.map((b) => (
+                  <li>{b}</li>
+                ))}
+              </ul>
+              <ul class="etiquettes" aria-label="Stack">
+                {m.stack.map((t) => (
+                  <li>{t}</li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
 
-        <div class="cd-timeline" role="list">
-          {missions.map((m) => (
-            <article class="cd-tl-item" role="listitem">
-              <div class="cd-tl-meta">
-                <div class="cd-tl-period">{m.period}</div>
-                <div class="cd-tl-client">{m.client}</div>
-                {m.clientLogo ? (
-                  <img class="cd-company-logo" src={m.clientLogo} alt={`Logo ${m.client}`} loading="lazy" />
-                ) : null}
-              </div>
-
-              <div class="cd-tl-card">
-                <h3 class="cd-h3">{m.role}</h3>
-                <p class="cd-muted">{m.summary}</p>
-                <ul class="cd-bullets">
-                  {m.bullets.map((b) => (
-                    <li>{b}</li>
-                  ))}
-                </ul>
-                <div class="cd-tags" aria-label="Stack">
-                  {m.stack.map((t) => (
-                    <span class="cd-tag">{t}</span>
-                  ))}
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    <section class="section fade-in cd-section">
-      <div class="container cd-two-col">
-        <div>
-          <h2 class="cd-h2">Certifications</h2>
-          <div class="cd-cert-grid" role="list">
-            {certifications.map((c) => (
-              <div class="cd-cert" role="listitem">
-                <div class="cd-cert-badge">{c.name}</div>
-                <div class="cd-cert-detail">{c.detail}</div>
-              </div>
-            ))}
+  <section>
+    <div class="section-head" data-reveal data-groupe="certifs">
+      <span>Certifications</span>
+      <span>({certifications.length})</span>
+    </div>
+    <div class="certifs">
+      {
+        certifications.map((c) => (
+          <div class="certif" data-reveal data-groupe="certifs">
+            <span class="certif-nom">{c.name}</span>
+            <span class="certif-detail">{c.detail}</span>
           </div>
-        </div>
-        <div>
-          <h2 class="cd-h2">Quelques repères</h2>
-          <div class="cd-note">
-            <ul class="cd-bullets">
-              {other.languages.map((l) => (
-                <li>
-                  <strong>{l.k} :</strong> {l.v}
-                </li>
-              ))}
-              {other.notes.map((n) => (
-                <li>{n}</li>
-              ))}
-            </ul>
-          </div>
-          
-        </div>
-      </div>
-    </section>
+        ))
+      }
+    </div>
+  </section>
 
-    <script>
-      (function () {
-        const nodes = Array.from(document.querySelectorAll('main .fade-in'));
-        if (!nodes.length) return;
-        const list = nodes
-          .map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
-          .sort((a, b) => a.top - b.top)
-          .map((o) => o.el);
-        const baseDelay = 80;
-        const step = 120;
-        list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
-      })();
-    </script>
-  </main>
+  <section>
+    <div class="section-head" data-reveal data-groupe="reperes">
+      <span>Quelques repères</span>
+    </div>
+    <div class="apport">
+      <ul class="puces large" data-reveal data-groupe="reperes">
+        {
+          other.languages.map((l) => (
+            <li>
+              <strong>{l.k} :</strong> {l.v}
+            </li>
+          ))
+        }
+        {other.notes.map((n) => <li>{n}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <Colophon />
 </Layout>
+
+<style>
+  /* Bandeau sous le titre : les trois repères, puis la pile technique. Le
+     carrousel de logos en orbite et les pastilles en verre dépoli sont retirés
+     — un système qui interdit dégradés, lueurs et ombres portées ne peut pas
+     les accueillir. Les logos restent, posés à plat. */
+  .bandeau {
+    padding: var(--pas-6) var(--edge) 0;
+  }
+
+  .reperes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    border-top: 1px solid var(--ink);
+    padding-top: 12px;
+  }
+  .repere {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .repere-k {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .repere-v {
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .pile {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 26px;
+    margin-top: var(--pas-3);
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--rule);
+  }
+  /* Chaque logo occupe le meme emplacement : a hauteur egale, des proportions
+     tres differentes donnaient des presences optiques inegales. `contain` garde
+     le rapport de chacun sans le deformer. */
+  .pile img {
+    height: 26px;
+    width: 44px;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  .apport,
+  .missions,
+  .certifs {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+
+  .colonnes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: var(--pas-6);
+  }
+  .bloc {
+    border-top: 1px solid var(--ink);
+    padding-top: 12px;
+  }
+  .bloc h3 {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .bloc p {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-55);
+  }
+
+  /* Étiquettes : un filet, aucun rayon, aucun fond. */
+  .etiquettes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .etiquettes li {
+    padding: 3px 7px;
+    border: 1px solid var(--rule);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+
+  /* Missions : la période et le client à gauche, le détail à droite, un filet
+     par entrée. C’est la mise en page d’un CV imprimé. */
+  .mission {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: var(--pas-6);
+    padding: var(--pas-3) 0 var(--pas-6);
+    border-top: 1px solid var(--rule);
+  }
+  .mission:first-child {
+    border-top-color: var(--ink);
+  }
+  .mission-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .mission-periode {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .mission-client {
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  /* Emplacement fixe : a hauteur egale, un logotype large comme ARDIAN
+     atteignait 165px et ecrasait le nom juste au-dessus, tandis qu'une marque
+     carree restait minuscule. Le nom reste le titre, le logo n'est qu'une
+     marque secondaire. */
+  .mission-logo {
+    height: 18px;
+    width: 78px;
+    object-fit: contain;
+    object-position: left center;
+    margin-top: 8px;
+  }
+  .mission-corps h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .mission-corps p {
+    margin: 0 0 12px;
+    max-width: 68ch;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-55);
+  }
+
+  .puces {
+    margin: 0 0 14px;
+    padding-left: 18px;
+    max-width: 68ch;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-55);
+  }
+  .puces li {
+    margin-bottom: 4px;
+  }
+  .puces.large {
+    margin: 0;
+  }
+  .puces strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .certifs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  .certif {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid var(--ink);
+    padding-top: 12px;
+  }
+  .certif-nom {
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  .certif-detail {
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-55);
+  }
+
+  @media (max-width: 1100px) {
+    .colonnes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 800px) {
+    .mission {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--pas-3);
+    }
+  }
+  @media (max-width: 700px) {
+    .reperes {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--pas-3);
+    }
+    .colonnes {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--pas-3);
+    }
+    .bandeau {
+      padding-top: var(--pas-3);
+    }
+    .pile {
+      gap: 18px;
+    }
+    .pile img {
+      height: 22px;
+      width: 38px;
+    }
+  }
+</style>

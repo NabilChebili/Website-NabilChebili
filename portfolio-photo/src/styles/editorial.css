@@ -565,3 +565,77 @@ html {
     padding-top: var(--pas-3);
   }
 }
+
+/* Lien dans du texte courant. Souligne en permanence — un lien qui n'apparait
+   qu'au survol ne se trouve pas quand il est noye dans une phrase. Le survol
+   epaissit le trait plutot que de le faire apparaitre. */
+.prose a,
+.lien {
+  color: var(--ink);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  transition: background-size var(--duree) var(--sortie);
+}
+.prose a:hover,
+.prose a:focus-visible,
+.lien:hover,
+.lien:focus-visible {
+  background-size: 100% 2px;
+}
+
+/* Duo : du texte et un visuel cote a cote. Meme rapport que le bloc « qui je
+   suis » de l'accueil, la colonne du visuel etant fixe pour que la mesure de
+   lecture ne depende pas de la largeur de l'ecran. */
+.duo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--pas-6);
+  align-items: start;
+  padding: var(--pas-6) var(--edge) 0;
+}
+.duo > .prose {
+  margin-top: 0;
+}
+.duo-media {
+  margin: 0;
+}
+.duo-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--block);
+}
+
+/* Bouton du systeme : filet a l'encre, aucun rayon, inversion au survol. */
+.bouton {
+  display: inline-block;
+  padding: 11px 16px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--duree) var(--sortie), color var(--duree) var(--sortie);
+}
+.bouton:hover,
+.bouton:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+@media (max-width: 900px) {
+  .duo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--pas-3);
+  }
+  .duo-media {
+    order: -1;
+  }
+}

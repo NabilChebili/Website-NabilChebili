@@ -1,36 +1,27 @@
 ---
 import "../styles/global.css";
-import "../styles/layout.css";
-import "../styles/index.css";
 import Layout from "../layouts/header.astro";
+import Colophon from "../components/Colophon.astro";
 ---
 
 <Layout
 	title="Gaming"
 	description="Jeux vidéo, streaming et contenus gaming — en construction."
+	mainClass="page editorial"
 >
-	<main class="page">
-		<h1 class="page-title fade-in">Gaming</h1>
-		<p class="paragraph-center fade-in">Travail en cours — cette page est en construction. Bientôt des retours sur le streaming, mes jeux favoris et quelques captures.</p>
+	<section class="tete-page">
+		<h1 class="titre-page" data-reveal data-groupe="tete">Gaming</h1>
+		<div class="prose" data-reveal data-groupe="tete">
+			<p>
+				Travail en cours — cette page est en construction. Bientôt des retours
+				sur le streaming, mes jeux favoris et quelques captures.
+			</p>
+			<p>
+				En attendant, la galerie <a class="lien" href="/photo">Photographie</a> est
+				en ligne, et le bloc Contact plus bas permet de me joindre.
+			</p>
+		</div>
+	</section>
 
-		<section class="section fade-in">
-			<div class="container">
-				<p style="text-align:center; margin-top:18px;">En attendant, découvrez la galerie <a href="/photo">Photographie</a> ou contactez-moi via la section Contact.</p>
-			</div>
-		</section>
-
-		<script>
-			(function () {
-				const nodes = Array.from(document.querySelectorAll('main .fade-in'));
-				if (!nodes.length) return;
-				const list = nodes
-					.map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
-					.sort((a, b) => a.top - b.top)
-					.map((o) => o.el);
-				const baseDelay = 80;
-				const step = 120;
-				list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
-			})();
-		</script>
-	</main>
+	<Colophon />
 </Layout>

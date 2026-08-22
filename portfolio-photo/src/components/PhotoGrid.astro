@@ -9,7 +9,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
   </div>
   <div class="photo-grid-cards">
     {items.map((p, i) => (
-      <figure class="photo-card fade-img" style={`--i:${i}`}>
+      <figure class="photo-card" style={`--i:${i}`}>
         <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
         {p.caption ? <figcaption>{p.caption}</figcaption> : null}
       </figure>
@@ -402,15 +402,29 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
     flex-direction: column;
     gap: 12px;
     margin: 0;
+  }
+
+  /* Le masquage ne s'applique que si le script tourne — le drapeau reveal-ok est
+     pose par header.astro avant le rendu. Sans JavaScript les 24 cartes d'une
+     galerie restaient invisibles pour toujours : la page ne montrait rien. */
+  :global(.reveal-ok) .photo-card {
     opacity: 0;
     transform: translateY(12px);
     transition: opacity var(--duree-longue) var(--sortie),
       transform var(--duree-longue) var(--sortie);
     transition-delay: calc(var(--i, 0) * 60ms);
   }
-  .photo-card.is-visible {
+  :global(.reveal-ok) .photo-card.is-visible {
     opacity: 1;
     transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(.reveal-ok) .photo-card {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   .photo-card img {

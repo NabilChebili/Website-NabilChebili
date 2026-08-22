@@ -1,156 +1,271 @@
 ---
 import "../styles/global.css";
-import "../styles/layout.css";
-import "../styles/index.css";
-import "../styles/musique.css";
 import Layout from "../layouts/header.astro";
-// Le chemin etait relatif : depuis /musique/ il pointait vers /musique/image.png,
-// qui renvoyait un 404. L import garantit une URL correcte.
-import guitare from "../assets/image.png";
-	const videos = [
-	  // première vidéo fournie (embed)
-	  "https://www.youtube.com/watch?v=WYXsf-MV1GM",
-	  "https://www.youtube.com/watch?v=6gsqAnGUTvw"
-	  // autre vidéo (embed)
-	];
+import Colophon from "../components/Colophon.astro";
+import { Image } from "astro:assets";
 
+// Le chemin etait relatif : depuis /musique/ il pointait vers /musique/image.png,
+// qui renvoyait un 404. L'import garantit une URL correcte — et passe par
+// astro:assets, qui sort du WebP redimensionne au lieu du PNG de 1,9 Mo.
+import guitare from "../assets/image.png";
+
+const videos = [
+	"https://www.youtube.com/watch?v=WYXsf-MV1GM",
+	"https://www.youtube.com/watch?v=6gsqAnGUTvw",
+];
+
+const idVideo = (url) =>
+	url.includes("v=") ? url.split("v=")[1].split("&")[0] : url.split("/").pop();
 ---
 
 <Layout
 	title="Musique"
 	description="Guitare, vidéos et progression autodidacte — une page dédiée à la musique."
+	mainClass="page editorial"
 >
-	<main class="page">
-		<h1 class="page-title fade-in">Musique</h1>
+	<section class="tete-page">
+		<h1 class="titre-page" data-reveal data-groupe="tete">Musique</h1>
+		<div class="prose" data-reveal data-groupe="tete">
+			<p>
+				Cette page est dédiée à ma passion pour la musique, en particulier la
+				guitare.
+			</p>
+		</div>
+	</section>
 
-		<p class="paragraph-center fade-in">
-			Cette page est dédiée à ma passion pour la musique, en particulier la guitare.
-		</p>
+	<section class="duo">
+		<div class="prose" data-reveal data-groupe="recit">
+			<p>
+				J’ai commencé la guitare presque par hasard, en apprenant le riff de
+				<em>Come As You Are</em> lors d’un voyage. Ce moment simple a été un
+				déclic. De retour chez moi, j’ai découvert quelques accords sur Internet
+				et je me suis mis à m’entraîner régulièrement pour reproduire des
+				chansons que j’aimais.
+			</p>
+			<p>
+				Peu à peu, la guitare a pris une place dans mon quotidien. Elle m’a
+				appris à écouter autrement, à reproduire ce que j’entendais, puis à
+				laisser venir mes propres idées. Avec le temps, j’y ai trouvé une vraie
+				satisfaction : progresser par étapes, avec patience.
+			</p>
+		</div>
 
-		<section class="section two-col">
-			<div class="container two-col-inner fade-in">
-				<div class="content">
-					<p class="paragraph-center narrow">
-						J’ai commencé la guitare presque par hasard, en apprenant le riff de <em>Come As You Are</em> lors d’un voyage. 
-						Ce moment simple a été un déclic. 
-						De retour chez moi, j’ai découvert quelques accords sur Internet et je me suis mis à m’entraîner régulièrement pour reproduire des chansons que j’aimais.
-					<br><br>
-					</p>
-					<p class="paragraph-center narrow">
-						Peu à peu, la guitare a pris une place dans mon quotidien. 
-						Elle m’a appris à écouter autrement, à reproduire ce que j’entendais, puis à laisser venir mes propres idées. 
-						Avec le temps, j’y ai trouvé une vraie satisfaction : progresser par étapes, avec patience.
-					</p>
-				</div>
-				<div class="media">
-					<img src={guitare.src} alt="Guitare" />
-				</div>
-			</div>
-		</section>
+		<figure class="duo-media" data-reveal data-groupe="recit">
+			<Image
+				src={guitare}
+				alt="Guitare"
+				widths={[400, 720]}
+				sizes="(max-width: 900px) 100vw, 360px"
+				loading="lazy"
+				decoding="async"
+			/>
+		</figure>
+	</section>
 
-		<section class="section fade-in">
-			<div class="container">
-				<h2 style="margin-bottom:12px;">Carrousel de vidéos</h2>
+	<section>
+		<div class="section-head" data-reveal data-groupe="videos">
+			<span>Vidéos</span>
+			<span>({videos.length})</span>
+		</div>
 
-				<div class="video-carousel" aria-label="Carrousel vidéo">
-					<button class="car-btn prev" aria-label="Précédent">‹</button>
-					<div class="carousel-track" role="list">
-						{videos.map((src) => {
-							const id = src.includes('v=') ? src.split('v=')[1].split('&')[0] : src.split('/').pop();
-							return (
-								<div class="carousel-item" role="listitem">
-									<iframe
-										width="200"
-										height="315"
-										src={`https://www.youtube-nocookie.com/embed/${id}`}
-										title="YouTube video player"
-										frameborder="0"
-										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-										referrerpolicy="strict-origin-when-cross-origin" 
-										allowfullscreen
-									></iframe>
-								</div>
-							);
-						})}
-					</div>
-					<button class="car-btn next" aria-label="Suivant">›</button>
-				</div>
-
-				<p class="paragraph-center">Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile, balayez la zone.</p>
-			</div>
-		</section>
-
-		<section class="section two-col">
-			<div class="tab-card fade-in">
-				<div class="tab-card-media" aria-hidden="true">🎸</div>
-				<div class="tab-card-body">
-					<h3>Tablatures</h3>
-					<p class="muted">Envie de jouer ces morceaux ? J'ai rassemblé des tablatures simplifiées pour commencer rapidement.</p>
-					<a class="tab-btn" href="https://docs.google.com/document/d/1lzav6pmo0A10RGYKqbtwUIGk8aWnmJpQV9uYpebnV2Q/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Accéder aux tablatures</a>
+		<div class="zone-carrousel">
+			<div class="video-carousel" aria-label="Carrousel vidéo">
+				<div class="carousel-track" role="list">
+					{
+						videos.map((src) => (
+							<div class="carousel-item" role="listitem">
+								<iframe
+									src={`https://www.youtube-nocookie.com/embed/${idVideo(src)}`}
+									title="Lecteur vidéo YouTube"
+									loading="lazy"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+									referrerpolicy="strict-origin-when-cross-origin"
+									allowfullscreen
+								/>
+							</div>
+						))
+					}
 				</div>
 			</div>
-		</section>
+			<div class="commandes">
+				<button class="car-btn prev" type="button" aria-label="Précédent">‹</button>
+				<button class="car-btn next" type="button" aria-label="Suivant">›</button>
+			</div>
+			<p class="aide">
+				Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile,
+				balayez la zone.
+			</p>
+		</div>
+	</section>
 
-		<script>
-			(function () {
-				// reveal animations (existing behavior)
-				const nodes = Array.from(document.querySelectorAll('main .fade-in'));
-				if (nodes.length) {
-					const list = nodes
-						.map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
-						.sort((a, b) => a.top - b.top)
-						.map((o) => o.el);
-					const baseDelay = 80;
-					const step = 120;
-					list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
-				}
+	<section>
+		<div class="section-head" data-reveal data-groupe="tablatures">
+			<span>Tablatures</span>
+			<span>(1)</span>
+		</div>
+		<div class="bloc-tab" data-reveal data-groupe="tablatures">
+			<p>
+				Envie de jouer ces morceaux ? J’ai rassemblé des tablatures simplifiées
+				pour commencer rapidement.
+			</p>
+			<a
+				class="bouton"
+				href="https://docs.google.com/document/d/1lzav6pmo0A10RGYKqbtwUIGk8aWnmJpQV9uYpebnV2Q/edit?usp=sharing"
+				target="_blank"
+				rel="noopener noreferrer">Accéder aux tablatures</a
+			>
+		</div>
+	</section>
 
-				// Carousel logic (use native horizontal scroll + CSS scroll-snap)
-				const carousel = document.querySelector('.video-carousel');
-				if (!carousel) return;
-				const track = carousel.querySelector('.carousel-track');
-				let items = Array.from(track.querySelectorAll('.carousel-item'));
-				const prev = carousel.querySelector('.car-btn.prev');
-				const next = carousel.querySelector('.car-btn.next');
-				let index = 0;
+	<Colophon />
 
-				function clamp(i) { return Math.max(0, Math.min(i, items.length - 1)); }
+	<script>
+		(function () {
+			const zone = document.querySelector(".zone-carrousel");
+			const carousel = document.querySelector(".video-carousel");
+			if (!zone || !carousel) return;
+			const track = carousel.querySelector(".carousel-track");
+			const prev = zone.querySelector(".car-btn.prev");
+			const next = zone.querySelector(".car-btn.next");
+			let items = Array.from(track.querySelectorAll(".carousel-item"));
+			let index = 0;
 
-				function scrollToIndex(i) {
+			const clamp = (i) => Math.max(0, Math.min(i, items.length - 1));
+
+			function scrollToIndex(i) {
+				const w = carousel.getBoundingClientRect().width;
+				index = clamp(i);
+				track.scrollTo({ left: index * w, behavior: "smooth" });
+			}
+
+			prev.addEventListener("click", () => scrollToIndex(index - 1));
+			next.addEventListener("click", () => scrollToIndex(index + 1));
+
+			// Les fleches ne pilotent le carrousel que s'il est a l'ecran : sinon
+			// elles volaient le clavier a toute la page.
+			document.addEventListener("keydown", (e) => {
+				if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+				const r = carousel.getBoundingClientRect();
+				if (r.bottom < 0 || r.top > window.innerHeight) return;
+				scrollToIndex(e.key === "ArrowLeft" ? index - 1 : index + 1);
+			});
+
+			let minuteur = null;
+			track.addEventListener("scroll", () => {
+				if (minuteur) clearTimeout(minuteur);
+				minuteur = setTimeout(() => {
 					const w = carousel.getBoundingClientRect().width;
-					track.scrollTo({ left: i * w, behavior: 'smooth' });
-					index = clamp(i);
-				}
+					index = Math.round(track.scrollLeft / w);
+				}, 120);
+			});
 
-				prev.addEventListener('click', () => { scrollToIndex(index - 1); });
-				next.addEventListener('click', () => { scrollToIndex(index + 1); });
-
-				// keyboard navigation
-				document.addEventListener('keydown', (e) => {
-					if (e.key === 'ArrowLeft') scrollToIndex(index - 1);
-					if (e.key === 'ArrowRight') scrollToIndex(index + 1);
+			function redimensionne() {
+				const w = carousel.getBoundingClientRect().width;
+				items = Array.from(track.querySelectorAll(".carousel-item"));
+				items.forEach((it) => {
+					it.style.width = w + "px";
 				});
-
-				// update index on native scroll end (debounced)
-				let scrollTimer = null;
-				track.addEventListener('scroll', () => {
-					if (scrollTimer) clearTimeout(scrollTimer);
-					scrollTimer = setTimeout(() => {
-						const w = carousel.getBoundingClientRect().width;
-						index = Math.round(track.scrollLeft / w);
-					}, 120);
-				});
-
-				// make carousel responsive: set items width to carousel width (use inline-block sizing)
-				function resize() {
-					const w = carousel.getBoundingClientRect().width;
-					items = Array.from(track.querySelectorAll('.carousel-item'));
-					items.forEach((it) => { it.style.width = w + 'px'; });
-					scrollToIndex(index);
-				}
-				window.addEventListener('resize', resize);
-				resize();
-			})();
-		</script>
-	</main>
+				scrollToIndex(index);
+			}
+			window.addEventListener("resize", redimensionne);
+			redimensionne();
+		})();
+	</script>
 </Layout>
+
+<style>
+	.zone-carrousel,
+	.bloc-tab {
+		padding: var(--pas-3) var(--edge) 0;
+	}
+
+	/* Sans plafond, une video 16:9 sur toute la largeur atteignait 690px de haut
+	   et ecrasait le reste de la page. */
+	.zone-carrousel {
+		box-sizing: border-box;
+		max-width: 960px;
+	}
+
+	.bloc-tab {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--pas-3);
+		max-width: 68ch;
+	}
+	.bloc-tab p {
+		margin: 0;
+		font-size: 15px;
+		line-height: 1.45;
+		color: var(--ink-55);
+	}
+
+	.video-carousel {
+		position: relative;
+	}
+
+	/* Les fleches etaient en blanc sur fond blanc, donc invisibles. Carre a
+	   l'encre, comme les autres commandes du systeme. */
+	.commandes {
+		display: flex;
+		gap: 8px;
+		margin: var(--pas-3) 0 0;
+	}
+
+	.car-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border: 1px solid var(--ink);
+		border-radius: 0;
+		background: var(--paper);
+		color: var(--ink);
+		font-size: 20px;
+		line-height: 1;
+		cursor: pointer;
+		transition: background var(--duree) var(--sortie), color var(--duree) var(--sortie);
+	}
+	.car-btn:hover {
+		background: var(--ink);
+		color: var(--paper);
+	}
+	.carousel-track {
+		display: flex;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+	.carousel-track::-webkit-scrollbar {
+		display: none;
+	}
+
+	.carousel-item {
+		flex: 0 0 auto;
+		scroll-snap-align: start;
+		box-sizing: border-box;
+	}
+	.carousel-item iframe {
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		height: auto;
+		border: 0;
+		background: var(--block);
+	}
+
+	.aide {
+		margin: var(--pas-3) 0 0;
+		font-size: 11px;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink-55);
+	}
+
+	.aide {
+		margin-top: 12px;
+	}
+</style>

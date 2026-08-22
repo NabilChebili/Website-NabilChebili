@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
 import PhotoGrid from "../components/PhotoGrid.astro";
 import AccordionSection from "../components/AccordionSection.astro";
@@ -32,31 +31,50 @@ const labels = {
 <Layout
   title="Vietnam"
   description="Récit photo d'un voyage au Vietnam : Saigon, Đà Nẵng, Nha Trang, Phú Yên et plus."
+  mainClass="page editorial"
 >
-  <main class="page">
-    <h1 class="page-title fade-in">Vietnam</h1>
-    <p class="paragraph-center fade-in page-intro">
-      Un mois à travers le Vietnam, du sud au centre, entre grandes villes bouillonnantes,
-      côtes sauvages et fêtes du Têt.
-    </p>
+  <section class="tete-page">
+    <a class="retour" href="/photo">← Toutes les galeries</a>
+    <h1 class="titre-page" data-reveal data-groupe="tete">Vietnam</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p>
+        Un mois à travers le Vietnam, du sud au centre, entre grandes villes
+        bouillonnantes, côtes sauvages et fêtes du Têt.
+      </p>
+    </div>
+  </section>
 
-    <PhotoGrid photos={vietnam.post} name="Vietnam" />
+  <section>
+    <div class="section-head" data-reveal data-groupe="recit">
+      <span>Le récit</span>
+      <span>({vietnam.post.length})</span>
+    </div>
+    <div class="galerie">
+      <PhotoGrid photos={vietnam.post} name="Vietnam" />
+    </div>
+  </section>
 
-    <h2 class="page-title fade-in" style="text-align:center; margin: 20px 0 24px; font-size: 1.4rem;">
-      Les étapes du voyage
-    </h2>
-
-    {Object.keys(vietnam.galleries).map((key) => (
-      <AccordionSection id={key} title={labels[key] ?? key} photos={photosByKey[key]} />
-    ))}
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const title = document.querySelector('.page-title');
-        const intro = document.querySelector('.page-intro');
-        if (title) setTimeout(() => title.classList.add('is-visible'), 120);
-        if (intro) setTimeout(() => intro.classList.add('is-visible'), 420);
-      });
-    </script>
-  </main>
+  <section>
+    <div class="section-head" data-reveal data-groupe="etapes">
+      <span>Les étapes du voyage</span>
+      <span>({Object.keys(vietnam.galleries).length})</span>
+    </div>
+    <div class="etapes">
+      {
+        Object.keys(vietnam.galleries).map((key) => (
+          <AccordionSection id={key} title={labels[key] ?? key} photos={photosByKey[key]} />
+        ))
+      }
+    </div>
+  </section>
 </Layout>
+
+<style>
+  .galerie,
+  .etapes {
+    padding: 0 var(--edge);
+  }
+  .etapes {
+    padding-top: var(--pas-3);
+  }
+</style>
