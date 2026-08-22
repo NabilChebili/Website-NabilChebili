@@ -250,6 +250,7 @@ main > section:nth-child(even) {
   object-position: 8% 50%;
 }
 .about-title {
+  /* balance repartit les deux lignes du titre a longueur egale. */
   margin: 0 0 18px;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
   font-size: clamp(22px, 2.6vw, 34px);
@@ -259,18 +260,24 @@ main > section:nth-child(even) {
   text-transform: uppercase;
   color: var(--ink);
   max-width: 24ch;
+  text-wrap: balance;
 }
 .about-text {
+  /* Les trois premieres lignes remplissaient 98 a 99 % de la mesure (656, 664
+     et 662px sur 668) : un drapeau aussi serre se lit comme une justification
+     ratee. Mesure resserree a 60 signes, et text-wrap: pretty pour eviter les
+     lignes finales orphelines. */
   margin: 0;
   /* 15px, interlignage 145 %, ligne sous 90 signes : les seuils de Butterick. */
   font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
-  max-width: 72ch;
+  max-width: 60ch;
   text-align: left;
   text-indent: 0;
   hyphens: manual;
   font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+  text-wrap: pretty;
 }
 
 /* ------------------------------------------------------------- univers --- */
