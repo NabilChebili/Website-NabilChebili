@@ -25,7 +25,10 @@
 :root {
   --ink: #1d1d1f;
   --ink-80: #333333;
-  --ink-48: #7a7a7a;
+  /* #7a7a7a du systeme echoue le seuil AA sur nos deux fonds (3,94:1 sur
+     #f5f5f7 et 4,29:1 sur blanc). #6e6e73, le gris secondaire de la meme
+     famille, passe : 4,66:1 et 5,07:1. */
+  --ink-48: #6e6e73;
   --surface: #ffffff;
   --surface-alt: #f5f5f7;
   --hairline: #e0e0e0;
@@ -76,7 +79,9 @@ main > section,
 main > section:nth-child(even) {
   background: var(--surface);
 }
-.section-tinted {
+/* Doit egaler la specificite de `main > section:nth-child(even)` d'index.css,
+   sinon l'alternance blanc/gris automatique reprend le dessus. */
+main > section.section-tinted {
   background: var(--surface-alt);
 }
 .apple-section {
@@ -122,7 +127,7 @@ main > section:nth-child(even) {
      espacees est justement le motif a eviter */
   text-transform: none;
 }
-.apple-title {
+.hero h1.apple-title {
   margin: 0;
   font-size: 56px;
   font-weight: 600;
@@ -133,7 +138,7 @@ main > section:nth-child(even) {
 }
 .apple-lead {
   margin: 18px auto 0;
-  max-width: 26ch;
+  max-width: 34ch;
   font-size: 28px;
   font-weight: 400;
   line-height: 1.14;
@@ -186,18 +191,28 @@ main > section:nth-child(even) {
   letter-spacing: 0;
   color: var(--ink);
 }
-.apple-body {
+/* Selecteur volontairement plus specifique que `.content p` d'index.css, qui
+   justifie et met un alinea : a specificite egale c'est index.css qui gagnait. */
+.content p.apple-body {
   font-size: 17px;
   font-weight: 400;
   line-height: 1.47;
   letter-spacing: -0.374px;
   color: var(--ink-80);
   max-width: 60ch;
+  /* index.css justifie ce paragraphe et lui met un alinea : sur une colonne
+     etroite en francais ca creuse des rivieres de blanc. */
+  text-align: left;
+  text-indent: 0;
+  hyphens: manual;
 }
 
-/* Seule l'imagerie porte une ombre, et c'est la valeur du systeme. */
+/* Les attributs width/height du markup servent a reserver la place avant le
+   chargement (CLS). Sans `height: auto`, c'est la hauteur de l'attribut qui
+   s'applique et l'image part etiree sur toute sa hauteur intrinseque. */
 .two-col .media img,
 .apple-tile img {
+  height: auto;
   box-shadow: none;
 }
 .two-col .media img {
@@ -389,7 +404,7 @@ main > section:nth-child(even) {
 /* ------------------------------------------------------------ responsive --- */
 
 @media (max-width: 1023px) {
-  .apple-title {
+  .hero h1.apple-title {
     font-size: 40px;
   }
   .apple-lead {
@@ -411,7 +426,7 @@ main > section:nth-child(even) {
   }
 }
 @media (max-width: 640px) {
-  .apple-title {
+  .hero h1.apple-title {
     font-size: 34px;
   }
   .apple-h2,
@@ -423,7 +438,7 @@ main > section:nth-child(even) {
   }
 }
 @media (max-width: 419px) {
-  .apple-title {
+  .hero h1.apple-title {
     font-size: 28px;
   }
 }
