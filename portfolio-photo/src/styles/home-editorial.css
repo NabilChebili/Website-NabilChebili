@@ -39,7 +39,7 @@
   --ink-55: #5c5c58;
   --rule: #c9c9c4;
   --block: #e6e6e2;
-  --edge: 22px;
+  --edge: 40px;
   --pas-3: 24px;
   --pas-8: 64px;
   --pas-10: 80px;
@@ -151,6 +151,7 @@ main > section:nth-child(even) {
 /* ------------------------------------------------------------- ouverture --- */
 
 .opening {
+  overflow: clip;
   padding: 8px var(--edge) 0;
 }
 
@@ -177,7 +178,7 @@ main > section:nth-child(even) {
 .mega {
   margin: 26px 0 0;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-  font-size: clamp(44px, 19.6vw, 420px);
+  font-size: clamp(44px, 18.7vw, 420px);
   font-weight: 800;
   line-height: 0.82;
   letter-spacing: -0.02em;
@@ -476,7 +477,7 @@ main > section:nth-child(even) {
 }
 @media (max-width: 700px) {
   :root {
-    --edge: 14px;
+    --edge: 20px;
   }
   .mega {
     /* Sur un ecran etroit, un nom bord a bord devient illisible : on autorise
