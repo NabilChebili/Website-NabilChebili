@@ -541,7 +541,6 @@ html {
    span interieur qui ne contient que les mots.
 
    Volontairement pas en ::after : la nav utilise deja ::before et ::after. */
-.site-nav a,
 .nav-home,
 .brand a,
 .footer-nav nav a,
@@ -554,8 +553,6 @@ html {
   background-size: 0% 1px;
   transition: background-size var(--duree) var(--sortie);
 }
-.site-nav a:hover,
-.site-nav a:focus-visible,
 .nav-home:hover,
 .brand a:hover,
 .footer-nav nav a:hover,
@@ -706,4 +703,25 @@ html {
 .activite:hover .activite-lien,
 .activite:focus-visible .activite-lien {
   background-size: 100% 1px;
+}
+
+/* Le survol de la nav, c'est la paire de crochets — pas un trait en plus.
+   Deux marqueurs superposes se disputaient le meme mot, et un trait tire de
+   crochet a crochet passe sous les espaces : il encadre les crochets au lieu
+   de souligner le mot, et prend l'allure d'un champ de formulaire.
+   L'espace des crochets reste reserve au repos, donc rien ne se decale.
+   Sur un appareil sans survol ils restent visibles : le marqueur ne serait
+   jamais declenche. */
+@media (hover: hover) {
+  .site-nav a::before,
+  .site-nav a::after {
+    color: transparent;
+    transition: color var(--duree) var(--sortie);
+  }
+  .site-nav a:hover::before,
+  .site-nav a:hover::after,
+  .site-nav a:focus-visible::before,
+  .site-nav a:focus-visible::after {
+    color: var(--ink);
+  }
 }
