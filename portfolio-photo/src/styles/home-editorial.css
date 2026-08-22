@@ -313,7 +313,8 @@ main > section:nth-child(even) {
   display: block;
   overflow: hidden;
   background: var(--block);
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 2;
+  max-height: 340px;
 }
 .activite-visuel img {
   width: 100%;
