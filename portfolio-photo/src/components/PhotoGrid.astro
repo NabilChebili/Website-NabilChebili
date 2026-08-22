@@ -9,7 +9,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
   </div>
   <div class="photo-grid-cards">
     {items.map((p, i) => (
-      <figure class="photo-card" style={`--i:${i}`}>
+      <figure class="photo-card" style={`--i:${i % 6}`}>
         <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
         {p.caption ? <figcaption>{p.caption}</figcaption> : null}
       </figure>
@@ -18,7 +18,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
 
   <div class="lightbox" aria-hidden="true">
     <div class="lb-inner">
-      <img src="" alt="" />
+      <img alt="" />
       <div class="lb-controls">
         <button class="lb-download" type="button">Télécharger</button>
         <button class="lb-share" type="button">Partager</button>

@@ -456,6 +456,14 @@ html {
 .tete-page {
   padding: var(--pas-6) var(--edge) 0;
 }
+
+/* Quand le bloc de contact suit directement l'en-tete de page — cas de /gaming,
+   qui n'a pas de section intermediaire — son filet venait se coller sous la
+   derniere ligne du paragraphe et se lisait comme un soulignement. Ailleurs
+   c'est la section suivante qui fournit cet air. */
+.tete-page + .colophon {
+  margin-top: var(--pas-8);
+}
 .titre-page {
   margin: 0;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
