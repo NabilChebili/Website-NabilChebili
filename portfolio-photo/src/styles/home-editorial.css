@@ -40,6 +40,13 @@
   --rule: #c9c9c4;
   --block: #e6e6e2;
   --edge: 40px;
+  /* Systeme de motion. Une transition d'interface tient entre 200 et 300ms :
+     au-dela de 500 elle est molle, en dessous de 100 elle est seche. La courbe
+     de deceleration correspond a la physique reelle — depart franc, arrivee
+     posee. */
+  --duree: 240ms;
+  --duree-longue: 560ms;
+  --sortie: cubic-bezier(0.2, 0, 0, 1);
   --pas-3: 24px;
   --pas-6: 48px;
   --pas-8: 64px;
@@ -170,6 +177,7 @@ main > section:nth-child(even) {
 /* L'unique moment display. Bord a bord : la taille est pilotee par la largeur
    du viewport, pas par une echelle de pas. */
 .mega {
+  overflow: clip;
   margin: 26px 0 0;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
   font-size: clamp(44px, 18.7vw, 420px);
@@ -179,6 +187,22 @@ main > section:nth-child(even) {
   text-transform: uppercase;
   color: var(--ink);
   white-space: nowrap;
+}
+
+/* Le titre se decouvre au chargement : le bloc monte depuis sa ligne de base,
+   sous le masque du h1. Animation CSS pure — elle tourne sans JavaScript et se
+   termine toujours, donc le titre n'est jamais masque durablement. */
+.mega span {
+  display: block;
+  animation: decouvreTitre var(--duree-longue) var(--sortie) both;
+}
+@keyframes decouvreTitre {
+  from {
+    transform: translateY(92%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 /* Sous le titre : une seule ligne, la phrase d'intention a gauche et le lien
@@ -328,13 +352,10 @@ main > section:nth-child(even) {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: filter 520ms ease;
-  filter: grayscale(1) contrast(1.04);
 }
 /* La couleur revient au survol : l'image reste en place, seul son rendu change.
    Plus discret qu'un agrandissement, et ca signale la carte active sans bouger
    la mise en page. */
-.activite:hover .activite-visuel img,
 .activite:focus-visible .activite-visuel img {
   filter: grayscale(0) contrast(1);
 }
@@ -368,7 +389,7 @@ main > section:nth-child(even) {
 .activite-lien i {
   font-style: normal;
   font-weight: 500;
-  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--duree) var(--sortie);
 }
 .activite:hover .activite-lien,
 .activite:focus-visible .activite-lien {
@@ -445,7 +466,7 @@ main > section:nth-child(even) {
 .colophon-links i {
   font-style: normal;
   font-weight: 500;
-  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform var(--duree) var(--sortie);
 }
 .colophon-links a:hover i {
   transform: translateX(6px);
@@ -458,21 +479,31 @@ main > section:nth-child(even) {
 /* ------------------------------------------- animations liees au scroll --- */
 
 @supports (animation-timeline: view()) {
-  /* Revelation par volet, du bas vers le haut : le tirage apparait. Une seule
-     propriete animee par planche. */
-  /* L'image se decouvre par le bas. Aucune opacite dans les etapes : une image
-     a zero d'opacite, c'est du contenu masque. Et la plage s'arrete des que
-     l'element est entierement entre, donc rien ne reste en cours de route. */
-  .activite-visuel img {
-    animation: reveleImage linear both;
+  /* Le cadre se decouvre par le bas quand il entre dans le viewport. Aucune
+     opacite dans les etapes : une image a zero d'opacite, c'est du contenu
+     masque. */
+  .activite-visuel {
+    animation: reveleCadre linear both;
     animation-timeline: view();
     animation-range: entry 0% entry 100%;
   }
+  /* Cascade. Les quatre cartes d'une meme rangee partagent la meme progression
+     de defilement : un decalage temporel n'aurait aucun effet. On decale leur
+     plage d'entree de 5 % chacune, ce qui produit la vague. */
+  .activite:nth-child(2) .activite-visuel {
+    animation-range: entry 5% entry 100%;
+  }
+  .activite:nth-child(3) .activite-visuel {
+    animation-range: entry 10% entry 100%;
+  }
+  .activite:nth-child(4) .activite-visuel {
+    animation-range: entry 15% entry 100%;
+  }
 }
 
-@keyframes reveleImage {
+@keyframes reveleCadre {
   from {
-    clip-path: inset(16% 0 0 0);
+    clip-path: inset(18% 0 0 0);
   }
   to {
     clip-path: inset(0 0 0 0);
@@ -534,7 +565,7 @@ main > section:nth-child(even) {
 /* --------------------------------------------------- mouvement reduit --- */
 
 @media (prefers-reduced-motion: reduce) {
-  .activite-visuel img {
+  .activite-visuel {
     animation: none !important;
     clip-path: none !important;
     opacity: 1 !important;
