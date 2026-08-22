@@ -61,43 +61,38 @@ const univers = [
 
       <h1 class="mega">Nabil Chebili</h1>
 
-      <div class="opening-body">
-        <div class="slashes">
-          {univers.map((u) => <a href={u.href}>{u.titre}</a>)}
-        </div>
-
-        <figure class="portrait">
-          <img
-            src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg"
-            alt="Portrait de Nabil Chebili"
-            width="2200"
-            height="1467"
-            loading="eager"
-            decoding="async"
-            fetchpriority="high"
-          />
-        </figure>
-
-        <div class="opening-aside">
-          <p>
-            Cloud &amp; DevOps, photographie et musique — projets, galeries et
-            inspirations.
-          </p>
-          <a class="jump" href="#explorer">Explorer &#8595;</a>
-        </div>
+      <div class="opening-foot">
+        <p>
+          Cloud &amp; DevOps, photographie et musique — projets, galeries et
+          inspirations.
+        </p>
+        <a class="jump" href="#explorer">Explorer &#8595;</a>
       </div>
     </section>
 
     <section class="about">
-      <h2 class="about-title">Vous vous demandez sûrement qui je suis ?</h2>
-      <p class="about-text">
+      <div>
+        <h2 class="about-title">Vous vous demandez sûrement qui je suis ?</h2>
+        <p class="about-text">
         Je suis quelqu’un de curieux, attiré par les choses que l’on construit et
         que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et
         reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
         systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est
         le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à
-        ce que tout fasse sens.
-      </p>
+          ce que tout fasse sens.
+        </p>
+      </div>
+
+      <figure class="about-media">
+        <img
+          src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg"
+          alt="Portrait de Nabil Chebili"
+          width="2200"
+          height="1467"
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
     </section>
 
     <section id="explorer">
