@@ -491,6 +491,7 @@ main > section:nth-child(even) {
     padding: var(--pas-3) var(--edge) 0;
   }
   .about-media {
+    justify-self: center;
     margin-right: 0;
   }
   :root {
