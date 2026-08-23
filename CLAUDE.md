@@ -119,8 +119,12 @@ ajustement de mise en forme — plusieurs de ces pièges ont coûté des tours e
   survol n'existe pas.
 - **Filet blanc sous les photos des cartes** : en `var(--paper)`, soit la couleur exacte du fond de
   page, il se confondait avec le fond au repos et donnait l'impression d'une photo rognée de 2px.
-- **Orbite de logos et pastilles en verre dépoli sur `/clouddevops`** : incompatibles avec un système
-  qui interdit dégradés, lueurs et ombres portées. Les logos restent, posés à plat.
+- **Pastilles en verre dépoli sur `/clouddevops`** : incompatibles avec un système qui interdit
+  dégradés, lueurs et ombres portées.
+- **L'orbite des logos, elle, a été redemandée et remise** (23/08 au soir), redessinée en filets SVG
+  de 1px : l'utilisateur la trouvait plus belle que la rangée à plat, et voulait « une animation qui
+  correspond au cloud, comme les planètes du système solaire ». Un motif animé n'est donc pas
+  interdit sur ce site — ce sont les effets (dégradé, lueur, ombre) qui le sont.
 - **Animation permanente sur le titre de l'accueil** : cinq variantes fabriquées et essayées
   (respiration de la graisse, vague au curseur, balayage lumineux, soulèvement des lettres, et la
   combinaison des deux dernières). Verdict de l'utilisateur : « ça fait pas très pro ». Abandonné.

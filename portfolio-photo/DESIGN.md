@@ -29,7 +29,7 @@ Ces règles ne sont pas décoratives : elles sont vérifiées par le script de c
 |---|---|
 | `border-radius` | Aucun coin arrondi sur les 16 pages. Un rayon suffit à faire basculer la page dans le registre « template ». |
 | `box-shadow` | Idem. La hiérarchie se fait par les filets et l'échelle typographique, pas par la profondeur. |
-| Dégradés, lueurs, verre dépoli | Retirés de `/clouddevops` (orbite de logos, pastilles) pour cette raison. |
+| Dégradés, lueurs, verre dépoli | Les pastilles en verre dépoli de `/clouddevops` ont été retirées pour cette raison. L'orbite des outils, elle, a été **redessinée** dans le vocabulaire du système : pistes en SVG à filets de 1px, aucun rayon CSS, aucune ombre, et la seule couleur vient des logos. Un motif animé n'est pas interdit — les effets le sont. |
 | Texte posé sur une photo | Le libellé va **sous** l'image. Les cartes de `/photo` le faisaient. |
 | `text-align: justify` | Sans césure maîtrisée, le français sur colonne étroite produit des rivières de blanc. Tout est aligné à gauche. |
 | Titre centré | Tout est calé sur le bord gauche, à `var(--edge)`. |
