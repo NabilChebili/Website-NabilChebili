@@ -343,11 +343,22 @@ const other = {
      haut que lui, le filet des reperes se coupait a 992px alors que tous les
      autres filets de la page vont de bord a bord, et il restait un grand vide
      a droite du titre. Le remonter regle les trois d'un coup. */
+  /* Le bloc de texte prend sa largeur naturelle, et le logo se CENTRE dans le
+     reliquat. Avec un logo epingle au bord droit, tout le reliquat s'accumulait
+     entre les deux : le vide central passait de 125px a 938px avec la largeur
+     de la fenetre pendant que la marge droite restait a 34px. Ici l'air est
+     rigoureusement egal a gauche et a droite du logo, a toutes les largeurs.
+     Gouttiere de colonne a zero : c'est le centrage qui doit produire les deux
+     ecarts, une gouttiere s'ajouterait d'un seul cote. */
   .tete-page {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    gap: var(--pas-6);
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0;
+    row-gap: var(--pas-6);
     align-items: start;
+  }
+  .tete-page > .outils-bloc {
+    justify-self: center;
   }
   /* Le titre passe sur deux lignes et l'intro le suit dans la meme colonne :
      sans ca le nuage (326px) surplombait le titre (118px) de 290px de blanc.
@@ -356,44 +367,9 @@ const other = {
     margin-top: var(--pas-6);
   }
 
-  /* Au-dela de 1250px, l'intro remonte ENTRE le titre et le nuage. Mesure du
-     defaut qu'elle corrige : a partir de 1280px le titre passe sur deux lignes
-     donc il rétrécit (425px) pendant que la fenetre s'elargit, et le vide
-     central passait de 125px a 938px alors que la marge droite restait a 34px.
-     Repartir ce vide aurait donne de l'air incoherent ; le remplir avec du
-     contenu rend la rangee pleine a toutes les largeurs.
-     `display: contents` evite de dupliquer le balisage : au-dela du seuil, le
-     titre et l'intro deviennent directement des cases de la grille. */
-  @media (min-width: 1250px) {
-    .tete-page {
-      /* min-content, pas max-content : max-content vaut la largeur du titre
-         SANS retour a la ligne (735px), alors que le titre replie n'en fait que
-         425 — la piste gardait donc 310px de vide interne. min-content vaut la
-         largeur du mot le plus long, donc la piste epouse le titre replie. */
-      grid-template-columns: min-content minmax(0, 1fr) 360px;
-    }
-    .tete-texte {
-      display: contents;
-    }
-    .tete-texte > .prose {
-      margin-top: 0;
-    }
-  }
-
-  /* Au-dela de 1600px l'intro cesse de remplir sa piste : elle est plafonnee a
-     68 caracteres, regle du site. Sans rien faire, tout le reliquat s'accumulait
-     entre elle et le nuage — 398px a 1920px. La centrer dans sa piste repartit
-     ce reliquat a egalite de part et d'autre. */
-  @media (min-width: 1600px) {
-    .tete-texte > .prose {
-      justify-self: center;
-    }
-  }
-
   /* Le morphing des logos. Le dessin est fait en canvas par
      src/scripts/morphOutils.js — voir l'en-tete de ce fichier pour les deux
-     regles a ne pas defaire (rastérisation en couverture de surface, et la
-     forme qui ne devient lisible qu'une fois le pavage exact). */
+     regles a ne pas defaire. */
   .outils-bloc {
     display: flex;
     flex-direction: column;
@@ -641,10 +617,15 @@ const other = {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-  @media (max-width: 980px) {
+  /* Sous 1080px, le reliquat devient plus etroit que le logo (326px) : il
+     deborderait. On empile, et le logo se cale a gauche comme le reste. */
+  @media (max-width: 1080px) {
     .tete-page {
       grid-template-columns: minmax(0, 1fr);
-      gap: var(--pas-3);
+      row-gap: var(--pas-3);
+    }
+    .tete-page > .outils-bloc {
+      justify-self: start;
     }
   }
   /* Le rail de 260px ne tient plus sous 800px : avec la gouttiere il ne laissait
