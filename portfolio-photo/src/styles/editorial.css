@@ -647,3 +647,33 @@ html {
     order: -1;
   }
 }
+
+/* En-tete de section, variante haute. A 11px un en-tete se lit comme une
+   etiquette, pas comme un titre de chapitre : sur une page longue et
+   structuree — un CV — le squelette devient invisible. Cette variante donne
+   le niveau typographique intermediaire qui manquait entre le titre de page
+   et le corps de texte. */
+.section-head.grande {
+  align-items: baseline;
+  padding-bottom: 12px;
+}
+.section-head.grande > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.section-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  color: var(--ink-55);
+}

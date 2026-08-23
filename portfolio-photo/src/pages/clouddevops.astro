@@ -147,6 +147,19 @@ const missions = [
   },
 ];
 
+// L'orbite des outils : rayon, duree d'un tour, et phase de depart pour les
+// repartir. Les orbites lointaines tournent plus lentement, comme les planetes
+// — c'est ce qui rend le mouvement calme plutot que decoratif.
+const outils = [
+  { n: "azure", r: 150, t: 96, p: 0 },
+  { n: "terraform", r: 150, t: 96, p: 0.34 },
+  { n: "kube", r: 150, t: 96, p: 0.67 },
+  { n: "docker", r: 106, t: 68, p: 0.12 },
+  { n: "git", r: 106, t: 68, p: 0.62 },
+  { n: "ado", r: 62, t: 44, p: 0.3 },
+  { n: "vscode", r: 62, t: 44, p: 0.8 },
+];
+
 const other = {
   languages: [{ k: "Anglais", v: "Courant (TOEIC 830)" }],
   notes: [
@@ -163,37 +176,50 @@ const other = {
 >
   <section class="tete-page">
     <h1 class="titre-page" data-reveal data-groupe="tete">{profile.title}</h1>
-    <div class="prose" data-reveal data-groupe="tete">
-      <p>{profile.subtitle}</p>
-    </div>
   </section>
 
-  <section class="bandeau">
-    <div class="reperes" data-reveal data-groupe="tete">
-      {
-        profile.stats.map((s) => (
-          <div class="repere">
-            <span class="repere-k">{s.k}</span>
-            <span class="repere-v">{s.v}</span>
-          </div>
-        ))
-      }
-    </div>
-    <div class="pile" data-reveal data-groupe="tete">
-      <span class="rail-titre">Outils</span>
-      <span class="pile-marques">
+  <section class="entete">
+    <div class="entete-texte">
+      <div class="prose" data-reveal data-groupe="tete">
+        <p>{profile.subtitle}</p>
+      </div>
+
+      <div class="reperes" data-reveal data-groupe="tete">
         {
-          ["azure", "terraform", "kube", "docker", "git", "ado", "vscode"].map((n) => (
-            <img src={"/devops_images/" + n + ".png"} alt="" loading="lazy" decoding="async" />
+          profile.stats.map((s) => (
+            <div class="repere">
+              <span class="repere-k">{s.k}</span>
+              <span class="repere-v">{s.v}</span>
+            </div>
           ))
         }
-      </span>
+      </div>
     </div>
+
+    <figure class="orbite-bloc" data-reveal data-groupe="tete">
+      <figcaption>Outils · {outils.length}</figcaption>
+      <div class="orbite-scene" aria-hidden="true">
+        <svg class="orbite-pistes" viewBox="0 0 320 320" focusable="false">
+          <circle cx="160" cy="160" r="62" />
+          <circle cx="160" cy="160" r="106" />
+          <circle cx="160" cy="160" r="150" />
+        </svg>
+        {
+          outils.map((o) => (
+            <span class="orbite" style={`--r:${o.r}px; --t:${o.t}s; --p:${o.p}`}>
+              <span class="satellite">
+                <img src={"/devops_images/" + o.n + ".png"} alt="" loading="lazy" decoding="async" />
+              </span>
+            </span>
+          ))
+        }
+      </div>
+    </figure>
   </section>
 
   <section>
-    <div class="section-head" data-reveal data-groupe="apport">
-      <span>Ce que j’apporte</span>
+    <div class="section-head grande" data-reveal data-groupe="apport">
+      <span><i class="section-num">01</i> Ce que j’apporte</span>
       <span>({expertise.length})</span>
     </div>
     <div class="apport">
@@ -224,8 +250,8 @@ const other = {
   </section>
 
   <section id="missions">
-    <div class="section-head" data-reveal data-groupe="missions">
-      <span>Missions</span>
+    <div class="section-head grande" data-reveal data-groupe="missions">
+      <span><i class="section-num">02</i> Missions</span>
       <span>({missions.length})</span>
     </div>
     <div class="missions">
@@ -235,6 +261,9 @@ const other = {
             <div class="mission-meta">
               <span class="mission-periode">{m.period}</span>
               <span class="mission-client">{m.client}</span>
+              {m.clientLogo ? (
+                <img class="mission-logo" src={m.clientLogo} alt={"Logo " + m.client} loading="lazy" />
+              ) : null}
               <span class="rail-titre">Stack</span>
               <ul class="rail-liste">
                 {m.stack.map((t) => (
@@ -258,8 +287,8 @@ const other = {
   </section>
 
   <section>
-    <div class="section-head" data-reveal data-groupe="certifs">
-      <span>Certifications</span>
+    <div class="section-head grande" data-reveal data-groupe="certifs">
+      <span><i class="section-num">03</i> Certifications</span>
       <span>({certifications.length})</span>
     </div>
     <div class="certifs">
@@ -275,8 +304,8 @@ const other = {
   </section>
 
   <section>
-    <div class="section-head" data-reveal data-groupe="reperes">
-      <span>Quelques repères</span>
+    <div class="section-head grande" data-reveal data-groupe="reperes">
+      <span><i class="section-num">04</i> Quelques repères</span>
       <span>({other.languages.length + other.notes.length})</span>
     </div>
     <div class="apport">
@@ -297,17 +326,115 @@ const other = {
 </Layout>
 
 <style>
-  /* Bandeau sous le titre : les trois repères, puis la pile technique. Le
-     carrousel de logos en orbite et les pastilles en verre dépoli sont retirés
-     — un système qui interdit dégradés, lueurs et ombres portées ne peut pas
-     les accueillir. Les logos restent, posés à plat. */
-  .bandeau {
+  /* En-tete : la phrase d'intention a gauche, l'orbite des outils a droite.
+     C'est l'en-tete d'un CV — qui je suis, puis avec quoi je travaille. */
+  .entete {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: var(--pas-6);
+    align-items: start;
     padding: var(--pas-6) var(--edge) 0;
   }
+  .entete-texte > .prose {
+    margin-top: 0;
+  }
+  .entete-texte > .reperes {
+    margin-top: var(--pas-6);
+  }
 
+  /* L'orbite. Les pistes sont un SVG a filets — pas de border-radius, pas
+     d'ombre, pas de lueur : le motif « systeme » tient entierement dans des
+     traits de 1px et la seule couleur vient des logos eux-memes.
+     Chaque satellite est porte par un calque qui tourne ; l'image tourne en
+     sens inverse a la meme vitesse et reste donc droite. Les orbites
+     lointaines sont les plus lentes. */
+  .orbite-bloc {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin: 0;
+  }
+  /* La boite se deduit du rayon exterieur plus la moitie d'un logo : a 320px
+     fixes, le satellite le plus lointain depassait de 3px et faisait deborder
+     la page entiere. Les pistes SVG sont dimensionnees separement, a la meme
+     echelle que les rayons, pour que les logos tombent bien dessus. */
+  .orbite-scene {
+    --rmax: 150;
+    --k: 1;
+    --icone: 26px;
+    position: relative;
+    width: calc((var(--rmax) * var(--k) * 1px) * 2 + var(--icone));
+    aspect-ratio: 1;
+  }
+  .orbite-pistes {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(320px * var(--k));
+    height: calc(320px * var(--k));
+    transform: translate(-50%, -50%);
+  }
+  .orbite-pistes circle {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+  .orbite {
+    position: absolute;
+    inset: 0;
+    animation: tourne var(--t) linear infinite;
+    animation-delay: calc(-1 * var(--t) * var(--p));
+  }
+  .satellite {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateX(calc(var(--r) * var(--k)));
+  }
+  .satellite img {
+    display: block;
+    width: var(--icone);
+    height: var(--icone);
+    object-fit: contain;
+    animation: contre var(--t) linear infinite;
+    animation-delay: calc(-1 * var(--t) * var(--p));
+  }
+  @keyframes tourne {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes contre {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+  .orbite-bloc figcaption {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+
+  /* Mouvement arrete : les satellites doivent garder leur position de depart,
+     sinon l'animation figee les empile tous au meme point. */
+  @media (prefers-reduced-motion: reduce) {
+    .orbite {
+      animation: none;
+      transform: rotate(calc(var(--p) * 360deg));
+    }
+    .satellite img {
+      animation: none;
+      transform: rotate(calc(var(--p) * -360deg));
+    }
+  }
+
+  /* Trois colonnes egales : la mesure du rail deformait la repartition. */
   .reperes {
     display: grid;
-    grid-template-columns: 260px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--pas-6);
     border-top: 1px solid var(--ink);
     padding-top: 12px;
@@ -356,30 +483,6 @@ const other = {
     color: var(--ink);
   }
 
-  .pile {
-    display: grid;
-    grid-template-columns: 260px minmax(0, 1fr);
-    gap: var(--pas-6);
-    align-items: center;
-    margin-top: var(--pas-3);
-    padding-top: var(--pas-3);
-    border-top: 1px solid var(--rule);
-  }
-  .pile-marques {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 26px;
-  }
-  /* Chaque logo occupe le meme emplacement : a hauteur egale, des proportions
-     tres differentes donnaient des presences optiques inegales. `contain` garde
-     le rapport de chacun sans le deformer. */
-  .pile img {
-    height: 26px;
-    width: 44px;
-    object-fit: contain;
-    object-position: left center;
-  }
 
   .apport,
   .missions,
@@ -469,6 +572,32 @@ const other = {
     line-height: 1.05;
     text-transform: uppercase;
   }
+  .mission-logo {
+    height: 20px;
+    width: 84px;
+    object-fit: contain;
+    object-position: left center;
+    margin-top: 10px;
+  }
+  :global(.reveal-ok) .mission-logo {
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity var(--duree-longue) var(--sortie),
+      transform var(--duree-longue) var(--sortie);
+    transition-delay: 260ms;
+  }
+  :global(.reveal-ok) [data-reveal].vu .mission-logo {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.reveal-ok) .mission-logo {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
   .mission-corps h3 {
     margin: 0 0 8px;
     font-size: 15px;
@@ -528,26 +657,33 @@ const other = {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+  @media (max-width: 980px) {
+    .entete {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .orbite-bloc {
+      align-items: flex-start;
+    }
+  }
   /* Le rail de 260px ne tient plus sous 800px : avec la gouttiere il ne laissait
      que 42px au libelle d'une certification, qui en reclame 117 — d'ou un
      debordement horizontal de 55px sur la page. Les trois blocs du rail
      s'empilent. */
   @media (max-width: 800px) {
     .mission,
-    .certif,
-    .pile {
+    .certif {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
     }
     .certif {
       gap: 4px;
     }
-    .pile {
-      gap: 12px;
-      align-items: start;
-    }
   }
   @media (max-width: 700px) {
+    .orbite-scene {
+      --k: 0.72;
+      --icone: 22px;
+    }
     .reperes {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
@@ -555,16 +691,6 @@ const other = {
     .colonnes {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
-    }
-    .bandeau {
-      padding-top: var(--pas-3);
-    }
-    .pile {
-      gap: 18px;
-    }
-    .pile img {
-      height: 22px;
-      width: 38px;
     }
   }
 </style>

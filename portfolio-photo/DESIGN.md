@@ -106,6 +106,8 @@ localement (`1100px` pour les grilles à 4 colonnes, `900px` pour `.duo`).
 | `.prose` | Texte courant, aligné à gauche, `max-width: 68ch`, `--ink-55` |
 | `.retour` | Lien de retour vers la page mère, mono capitales, souligné au survol |
 | `.section-head` | Intitulé de section + compteur, filet de bord à bord animé au défilement |
+| `.section-head.grande` | Variante haute : intitulé en display `clamp(28px, 3vw, 40px)`. À 11px un en-tête se lit comme une étiquette et non comme un titre de chapitre — sur une page longue et structurée le squelette devient invisible. C'est le **niveau typographique intermédiaire** entre le titre de page et le corps. Utilisée sur `/clouddevops` |
+| `.section-num` | Le numéro de chapitre (`01`, `02`…) placé avant l'intitulé. Toujours dans un élément non italique |
 | `.colophon` | Bloc de contact de fin de page — voir le composant `Colophon.astro` |
 
 ### Contenu

@@ -76,16 +76,20 @@ body {
    importe cette feuille : la nav se comporte donc pareil sur les 16 pages.
    L'opacite plutot qu'une couleur fixe, pour que les crochets restent en
    retrait quelle que soit la couleur du lien selon la page. */
-.site-nav a::before {
+.site-nav a::before,
+.nav-home::before {
   content: "[ ";
   opacity: 0.55;
 }
-.site-nav a::after {
+.site-nav a::after,
+.nav-home::after {
   content: " ]";
   opacity: 0.55;
 }
 .site-nav a[aria-current="page"]::before,
-.site-nav a[aria-current="page"]::after {
+.site-nav a[aria-current="page"]::after,
+.nav-home[aria-current="page"]::before,
+.nav-home[aria-current="page"]::after {
   content: none;
 }
 .site-nav a[aria-current="page"],
