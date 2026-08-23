@@ -2,6 +2,14 @@
 import "../styles/global.css";
 import Layout from "../layouts/header.astro";
 import Colophon from "../components/Colophon.astro";
+import { getImage } from "astro:assets";
+import logoAzure from "../assets/devops/azure.png";
+import logoTerraform from "../assets/devops/terraform.png";
+import logoKube from "../assets/devops/kube.png";
+import logoDocker from "../assets/devops/docker.png";
+import logoGit from "../assets/devops/git.png";
+import logoAdo from "../assets/devops/ado.png";
+import logoVscode from "../assets/devops/vscode.png";
 
 const profile = {
   title: "Cloud DevOps",
@@ -147,18 +155,24 @@ const missions = [
   },
 ];
 
-// L'orbite des outils : rayon, duree d'un tour, et phase de depart pour les
-// repartir. Les orbites lointaines tournent plus lentement, comme les planetes
-// — c'est ce qui rend le mouvement calme plutot que decoratif.
-const outils = [
-  { n: "azure", r: 150, t: 96, p: 0 },
-  { n: "terraform", r: 150, t: 96, p: 0.34 },
-  { n: "kube", r: 150, t: 96, p: 0.67 },
-  { n: "docker", r: 106, t: 68, p: 0.12 },
-  { n: "git", r: 106, t: 68, p: 0.62 },
-  { n: "ado", r: 62, t: 44, p: 0.3 },
-  { n: "vscode", r: 62, t: 44, p: 0.8 },
+// Les logos de la pile technique. Ils passent par astro:assets : sortis en WebP
+// de 256px au lieu des PNG d'origine, ou azure.png pesait a lui seul 698 Ko pour
+// 1,1 Mo au total. 256px suffit largement, le morphing echantillonne a ~202px.
+const brut = [
+  { src: logoAzure, nom: "Azure" },
+  { src: logoTerraform, nom: "Terraform" },
+  { src: logoKube, nom: "Kubernetes" },
+  { src: logoDocker, nom: "Docker" },
+  { src: logoGit, nom: "GitHub" },
+  { src: logoAdo, nom: "Azure DevOps" },
+  { src: logoVscode, nom: "VS Code" },
 ];
+const outils = await Promise.all(
+  brut.map(async (o) => ({
+    nom: o.nom,
+    src: (await getImage({ src: o.src, width: 256, format: "webp" })).src,
+  }))
+);
 
 const other = {
   languages: [{ k: "Anglais", v: "Courant (TOEIC 830)" }],
@@ -175,47 +189,30 @@ const other = {
   mainClass="page editorial"
 >
   <section class="tete-page">
-    <h1 class="titre-page" data-reveal data-groupe="tete">{profile.title}</h1>
-  </section>
-
-  <section class="entete">
-    <div class="entete-texte">
+    <div class="tete-texte">
+      <h1 class="titre-page" data-reveal data-groupe="tete">{profile.title}</h1>
       <div class="prose" data-reveal data-groupe="tete">
         <p>{profile.subtitle}</p>
       </div>
-
-      <div class="reperes" data-reveal data-groupe="tete">
-        {
-          profile.stats.map((s) => (
-            <div class="repere">
-              <span class="repere-k">{s.k}</span>
-              <span class="repere-v">{s.v}</span>
-            </div>
-          ))
-        }
-      </div>
     </div>
 
-    <figure class="orbite-bloc" data-reveal data-groupe="tete">
-      <figcaption>Outils · {outils.length}</figcaption>
-      <div class="orbite-scene" aria-hidden="true">
-        <svg class="orbite-pistes" viewBox="0 0 320 320" focusable="false">
-          <circle cx="160" cy="160" r="62" />
-          <circle cx="160" cy="160" r="106" />
-          <circle cx="160" cy="160" r="150" />
-        </svg>
-        {
-          outils.map((o) => (
-            <span class="orbite" style={`--r:${o.r}px; --t:${o.t}s; --p:${o.p}`}>
-              <span class="satellite">
-                <img src={"/devops_images/" + o.n + ".png"} alt="" loading="lazy" decoding="async" />
-              </span>
-            </span>
-          ))
-        }
-      </div>
+    <figure class="outils-bloc" data-reveal data-groupe="tete">
+      <figcaption id="outils-nom">Outils &middot; {outils.length}</figcaption>
+      <canvas id="outils-scene" data-outils={JSON.stringify(outils)} aria-hidden="true"
+      ></canvas>
     </figure>
   </section>
+
+  <div class="reperes" data-reveal data-groupe="tete">
+    {
+      profile.stats.map((s) => (
+        <div class="repere">
+          <span class="repere-k">{s.k}</span>
+          <span class="repere-v">{s.v}</span>
+        </div>
+      ))
+    }
+  </div>
 
   <section>
     <div class="section-head grande" data-reveal data-groupe="apport">
@@ -323,94 +320,60 @@ const other = {
   </section>
 
   <Colophon />
+
+  <script>
+    import { morphOutils } from "../scripts/morphOutils.js";
+
+    const toile = document.getElementById("outils-scene");
+    if (toile) {
+      const outils = JSON.parse(toile.dataset.outils);
+      const libelle = document.getElementById("outils-nom");
+      // 240px sous 700px de large : la colonne de droite passe sous le texte.
+      const taille = matchMedia("(max-width: 700px)").matches ? 240 : 326;
+      morphOutils(toile, taille, outils, (nom) => {
+        if (libelle) libelle.textContent = nom;
+      });
+    }
+  </script>
 </Layout>
 
 <style>
-  /* En-tete : la phrase d'intention a gauche, l'orbite des outils a droite.
-     C'est l'en-tete d'un CV — qui je suis, puis avec quoi je travaille. */
-  .entete {
+  /* Le titre et le nuage sur la meme ligne. Avant, le nuage vivait dans une
+     colonne a droite de l'intro : la colonne de gauche s'arretait 180px plus
+     haut que lui, le filet des reperes se coupait a 992px alors que tous les
+     autres filets de la page vont de bord a bord, et il restait un grand vide
+     a droite du titre. Le remonter regle les trois d'un coup. */
+  .tete-page {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 360px;
     gap: var(--pas-6);
     align-items: start;
-    padding: var(--pas-6) var(--edge) 0;
   }
-  .entete-texte > .prose {
-    margin-top: 0;
+  /* Le titre passe sur deux lignes et l'intro le suit dans la meme colonne :
+     sans ca le nuage (326px) surplombait le titre (118px) de 290px de blanc.
+     Les deux colonnes font desormais des hauteurs comparables. */
+  .tete-page .titre-page {
+    max-width: 620px;
   }
-  .entete-texte > .reperes {
+  .tete-texte > .prose {
     margin-top: var(--pas-6);
   }
 
-  /* L'orbite. Les pistes sont un SVG a filets — pas de border-radius, pas
-     d'ombre, pas de lueur : le motif « systeme » tient entierement dans des
-     traits de 1px et la seule couleur vient des logos eux-memes.
-     Chaque satellite est porte par un calque qui tourne ; l'image tourne en
-     sens inverse a la meme vitesse et reste donc droite. Les orbites
-     lointaines sont les plus lentes. */
-  .orbite-bloc {
+  /* Le morphing des logos. Le dessin est fait en canvas par
+     src/scripts/morphOutils.js — voir l'en-tete de ce fichier pour les deux
+     regles a ne pas defaire (rastérisation en couverture de surface, et la
+     forme qui ne devient lisible qu'une fois le pavage exact). */
+  .outils-bloc {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
+    gap: 10px;
     margin: 0;
   }
-  /* La boite se deduit du rayon exterieur plus la moitie d'un logo : a 320px
-     fixes, le satellite le plus lointain depassait de 3px et faisait deborder
-     la page entiere. Les pistes SVG sont dimensionnees separement, a la meme
-     echelle que les rayons, pour que les logos tombent bien dessus. */
-  .orbite-scene {
-    --rmax: 150;
-    --k: 1;
-    --icone: 26px;
-    position: relative;
-    width: calc((var(--rmax) * var(--k) * 1px) * 2 + var(--icone));
-    aspect-ratio: 1;
-  }
-  .orbite-pistes {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: calc(320px * var(--k));
-    height: calc(320px * var(--k));
-    transform: translate(-50%, -50%);
-  }
-  .orbite-pistes circle {
-    fill: none;
-    stroke: var(--rule);
-    stroke-width: 1;
-  }
-  .orbite {
-    position: absolute;
-    inset: 0;
-    animation: tourne var(--t) linear infinite;
-    animation-delay: calc(-1 * var(--t) * var(--p));
-  }
-  .satellite {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) translateX(calc(var(--r) * var(--k)));
-  }
-  .satellite img {
+  #outils-scene {
     display: block;
-    width: var(--icone);
-    height: var(--icone);
-    object-fit: contain;
-    animation: contre var(--t) linear infinite;
-    animation-delay: calc(-1 * var(--t) * var(--p));
   }
-  @keyframes tourne {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @keyframes contre {
-    to {
-      transform: rotate(-360deg);
-    }
-  }
-  .orbite-bloc figcaption {
+  .outils-bloc figcaption {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.09em;
@@ -418,26 +381,16 @@ const other = {
     color: var(--ink-55);
   }
 
-  /* Mouvement arrete : les satellites doivent garder leur position de depart,
-     sinon l'animation figee les empile tous au meme point. */
-  @media (prefers-reduced-motion: reduce) {
-    .orbite {
-      animation: none;
-      transform: rotate(calc(var(--p) * 360deg));
-    }
-    .satellite img {
-      animation: none;
-      transform: rotate(calc(var(--p) * -360deg));
-    }
-  }
-
-  /* Trois colonnes egales : la mesure du rail deformait la repartition. */
+  /* Trois colonnes egales, et le filet court de bord a bord : il est porte par
+     un element pleine largeur dont le rembourrage cale le contenu sur --edge,
+     exactement comme un en-tete de section. */
   .reperes {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--pas-6);
+    margin-top: var(--pas-6);
+    padding: 12px var(--edge) 0;
     border-top: 1px solid var(--ink);
-    padding-top: 12px;
   }
   .repere {
     display: flex;
@@ -658,11 +611,9 @@ const other = {
     }
   }
   @media (max-width: 980px) {
-    .entete {
+    .tete-page {
       grid-template-columns: minmax(0, 1fr);
-    }
-    .orbite-bloc {
-      align-items: flex-start;
+      gap: var(--pas-3);
     }
   }
   /* Le rail de 260px ne tient plus sous 800px : avec la gouttiere il ne laissait
@@ -680,10 +631,6 @@ const other = {
     }
   }
   @media (max-width: 700px) {
-    .orbite-scene {
-      --k: 0.72;
-      --icone: 22px;
-    }
     .reperes {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
