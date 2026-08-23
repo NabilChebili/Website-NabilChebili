@@ -180,11 +180,14 @@ const other = {
       }
     </div>
     <div class="pile" data-reveal data-groupe="tete">
-      {
-        ["azure", "terraform", "kube", "docker", "git", "ado", "vscode"].map((n) => (
-          <img src={"/devops_images/" + n + ".png"} alt="" loading="lazy" decoding="async" />
-        ))
-      }
+      <span class="rail-titre">Outils</span>
+      <span class="pile-marques">
+        {
+          ["azure", "terraform", "kube", "docker", "git", "ado", "vscode"].map((n) => (
+            <img src={"/devops_images/" + n + ".png"} alt="" loading="lazy" decoding="async" />
+          ))
+        }
+      </span>
     </div>
   </section>
 
@@ -232,9 +235,12 @@ const other = {
             <div class="mission-meta">
               <span class="mission-periode">{m.period}</span>
               <span class="mission-client">{m.client}</span>
-              {m.clientLogo ? (
-                <img class="mission-logo" src={m.clientLogo} alt={"Logo " + m.client} loading="lazy" />
-              ) : null}
+              <span class="rail-titre">Stack</span>
+              <ul class="rail-liste">
+                {m.stack.map((t) => (
+                  <li>{t}</li>
+                ))}
+              </ul>
             </div>
             <div class="mission-corps">
               <h3>{m.role}</h3>
@@ -242,11 +248,6 @@ const other = {
               <ul class="puces">
                 {m.bullets.map((b) => (
                   <li>{b}</li>
-                ))}
-              </ul>
-              <ul class="etiquettes" aria-label="Stack">
-                {m.stack.map((t) => (
-                  <li>{t}</li>
                 ))}
               </ul>
             </div>
@@ -276,6 +277,7 @@ const other = {
   <section>
     <div class="section-head" data-reveal data-groupe="reperes">
       <span>Quelques repères</span>
+      <span>({other.languages.length + other.notes.length})</span>
     </div>
     <div class="apport">
       <ul class="puces large" data-reveal data-groupe="reperes">
@@ -305,8 +307,8 @@ const other = {
 
   .reperes {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
+    grid-template-columns: 260px minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--pas-6);
     border-top: 1px solid var(--ink);
     padding-top: 12px;
   }
@@ -331,14 +333,43 @@ const other = {
     color: var(--ink);
   }
 
+  /* ------------------------------------------------------------- le rail ---
+     Une seule mesure de colonne de gauche, 260px, partagee par la pile
+     technique, les missions et les certifications : les trois sections
+     s'alignent verticalement et la marge de droite devient constante. */
+  .rail-titre {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .rail-liste {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+
   .pile {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: var(--pas-6);
+    align-items: center;
+    margin-top: var(--pas-3);
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--rule);
+  }
+  .pile-marques {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 26px;
-    margin-top: var(--pas-3);
-    padding-top: var(--pas-3);
-    border-top: 1px solid var(--rule);
   }
   /* Chaque logo occupe le meme emplacement : a hauteur egale, des proportions
      tres differentes donnaient des presences optiques inegales. `contain` garde
@@ -409,14 +440,20 @@ const other = {
     padding: var(--pas-3) 0 var(--pas-6);
     border-top: 1px solid var(--rule);
   }
-  .mission:first-child {
-    border-top-color: var(--ink);
+  /* La premiere entree n'a pas de filet : celui de l'en-tete de section est a
+     25px au-dessus, les deux se lisaient comme un doublon. */
+  .mission:first-of-type,
+  .certif:first-of-type {
+    border-top: 0;
   }
   .mission-meta {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
+  }
+  .mission-meta .rail-titre {
+    margin-top: var(--pas-3);
   }
   .mission-periode {
     font-size: 11px;
@@ -431,17 +468,6 @@ const other = {
     font-weight: 800;
     line-height: 1.05;
     text-transform: uppercase;
-  }
-  /* Emplacement fixe : a hauteur egale, un logotype large comme ARDIAN
-     atteignait 165px et ecrasait le nom juste au-dessus, tandis qu'une marque
-     carree restait minuscule. Le nom reste le titre, le logo n'est qu'une
-     marque secondaire. */
-  .mission-logo {
-    height: 18px;
-    width: 78px;
-    object-fit: contain;
-    object-position: left center;
-    margin-top: 8px;
   }
   .mission-corps h3 {
     margin: 0 0 8px;
@@ -476,17 +502,13 @@ const other = {
     font-weight: 700;
   }
 
-  .certifs {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 20px;
-  }
   .certif {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    border-top: 1px solid var(--ink);
-    padding-top: 12px;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: var(--pas-6);
+    align-items: baseline;
+    padding: 14px 0;
+    border-top: 1px solid var(--rule);
   }
   .certif-nom {
     font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
@@ -506,10 +528,23 @@ const other = {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+  /* Le rail de 260px ne tient plus sous 800px : avec la gouttiere il ne laissait
+     que 42px au libelle d'une certification, qui en reclame 117 — d'ou un
+     debordement horizontal de 55px sur la page. Les trois blocs du rail
+     s'empilent. */
   @media (max-width: 800px) {
-    .mission {
+    .mission,
+    .certif,
+    .pile {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
+    }
+    .certif {
+      gap: 4px;
+    }
+    .pile {
+      gap: 12px;
+      align-items: start;
     }
   }
   @media (max-width: 700px) {
