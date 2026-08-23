@@ -159,17 +159,18 @@ const missions = [
 // de 256px au lieu des PNG d'origine, ou azure.png pesait a lui seul 698 Ko pour
 // 1,1 Mo au total. 256px suffit largement, le morphing echantillonne a ~202px.
 const brut = [
-  { src: logoAzure, nom: "Azure" },
-  { src: logoTerraform, nom: "Terraform" },
-  { src: logoKube, nom: "Kubernetes" },
-  { src: logoDocker, nom: "Docker" },
-  { src: logoGit, nom: "GitHub" },
-  { src: logoAdo, nom: "Azure DevOps" },
-  { src: logoVscode, nom: "VS Code" },
+  { src: logoAzure, nom: "Azure", role: "Cloud" },
+  { src: logoTerraform, nom: "Terraform", role: "Infra as code" },
+  { src: logoKube, nom: "Kubernetes", role: "Orchestration" },
+  { src: logoDocker, nom: "Docker", role: "Conteneurs" },
+  { src: logoGit, nom: "GitHub", role: "Sources" },
+  { src: logoAdo, nom: "Azure DevOps", role: "CI / CD" },
+  { src: logoVscode, nom: "VS Code", role: "Poste de travail" },
 ];
 const outils = await Promise.all(
   brut.map(async (o) => ({
     nom: o.nom,
+    role: o.role,
     src: (await getImage({ src: o.src, width: 256, format: "webp" })).src,
   }))
 );
@@ -188,19 +189,24 @@ const other = {
   description={profile.subtitle}
   mainClass="page editorial"
 >
-  <section class="tete-page">
-    <div class="tete-texte">
-      <h1 class="titre-page" data-reveal data-groupe="tete">{profile.title}</h1>
-      <div class="prose" data-reveal data-groupe="tete">
-        <p>{profile.subtitle}</p>
-      </div>
+  {/* Ouverture au rythme de celle de l'accueil : de petits faits d'abord, qui
+      donnent envie de lire, puis le titre bord a bord qui accroche l'oeil, puis
+      une seule ligne — la phrase d'intention a gauche, le lien vers la suite a
+      droite. Avant, la page ouvrait directement sur un mur d'information. */}
+  <section class="ouverture">
+    <div class="meta-row" data-reveal data-groupe="tete">
+      <span>
+        <b>{missions.length}</b> missions &middot; <b>{certifications.length}</b> certifications
+      </span>
+      <span>Ingénieur Cloud &amp; DevOps &middot; <b>+4</b> ans</span>
     </div>
 
-    <figure class="outils-bloc" data-reveal data-groupe="tete">
-      <figcaption id="outils-nom">Outils &middot; {outils.length}</figcaption>
-      <canvas id="outils-scene" data-outils={JSON.stringify(outils)} aria-hidden="true"
-      ></canvas>
-    </figure>
+    <h1 class="titre-geant" data-reveal data-groupe="tete">{profile.title}</h1>
+
+    <div class="ouverture-pied" data-reveal data-groupe="tete">
+      <p>{profile.subtitle}</p>
+      <a class="jump" href="#missions">Voir les missions &#8595;</a>
+    </div>
   </section>
 
   <div class="reperes" data-reveal data-groupe="tete">
@@ -246,9 +252,35 @@ const other = {
     </div>
   </section>
 
+  {/* L'animation a maintenant son chapitre, en face de la liste des outils dont
+      l'element courant s'allume avec elle. Elle n'illustre plus rien de vague
+      dans un coin : elle EST le contenu de ce chapitre, et elle sert a le lire. */}
+  <section id="outils">
+    <div class="section-head grande" data-reveal data-groupe="outils">
+      <span><i class="section-num">02</i> Outils</span>
+      <span>({outils.length})</span>
+    </div>
+    <div class="outils" data-reveal data-groupe="outils">
+      <figure class="outils-bloc">
+        <canvas id="outils-scene" data-outils={JSON.stringify(outils)} aria-hidden="true"
+        ></canvas>
+      </figure>
+      <ul class="outils-liste" id="outils-liste">
+        {
+          outils.map((o) => (
+            <li data-nom={o.nom}>
+              <span>{o.nom}</span>
+              <span class="outils-role">{o.role}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
   <section id="missions">
     <div class="section-head grande" data-reveal data-groupe="missions">
-      <span><i class="section-num">02</i> Missions</span>
+      <span><i class="section-num">03</i> Missions</span>
       <span>({missions.length})</span>
     </div>
     <div class="missions">
@@ -256,11 +288,12 @@ const other = {
         missions.map((m) => (
           <article class="mission" data-reveal data-groupe="missions">
             <div class="mission-meta">
-              <span class="mission-periode">{m.period}</span>
+              <span class="mission-periode">{m.period.replace(" (mission active)", "")}</span>
               <span class="mission-client">{m.client}</span>
               {m.clientLogo ? (
                 <img class="mission-logo" src={m.clientLogo} alt={"Logo " + m.client} loading="lazy" />
               ) : null}
+              {m.period.includes("active") ? <span class="mission-encours">En cours</span> : null}
               <span class="rail-titre">Stack</span>
               <ul class="rail-liste">
                 {m.stack.map((t) => (
@@ -285,7 +318,7 @@ const other = {
 
   <section>
     <div class="section-head grande" data-reveal data-groupe="certifs">
-      <span><i class="section-num">03</i> Certifications</span>
+      <span><i class="section-num">04</i> Certifications</span>
       <span>({certifications.length})</span>
     </div>
     <div class="certifs">
@@ -302,20 +335,21 @@ const other = {
 
   <section>
     <div class="section-head grande" data-reveal data-groupe="reperes">
-      <span><i class="section-num">04</i> Quelques repères</span>
+      <span><i class="section-num">05</i> Quelques repères</span>
       <span>({other.languages.length + other.notes.length})</span>
     </div>
-    <div class="apport">
-      <ul class="puces large" data-reveal data-groupe="reperes">
-        {
-          other.languages.map((l) => (
-            <li>
-              <strong>{l.k} :</strong> {l.v}
-            </li>
-          ))
-        }
-        {other.notes.map((n) => <li>{n}</li>)}
-      </ul>
+    <div class="certifs">
+      {
+        other.languages.map((l) => (
+          <div class="certif" data-reveal data-groupe="reperes">
+            <span class="certif-nom">{l.k}</span>
+            <span class="certif-detail">{l.v}</span>
+          </div>
+        ))
+      }
+      <div class="notes" data-reveal data-groupe="reperes">
+        {other.notes.map((n) => <p>{n}</p>)}
+      </div>
     </div>
   </section>
 
@@ -327,29 +361,34 @@ const other = {
     const toile = document.getElementById("outils-scene");
     if (toile) {
       const outils = JSON.parse(toile.dataset.outils);
-      const libelle = document.getElementById("outils-nom");
+      const liste = document.getElementById("outils-liste");
       const bloc = toile.parentElement;
 
-      // La toile epouse la largeur de sa PISTE de grille, plafonnee a 400px :
-      // au-dela, la surface a composer chaque image faisait chuter la cadence
-      // de 60 a 34 images/s.
-      // On lit la piste resolue et non la boite du bloc : celle-ci depend de la
-      // toile qu'elle contient, la mesure etait donc circulaire et donnait 459px
-      // pour une piste de 368 — la toile empietait alors sur le texte.
+      // L'element courant de la liste s'allume avec l'animation : c'est ce qui
+      // relie le morphing au contenu au lieu d'en faire un ornement.
+      const allumer = (nom) => {
+        if (!liste) return;
+        for (const li of liste.children) {
+          li.classList.toggle("actif", li.dataset.nom === nom);
+        }
+      };
+
+      // La toile epouse la largeur de sa piste de grille, plafonnee a 400px : la
+      // composition est en O(L²) et au-dela la cadence tombait de 60 a 34
+      // images/s. On lit la piste resolue et non la boite du bloc, dont la
+      // largeur depend de la toile qu'elle contient — la mesure serait circulaire.
       const calculer = () => {
-        const grille = bloc.parentElement;
-        const pistes = getComputedStyle(grille).gridTemplateColumns.split(" ").map(parseFloat);
-        const dispo = pistes.length > 1 ? pistes[pistes.length - 1] : pistes[0];
-        return Math.round(Math.max(240, Math.min(400, dispo)));
+        // Depuis le viewport, PAS depuis la piste de grille : celle-ci est en
+        // max-content, donc sa largeur est celle de la toile qu'elle contient.
+        // La mesure serait circulaire et la toile resterait a sa taille par
+        // defaut de 300px.
+        const l = document.documentElement.clientWidth;
+        return Math.round(Math.max(240, Math.min(400, l * 0.28)));
       };
 
       let taille = calculer();
-      let arreter = await morphOutils(toile, taille, outils, (nom) => {
-        if (libelle) libelle.textContent = nom;
-      });
+      let arreter = await morphOutils(toile, taille, outils, allumer);
 
-      // Reconstruction seulement si la taille change vraiment : rechantillonner
-      // les sept logos coute une cinquantaine de millisecondes.
       let minuteur = 0;
       addEventListener("resize", () => {
         clearTimeout(minuteur);
@@ -358,9 +397,7 @@ const other = {
           if (Math.abs(t - taille) < 8) return;
           taille = t;
           arreter && arreter();
-          arreter = await morphOutils(toile, taille, outils, (nom) => {
-            if (libelle) libelle.textContent = nom;
-          });
+          arreter = await morphOutils(toile, taille, outils, allumer);
         }, 250);
       });
     }
@@ -368,80 +405,58 @@ const other = {
 </Layout>
 
 <style>
-  /* Le titre et le nuage sur la meme ligne. Avant, le nuage vivait dans une
-     colonne a droite de l'intro : la colonne de gauche s'arretait 180px plus
-     haut que lui, le filet des reperes se coupait a 992px alors que tous les
-     autres filets de la page vont de bord a bord, et il restait un grand vide
-     a droite du titre. Le remonter regle les trois d'un coup. */
-  /* Le bloc de texte prend sa largeur naturelle, et le logo se CENTRE dans le
-     reliquat. Avec un logo epingle au bord droit, tout le reliquat s'accumulait
-     entre les deux : le vide central passait de 125px a 938px avec la largeur
-     de la fenetre pendant que la marge droite restait a 34px. Ici l'air est
-     rigoureusement egal a gauche et a droite du logo, a toutes les largeurs.
-     Gouttiere de colonne a zero : c'est le centrage qui doit produire les deux
-     ecarts, une gouttiere s'ajouterait d'un seul cote. */
-  .tete-page {
-    display: grid;
-    grid-template-columns: max-content minmax(0, 1fr);
-    column-gap: 0;
-    row-gap: var(--pas-6);
-    align-items: start;
+  /* ------------------------------------------------------------ ouverture ---
+     Reprend le registre de l'accueil : le titre bord a bord est l'unique moment
+     display de la page, sa taille pilotee par la largeur du viewport et non par
+     l'echelle de pas. Les regles sont locales a cette page : celles de l'accueil
+     vivent dans home-editorial.css et n'ont pas a etre partagees pour l'instant. */
+  .ouverture {
+    overflow: clip;
+    padding: 8px var(--edge) 0;
   }
-  /* Le bloc occupe toute sa piste et la toile se centre dedans : sa taille est
-     calculee au chargement depuis la largeur reelle de cette piste, de sorte
-     que l'animation grandisse avec l'espace disponible au lieu de rester a une
-     taille fixe. Sa legende partage son axe. */
-  .tete-page > .outils-bloc {
-    width: 100%;
-    align-items: center;
-  }
-  /* Le titre passe sur deux lignes et l'intro le suit dans la meme colonne :
-     sans ca le nuage (326px) surplombait le titre (118px) de 290px de blanc.
-     Les deux colonnes font desormais des hauteurs comparables. */
-  .tete-texte > .prose {
-    margin-top: var(--pas-6);
-  }
-
-  /* `max-width: min-content` vaut la largeur du mot le plus long : le titre se
-     replie donc toujours en CLOUD / DEVOPS, a toutes les largeurs. Sans valeur
-     en dur — pas de seuil a maintenir si le corps du titre change.
-     La piste, elle, reste en max-content : le plafond de 68 caracteres de
-     l'intro borne sa contribution, donc la piste vaut la largeur de l'intro et
-     c'est bien ELLE qui definit le bord droit du bloc. Le reliquat se mesure
-     donc a partir d'un bord reel, ce qui garde l'air egal autour du logo. */
-  .tete-page .titre-page {
-    max-width: min-content;
-  }
-
-  /* Le morphing des logos. Le dessin est fait en canvas par
-     src/scripts/morphOutils.js — voir l'en-tete de ce fichier pour les deux
-     regles a ne pas defaire. */
-  .outils-bloc {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    margin: 0;
-  }
-  #outils-scene {
-    display: block;
-  }
-  .outils-bloc figcaption {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.09em;
+  .titre-geant {
+    overflow: clip;
+    margin: 26px 0 0;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    /* Le 18,7vw de l'accueil coupait ce titre : « CLOUD DEVOPS » fait 5,356
+       fois son corps en largeur contre 4,927 pour « NABIL CHEBILI » — des O, U
+       et D contre des I et L. A 1440px, 82px depassaient et le S final etait
+       rogne. On divise donc la largeur DISPONIBLE (viewport moins les deux
+       retraits de bord) par ce rapport mesure : le titre tient exactement, a
+       toute largeur. 5,4 plutot que 5,356 pour garder un peu de jeu. */
+    font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / 5.4), 420px);
+    font-weight: 800;
+    line-height: 0.82;
+    letter-spacing: -0.02em;
     text-transform: uppercase;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .ouverture-pied {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 32px;
+    margin-top: 22px;
+    padding-bottom: 4px;
+  }
+  .ouverture-pied p {
+    margin: 0;
+    max-width: 52ch;
+    font-size: 15px;
+    line-height: 1.5;
     color: var(--ink-55);
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
   }
 
-  /* Trois colonnes egales, et le filet court de bord a bord : il est porte par
-     un element pleine largeur dont le rembourrage cale le contenu sur --edge,
-     exactement comme un en-tete de section. */
+  /* Trois colonnes egales, filet de bord a bord : il est porte par un element
+     pleine largeur dont le rembourrage cale le contenu sur --edge, exactement
+     comme un en-tete de section. */
   .reperes {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--pas-6);
-    margin-top: var(--pas-6);
+    margin-top: var(--pas-8);
     padding: 12px var(--edge) 0;
     border-top: 1px solid var(--ink);
   }
@@ -466,36 +481,80 @@ const other = {
     color: var(--ink);
   }
 
-  /* ------------------------------------------------------------- le rail ---
-     Une seule mesure de colonne de gauche, 260px, partagee par la pile
-     technique, les missions et les certifications : les trois sections
-     s'alignent verticalement et la marge de droite devient constante. */
-  .rail-titre {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--ink-55);
+  /* --------------------------------------------------------------- outils ---
+     La toile a gauche, calee sur le bord comme tout le reste de la page, et la
+     liste en face. L'element courant s'allume : le morphing sert alors a lire
+     la liste au lieu de decorer un coin. */
+  .outils {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: var(--pas-6);
+    align-items: center;
+    padding: var(--pas-3) var(--edge) 0;
   }
-  .rail-liste {
-    margin: 8px 0 0;
+  .outils-bloc {
+    margin: 0;
+  }
+  #outils-scene {
+    display: block;
+  }
+  .outils-liste {
+    margin: 0;
     padding: 0;
     list-style: none;
-    font-size: 11px;
+  }
+  .outils-liste li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 7px 0;
+    border-top: 1px solid var(--rule);
+    font-size: 13px;
     font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+    transition: color var(--duree) var(--sortie),
+      border-top-color var(--duree) var(--sortie);
+  }
+  .outils-liste li:first-child {
+    border-top-color: var(--ink);
+  }
+  .outils-liste li.actif {
+    color: var(--ink);
+    border-top-color: var(--ink);
+  }
+  .outils-role {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    line-height: 1.9;
+    /* Pas --rule : #c9c9c4 sur le papier ne donne que 1,51:1 de contraste, et
+       ce libelle fait 10px. #6e6e68 monte a 4,67:1 tout en restant plus clair
+       que --ink-55, donc la hierarchie nom / role tient sans sacrifier la
+       lisibilite. */
+    color: #6e6e68;
+    transition: color var(--duree) var(--sortie);
+  }
+  .outils-liste li.actif .outils-role {
     color: var(--ink);
   }
 
+  /* La barre du haut est fixe sur 64px : sans cette marge, une ancre depose le
+     titre du chapitre DERRIERE elle. Le lien « Voir les missions » atterrissait
+     sur un « 03 Missions » a moitie masque. */
+  #outils,
+  #missions {
+    scroll-margin-top: 88px;
+  }
 
+  /* ------------------------------------------------------- ce que j'apporte --- */
   .apport,
   .missions,
   .certifs {
     padding: var(--pas-3) var(--edge) 0;
   }
-
   .colonnes {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -521,7 +580,7 @@ const other = {
     color: var(--ink-55);
   }
 
-  /* Étiquettes : un filet, aucun rayon, aucun fond. */
+  /* Etiquettes : un filet, aucun rayon, aucun fond. */
   .etiquettes {
     display: flex;
     flex-wrap: wrap;
@@ -540,17 +599,41 @@ const other = {
     color: var(--ink-55);
   }
 
-  /* Missions : la période et le client à gauche, le détail à droite, un filet
-     par entrée. C’est la mise en page d’un CV imprimé. */
+  /* ------------------------------------------------------------- le rail ---
+     Une seule mesure de colonne de gauche, 260px, partagee par les missions et
+     les certifications : les deux sections s'alignent verticalement et la marge
+     de droite devient constante. */
+  .rail-titre {
+    margin-top: var(--pas-3);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .rail-liste {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+
+  /* Missions : la periode et le client a gauche, le detail a droite, un filet
+     par entree. C'est la mise en page d'un CV imprime. */
   .mission {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
     gap: var(--pas-6);
-    padding: var(--pas-3) 0 var(--pas-6);
+    padding: var(--pas-3) 0 var(--pas-8);
     border-top: 1px solid var(--rule);
   }
-  /* La premiere entree n'a pas de filet : celui de l'en-tete de section est a
-     25px au-dessus, les deux se lisaient comme un doublon. */
+  /* La premiere entree n'a pas de filet : celui de l'en-tete de section est
+     juste au-dessus, les deux se lisaient comme un doublon. */
   .mission:first-of-type,
   .certif:first-of-type {
     border-top: 0;
@@ -560,9 +643,6 @@ const other = {
     flex-direction: column;
     align-items: flex-start;
     gap: 6px;
-  }
-  .mission-meta .rail-titre {
-    margin-top: var(--pas-3);
   }
   .mission-periode {
     font-size: 11px;
@@ -578,11 +658,29 @@ const other = {
     line-height: 1.05;
     text-transform: uppercase;
   }
+  /* Un seul point d'accroche dans une liste de sept blocs identiques : l'oeil a
+     besoin d'un endroit ou se poser. */
+  .mission-encours {
+    margin-top: 4px;
+    padding: 3px 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  /* Boite bornee plutot que fente fixe. Un creneau de 84x20 en `contain`
+     ramenait le logo RTE, presque carre, a 20px de cote : il se lisait comme un
+     point. En bornant les deux dimensions et en laissant le ratio naturel, un
+     logo large est plafonne en largeur et un logo carre garde sa hauteur — les
+     deux restent lisibles sans qu'aucun ecrase l'autre. */
   .mission-logo {
-    height: 20px;
-    width: 84px;
-    object-fit: contain;
-    object-position: left center;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 108px;
+    max-height: 30px;
     margin-top: 10px;
   }
   :global(.reveal-ok) .mission-logo {
@@ -596,14 +694,6 @@ const other = {
     opacity: 1;
     transform: none;
   }
-  @media (prefers-reduced-motion: reduce) {
-    :global(.reveal-ok) .mission-logo {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-  }
-
   .mission-corps h3 {
     margin: 0 0 8px;
     font-size: 15px;
@@ -617,7 +707,6 @@ const other = {
     line-height: 1.45;
     color: var(--ink-55);
   }
-
   .puces {
     margin: 0 0 14px;
     padding-left: 18px;
@@ -637,6 +726,8 @@ const other = {
     font-weight: 700;
   }
 
+  /* Certifications : une liste sur le rail, pas une grille. Quatre codes courts
+     et un libelle long ne tiennent pas dans une grille reguliere. */
   .certif {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
@@ -658,23 +749,51 @@ const other = {
     color: var(--ink-55);
   }
 
+  /* Le chapitre 05 reprend le rail des certifications juste au-dessus : meme
+     colonne de 260px, meme filet, meme depart a --edge. Avant, c'etait le seul
+     bloc a puces de la page, et son retrait de 18px le sortait du guide gauche
+     que tous les autres blocs respectent. */
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pas-6);
+    /* Le bas : l'air entre chapitres vient de `.section-head.grande
+       { margin-top }`. Le dernier bloc n'est suivi d'aucun en-tete mais du
+       colophon, qui n'apporte pas cette marge : ses phrases arrivaient a 15px
+       du filet, contre 100px partout ailleurs. */
+    padding: 14px 0 var(--pas-8);
+    border-top: 1px solid var(--rule);
+  }
+  .notes p {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-55);
+  }
+
+  /* Plus d'air entre les chapitres : la page donnait l'impression d'etre
+     compactee, sans respiration entre les blocs d'information. */
+  .section-head.grande {
+    margin-top: var(--pas-10);
+  }
+
+  @media (max-width: 1100px) {
+    .outils {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      gap: var(--pas-3);
+    }
+    .outils-liste {
+      width: 100%;
+      max-width: 400px;
+    }
+  }
   @media (max-width: 1100px) {
     .colonnes {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-  /* Sous 1080px, le reliquat devient plus etroit que le logo (326px) : il
-     deborderait. On empile, et le logo se cale a gauche comme le reste. */
-  @media (max-width: 1080px) {
-    .tete-page {
-      grid-template-columns: minmax(0, 1fr);
-      row-gap: var(--pas-3);
-    }
-  }
-  /* Le rail de 260px ne tient plus sous 800px : avec la gouttiere il ne laissait
-     que 42px au libelle d'une certification, qui en reclame 117 — d'ou un
-     debordement horizontal de 55px sur la page. Les trois blocs du rail
-     s'empilent. */
   @media (max-width: 800px) {
     .mission,
     .certif {
@@ -689,10 +808,23 @@ const other = {
     .reperes {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
+      margin-top: var(--pas-6);
     }
     .colonnes {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
+    }
+    .notes {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--pas-3);
+    }
+    .ouverture-pied {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .section-head.grande {
+      margin-top: var(--pas-8);
     }
   }
 </style>
