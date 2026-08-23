@@ -367,6 +367,17 @@ const other = {
     margin-top: var(--pas-6);
   }
 
+  /* `max-width: min-content` vaut la largeur du mot le plus long : le titre se
+     replie donc toujours en CLOUD / DEVOPS, a toutes les largeurs. Sans valeur
+     en dur — pas de seuil a maintenir si le corps du titre change.
+     La piste, elle, reste en max-content : le plafond de 68 caracteres de
+     l'intro borne sa contribution, donc la piste vaut la largeur de l'intro et
+     c'est bien ELLE qui definit le bord droit du bloc. Le reliquat se mesure
+     donc a partir d'un bord reel, ce qui garde l'air egal autour du logo. */
+  .tete-page .titre-page {
+    max-width: min-content;
+  }
+
   /* Le morphing des logos. Le dessin est fait en canvas par
      src/scripts/morphOutils.js — voir l'en-tete de ce fichier pour les deux
      regles a ne pas defaire. */
@@ -624,8 +635,12 @@ const other = {
       grid-template-columns: minmax(0, 1fr);
       row-gap: var(--pas-3);
     }
+    /* En pile, le logo est centre : cale a gauche, une toile de 240px dans une
+       zone de 350 laissait 110px de vide a droite et paraissait de travers.
+       Sa legende se centre avec lui pour qu'ils partagent le meme axe. */
     .tete-page > .outils-bloc {
-      justify-self: start;
+      justify-self: center;
+      align-items: center;
     }
   }
   /* Le rail de 260px ne tient plus sous 800px : avec la gouttiere il ne laissait
