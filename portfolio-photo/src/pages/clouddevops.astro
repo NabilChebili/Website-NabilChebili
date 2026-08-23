@@ -449,16 +449,28 @@ const other = {
     font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
   }
 
-  /* Trois colonnes egales, filet de bord a bord : il est porte par un element
-     pleine largeur dont le rembourrage cale le contenu sur --edge, exactement
-     comme un en-tete de section. */
+  /* Les trois reperes, centres en bloc sous un filet qui court de bord a bord.
+     Avant, c'etait une grille de trois colonnes egales : les valeurs ont des
+     largeurs tres inegales (103, 210 et 227px), donc chacune se collait a
+     gauche de son tiers et le bloc s'arretait a 234px du bord droit alors qu'il
+     partait a 40px du gauche. Il avait l'air aligne a gauche sans l'etre.
+
+     En `flex` avec `wrap` plutot qu'en trois colonnes `max-content` : le total
+     des trois valeurs plus les ecarts frole la largeur disponible vers 700px, et
+     un retour a la ligne est toujours preferable a un debordement. Ici c'est
+     structurellement impossible de deborder. */
   .reperes {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--pas-6);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: clamp(28px, 5vw, 80px);
+    row-gap: var(--pas-3);
     margin-top: var(--pas-8);
     padding: 12px var(--edge) 0;
     border-top: 1px solid var(--ink);
+  }
+  .reperes .repere {
+    text-align: center;
   }
   .repere {
     display: flex;
@@ -806,7 +818,8 @@ const other = {
   }
   @media (max-width: 700px) {
     .reperes {
-      grid-template-columns: minmax(0, 1fr);
+      flex-direction: column;
+      align-items: center;
       gap: var(--pas-3);
       margin-top: var(--pas-6);
     }
