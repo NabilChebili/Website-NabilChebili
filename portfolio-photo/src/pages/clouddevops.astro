@@ -328,10 +328,40 @@ const other = {
     if (toile) {
       const outils = JSON.parse(toile.dataset.outils);
       const libelle = document.getElementById("outils-nom");
-      // 240px sous 700px de large : la colonne de droite passe sous le texte.
-      const taille = matchMedia("(max-width: 700px)").matches ? 240 : 326;
-      morphOutils(toile, taille, outils, (nom) => {
+      const bloc = toile.parentElement;
+
+      // La toile epouse la largeur de sa PISTE de grille, plafonnee a 400px :
+      // au-dela, la surface a composer chaque image faisait chuter la cadence
+      // de 60 a 34 images/s.
+      // On lit la piste resolue et non la boite du bloc : celle-ci depend de la
+      // toile qu'elle contient, la mesure etait donc circulaire et donnait 459px
+      // pour une piste de 368 — la toile empietait alors sur le texte.
+      const calculer = () => {
+        const grille = bloc.parentElement;
+        const pistes = getComputedStyle(grille).gridTemplateColumns.split(" ").map(parseFloat);
+        const dispo = pistes.length > 1 ? pistes[pistes.length - 1] : pistes[0];
+        return Math.round(Math.max(240, Math.min(400, dispo)));
+      };
+
+      let taille = calculer();
+      let arreter = await morphOutils(toile, taille, outils, (nom) => {
         if (libelle) libelle.textContent = nom;
+      });
+
+      // Reconstruction seulement si la taille change vraiment : rechantillonner
+      // les sept logos coute une cinquantaine de millisecondes.
+      let minuteur = 0;
+      addEventListener("resize", () => {
+        clearTimeout(minuteur);
+        minuteur = setTimeout(async () => {
+          const t = calculer();
+          if (Math.abs(t - taille) < 8) return;
+          taille = t;
+          arreter && arreter();
+          arreter = await morphOutils(toile, taille, outils, (nom) => {
+            if (libelle) libelle.textContent = nom;
+          });
+        }, 250);
       });
     }
   </script>
@@ -357,8 +387,13 @@ const other = {
     row-gap: var(--pas-6);
     align-items: start;
   }
+  /* Le bloc occupe toute sa piste et la toile se centre dedans : sa taille est
+     calculee au chargement depuis la largeur reelle de cette piste, de sorte
+     que l'animation grandisse avec l'espace disponible au lieu de rester a une
+     taille fixe. Sa legende partage son axe. */
   .tete-page > .outils-bloc {
-    justify-self: center;
+    width: 100%;
+    align-items: center;
   }
   /* Le titre passe sur deux lignes et l'intro le suit dans la meme colonne :
      sans ca le nuage (326px) surplombait le titre (118px) de 290px de blanc.
@@ -634,13 +669,6 @@ const other = {
     .tete-page {
       grid-template-columns: minmax(0, 1fr);
       row-gap: var(--pas-3);
-    }
-    /* En pile, le logo est centre : cale a gauche, une toile de 240px dans une
-       zone de 350 laissait 110px de vide a droite et paraissait de travers.
-       Sa legende se centre avec lui pour qu'ils partagent le meme axe. */
-    .tete-page > .outils-bloc {
-      justify-self: center;
-      align-items: center;
     }
   }
   /* Le rail de 260px ne tient plus sous 800px : avec la gouttiere il ne laissait

@@ -84,7 +84,11 @@ export async function morphOutils(canvas, taille, outils, surNom) {
   const reduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const PAPIER = couleurPapier(canvas);
 
-  const L = Math.round(taille * Math.min(2, devicePixelRatio || 1));
+  // Au-dela de 340px de cote, on plafonne le ratio a 1,5 : la composition est
+  // en O(L²) et une toile de 400px a ratio 2 faisait 640 000 pixels par image,
+  // ce qui faisait tomber la cadence a 34 images/s.
+  const ratioMax = taille > 340 ? 1.5 : 2;
+  const L = Math.round(taille * Math.min(ratioMax, devicePixelRatio || 1));
   const dpr = L / taille;
   canvas.width = L;
   canvas.height = L;
@@ -197,10 +201,10 @@ export async function morphOutils(canvas, taille, outils, surNom) {
   if (reduit) {
     dessine(1);
     surNom && surNom(outils[0].nom);
-    return;
+    return () => {};
   }
 
-  let depart = performance.now(), enPause = false, annonce = false;
+  let depart = performance.now(), enPause = false, annonce = false, id = 0;
   surNom && surNom(outils[0].nom);
   const boucle = (ms) => {
     const dt = ms - depart;
@@ -226,7 +230,10 @@ export async function morphOutils(canvas, taille, outils, surNom) {
         surNom && surNom(outils[vers].nom);
       }
     }
-    requestAnimationFrame(boucle);
+    id = requestAnimationFrame(boucle);
   };
-  requestAnimationFrame(boucle);
+  id = requestAnimationFrame(boucle);
+  // Rendue arretable : la taille de la toile suit sa colonne, donc il faut
+  // pouvoir reconstruire l'animation quand la fenetre change de largeur.
+  return () => cancelAnimationFrame(id);
 }
