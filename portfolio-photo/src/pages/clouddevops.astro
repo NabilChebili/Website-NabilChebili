@@ -352,11 +352,42 @@ const other = {
   /* Le titre passe sur deux lignes et l'intro le suit dans la meme colonne :
      sans ca le nuage (326px) surplombait le titre (118px) de 290px de blanc.
      Les deux colonnes font desormais des hauteurs comparables. */
-  .tete-page .titre-page {
-    max-width: 620px;
-  }
   .tete-texte > .prose {
     margin-top: var(--pas-6);
+  }
+
+  /* Au-dela de 1250px, l'intro remonte ENTRE le titre et le nuage. Mesure du
+     defaut qu'elle corrige : a partir de 1280px le titre passe sur deux lignes
+     donc il rétrécit (425px) pendant que la fenetre s'elargit, et le vide
+     central passait de 125px a 938px alors que la marge droite restait a 34px.
+     Repartir ce vide aurait donne de l'air incoherent ; le remplir avec du
+     contenu rend la rangee pleine a toutes les largeurs.
+     `display: contents` evite de dupliquer le balisage : au-dela du seuil, le
+     titre et l'intro deviennent directement des cases de la grille. */
+  @media (min-width: 1250px) {
+    .tete-page {
+      /* min-content, pas max-content : max-content vaut la largeur du titre
+         SANS retour a la ligne (735px), alors que le titre replie n'en fait que
+         425 — la piste gardait donc 310px de vide interne. min-content vaut la
+         largeur du mot le plus long, donc la piste epouse le titre replie. */
+      grid-template-columns: min-content minmax(0, 1fr) 360px;
+    }
+    .tete-texte {
+      display: contents;
+    }
+    .tete-texte > .prose {
+      margin-top: 0;
+    }
+  }
+
+  /* Au-dela de 1600px l'intro cesse de remplir sa piste : elle est plafonnee a
+     68 caracteres, regle du site. Sans rien faire, tout le reliquat s'accumulait
+     entre elle et le nuage — 398px a 1920px. La centrer dans sa piste repartit
+     ce reliquat a egalite de part et d'autre. */
+  @media (min-width: 1600px) {
+    .tete-texte > .prose {
+      justify-self: center;
+    }
   }
 
   /* Le morphing des logos. Le dessin est fait en canvas par
