@@ -124,7 +124,11 @@ const commentees = vietnam.post.length + indonesie.post.length;
   }
   .titre-geant {
     overflow: clip;
-    margin: 26px 0 0;
+    /* 64px et non 26 : avec un interlignage de 0,82 les lettres DEBORDENT de
+       leur boite. Mesure de texte a texte — la seule qui dise ce que l'oeil
+       voit — les ecarts au bandeau et a l'intro etaient de -6 et -8px,
+       donc le titre chevauchait ses voisins. */
+    margin: 64px 0 0;
     font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
     font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / 8), 300px);
     font-weight: 800;
@@ -139,7 +143,7 @@ const commentees = vietnam.post.length + indonesie.post.length;
     align-items: baseline;
     justify-content: space-between;
     gap: 32px;
-    margin-top: 22px;
+    margin-top: 64px;
     padding-bottom: 4px;
   }
   .ouverture-pied p {
