@@ -115,10 +115,10 @@ const idVideo = (url) =>
 						))
 					}
 				</div>
-			</div>
-			<div class="commandes">
-				<button class="car-btn prev" type="button" aria-label="Précédent">‹</button>
-				<button class="car-btn next" type="button" aria-label="Suivant">›</button>
+				<div class="commandes">
+					<button class="car-btn prev" type="button" aria-label="Précédent">‹</button>
+					<button class="car-btn next" type="button" aria-label="Suivant">›</button>
+				</div>
 			</div>
 			<p class="aide">
 				Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile,
@@ -294,11 +294,28 @@ const idVideo = (url) =>
 	}
 
 	/* Les fleches etaient en blanc sur fond blanc, donc invisibles. Carre a
-	   l'encre, comme les autres commandes du systeme. */
+	   l'encre, comme les autres commandes du systeme.
+
+	   Elles etaient posees SOUS le lecteur, cote a cote a gauche : on ne les
+	   associait pas a la video qu'elles pilotent, et elles ajoutaient une
+	   rangee de 40px sous un bloc deja haut. Elles passent de part et d'autre
+	   du lecteur, a l'aplomb de son centre — la ou la main les cherche.
+	   `.commandes` est desormais dans `.video-carousel`, qui porte deja
+	   `position: relative`. */
 	.commandes {
+		position: absolute;
+		inset: 0;
 		display: flex;
-		gap: 8px;
-		margin: var(--pas-3) 0 0;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 14px;
+		/* Le conteneur ne doit rien intercepter : sans ca, il couvrirait tout le
+		   lecteur et le clic sur la video ne partirait jamais. Seuls les boutons
+		   reprennent les evenements. */
+		pointer-events: none;
+	}
+	.commandes .car-btn {
+		pointer-events: auto;
 	}
 
 	.car-btn {
