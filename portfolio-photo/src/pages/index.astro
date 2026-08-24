@@ -262,11 +262,51 @@ const univers = [
     padding-top: 112px;
   }
 
+  /* Les filets s'arretent AU cadre au lieu de le traverser.
+     C'etait ce qui empechait le viseur de se lire comme un viseur : les filets
+     pleine largeur du systeme courent de 0 a 100% et passaient donc a travers
+     les equerres, de part en part. Un cadre traverse par des traits n'est plus
+     un cadre.
+
+     Le flou avait ete essaye pour la meme intention — marquer un hors-champ —
+     et il ne peut pas fonctionner ici : les bandes de marge sont VIDES. Le
+     contenu s'arrete a 64px, il n'y a rien a flouter entre 0 et 64. Pour que le
+     flou dise quelque chose il faudrait que du texte passe dans le hors-champ,
+     donc qu'une partie du texte soit illisible — un cout qu'un CV ne peut pas
+     payer.
+
+     Seuls les FILETS sont rentres, pas les blocs : rentrer aussi leurs marges
+     decalait les quatre cartes de 64px supplementaires. */
+  :global(main.page.home) .section-head::after,
+  :global(main.page.home) .colophon::before {
+    left: 64px;
+    right: 64px;
+  }
+  :global(main.page.home) .about,
+  :global(main.page.home) .colophon {
+    border-image: linear-gradient(
+        to right,
+        transparent 0 64px,
+        var(--ink) 64px calc(100% - 64px),
+        transparent calc(100% - 64px)
+      )
+      1;
+  }
+
   /* Sous 900px il ne reste plus assez de marge pour loger les equerres sans
      mordre sur le texte : le viseur disparait et la page reprend ses retraits
      normaux. */
   @media (max-width: 900px) {
     .viseur { display: none; }
+    :global(main.page.home) .section-head::after,
+    :global(main.page.home) .colophon::before {
+      left: 0;
+      right: 0;
+    }
+    :global(main.page.home) .about,
+    :global(main.page.home) .colophon {
+      border-image: none;
+    }
     :global(main.page.home) {
       --edge: 40px;
       padding-top: 64px;
