@@ -423,8 +423,12 @@ const other = {
        et D contre des I et L. A 1440px, 82px depassaient et le S final etait
        rogne. On divise donc la largeur DISPONIBLE (viewport moins les deux
        retraits de bord) par ce rapport mesure : le titre tient exactement, a
-       toute largeur. 5,4 plutot que 5,356 pour garder un peu de jeu. */
-    font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / 5.4), 420px);
+       toute largeur.
+       Diviseur porte de 5,4 a 7,8 pour suivre la meme reduction que le titre
+       de l'accueil (18,7vw -> 13vw, environ -30%) : a 1440px le titre passe de
+       252px a 174px. Le rapport texte/corps (5,356) ne change pas, donc la
+       marge de non-rognage grandit d'autant — aucun risque de recoupe. */
+    font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / 7.8), 300px);
     font-weight: 800;
     line-height: 0.82;
     letter-spacing: -0.02em;
