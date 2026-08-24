@@ -459,34 +459,36 @@ const other = {
      gauche de son tiers et le bloc s'arretait a 234px du bord droit alors qu'il
      partait a 40px du gauche. Il avait l'air aligne a gauche sans l'etre.
 
-     En `flex` avec `wrap` plutot qu'en trois colonnes `max-content` : le total
-     des trois valeurs plus les ecarts frole la largeur disponible vers 700px, et
-     un retour a la ligne est toujours preferable a un debordement. Ici c'est
-     structurellement impossible de deborder. */
-  /* Pas de filet noir : ce trait marque ailleurs le DEBUT d'un chapitre
-     numerote (01, 02...), et les reperes ne sont pas un chapitre, ils
-     appartiennent a l'ouverture — meme groupe de reveal que le titre et le
-     sous-titre. Le filet les faisait lire comme une section a part alors
-     qu'ils prolongent l'en-tete. Rapprocher (pas-8 + filet -> pas-6, sans
-     rien) les rattache visuellement au bloc du haut ; le vrai chapitre
-     suivant garde son filet et ses pas-10 de marge, donc la coupure reste
-     lisible la ou elle compte. */
+     Centrer en bloc corrigeait la symetrie mais creait un autre defaut : trois
+     etiquettes flottant seules au milieu du vide ne forment pas un ensemble,
+     et DESIGN.md l'interdit explicitement — "tout est cale sur le bord
+     gauche, a --edge", la meme regle qui empeche un titre centre. Le systeme
+     ne structure jamais un groupe de faits par du centrage : `.meta-row`
+     justifie deux blocs aux bords, `.outils-liste` et `.certif` alignent
+     chaque ligne sur un filet. Ici, trois filets VERTICAUX rattachent les
+     reperes en une seule bande calee au meme bord gauche que le titre et le
+     paragraphe au-dessus : ils lisent comme un objet, pas comme trois
+     etiquettes eparpillees. `nowrap` plutot que `wrap` : un retour a la ligne
+     couperait la bande en deux lignes inegales avec un filet orphelin en
+     debut de ligne. La rupture vers l'empilement mobile est nette (766px,
+     mesuree) plutot que graduelle. */
   .reperes {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    column-gap: clamp(28px, 5vw, 80px);
-    row-gap: var(--pas-3);
+    flex-wrap: nowrap;
     margin-top: var(--pas-6);
     padding: 0 var(--edge);
-  }
-  .reperes .repere {
-    text-align: center;
   }
   .repere {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    padding-left: var(--pas-6);
+    border-left: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  .repere:first-child {
+    padding-left: 0;
+    border-left: 0;
   }
   .repere-k {
     font-size: 11px;
@@ -827,13 +829,32 @@ const other = {
       gap: 4px;
     }
   }
-  @media (max-width: 700px) {
+  /* Rupture propre a la bande de reperes, distincte du seuil global de 700px
+     (celui ou --edge passe de 40 a 20). La bande en une ligne (nowrap) exige
+     718px mesures (638px de contenu + 2 x 40px de bord) ; en dessous de 700,
+     --edge tombe a 20 et suffirait a 678px, mais RIEN ne comble l'ecart entre
+     700 et 718 si les deux ruptures restent au meme seuil — la bande
+     deborderait sur cette fenetre de 18px. 780px donne une marge large. */
+  @media (max-width: 780px) {
     .reperes {
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       gap: var(--pas-3);
       margin-top: var(--pas-6);
     }
+    .repere {
+      padding-left: 0;
+      border-left: 0;
+      padding-top: var(--pas-3);
+      border-top: 1px solid var(--rule);
+      white-space: normal;
+    }
+    .repere:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+  @media (max-width: 700px) {
     .colonnes {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
