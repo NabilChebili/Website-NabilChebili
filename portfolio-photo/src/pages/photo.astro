@@ -207,41 +207,75 @@ const commentees = vietnam.post.length + indonesie.post.length;
 
      Pose par une classe ajoutee en JavaScript : sans JavaScript, la page arrive
      simplement nette. Rien n'est jamais masque par defaut. */
-  :global(main.af-recherche) {
-    animation: page-au-point 1500ms cubic-bezier(0.22, 0, 0, 1) both;
+  /* Le filtre porte sur les ENFANTS de <main>, pas sur <main> lui-meme, et le
+     viseur en est exclu. Deux raisons, la seconde invisible a l'oeil :
+
+     1. Le cadre est un enfant de <main> : le flouter avec le reste revenait a
+        flouter l'afficheur du boitier, ce qu'aucun viseur ne fait.
+     2. Un `filter` sur un ancetre en fait le BLOC CONTENEUR de ses descendants
+        en `position: fixed`. Le cadre etait donc positionne par rapport a
+        <main> pendant toute l'animation, puis resautait au cadre de la fenetre
+        a la fin — un deplacement que la mesure d'opacite ne voit pas. */
+  :global(main.af-recherche) > *:not(.viseur) {
+    animation: page-au-point 1200ms linear both;
   }
+  /* LA RECHERCHE. Un autofocus ne va pas du flou au net d'un trait : il
+     s'approche, DEPASSE le point, revient, redepasse un peu moins, puis
+     accroche. Sans ce va-et-vient on lit une simple apparition, pas une mise
+     au point.
+
+     `linear` et non une courbe d'amorti : c'est le mouvement d'un moteur, pas
+     celui d'une interface. La courbe est deja dans les paliers.
+
+     1200ms et non 1500 : a 1500 la recherche trainait. */
   @keyframes page-au-point {
-    0% { filter: blur(13px); transform: scale(1.012); }
-    30% { filter: blur(11px); transform: scale(1.01); }
-    100% { filter: blur(0); transform: scale(1); }
+    0%   { filter: blur(14px);  transform: scale(1.014); }
+    8%   { filter: blur(13px);  transform: scale(1.013); }
+    26%  { filter: blur(1.4px); transform: scale(1.004); }
+    37%  { filter: blur(6.5px); transform: scale(1.008); }
+    58%  { filter: blur(0.5px); transform: scale(1.001); }
+    69%  { filter: blur(2.8px); transform: scale(1.003); }
+    88%  { filter: blur(0);     transform: scale(1); }
+    100% { filter: blur(0);     transform: scale(1); }
   }
   :global(main.af-recherche) ~ .viseur,
   .viseur {
     transform-origin: 50% 50%;
   }
   :global(body:has(main.af-recherche)) .viseur {
-    animation: viseur-au-point 1500ms cubic-bezier(0.22, 0, 0, 1) both;
+    animation: viseur-au-point 1200ms linear both;
   }
+  /* Le cadre ne bouge PAS. Une premiere version le faisait se resserrer d'un
+     scale(1.035) : joli en principe, faux en pratique — sur un boitier, le
+     viseur est un repere fixe, ce sont les collimateurs et les temoins qui
+     reagissent. Et le scale poussait les equerres hors de l'ecran (mesure :
+     bord gauche a -6px pendant l'animation, 16px apres). Il ne reste que la
+     montee en presence. */
   @keyframes viseur-au-point {
-    0% { transform: scale(1.035); opacity: 0.45; }
-    30% { transform: scale(1.03); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
+    0% { opacity: 0.45; }
+    30% { opacity: 0.72; }
+    100% { opacity: 1; }
   }
   /* Le temoin reste neutre pendant la recherche et passe au vert a l'accroche,
      comme sur un boitier. */
+  /* Le temoin reste GRIS pendant toute la recherche et ne passe au vert qu'a
+     l'accroche. Une premiere version le faisait virer au vert a chaque
+     approche du point : c'est faux — un temoin de mise au point confirme une
+     mise au point, il ne commente pas la recherche. Tant que l'image est
+     floue, il reste eteint. */
   :global(body:has(main.af-recherche)) .viseur-point {
-    animation: temoin-accroche 1500ms steps(1, end) both;
+    animation: temoin-accroche 1200ms steps(1, end) both;
   }
   @keyframes temoin-accroche {
-    0% { background: var(--rule); }
-    82% { background: var(--rule); }
+    0%   { background: var(--rule); }
+    88%  { background: var(--rule); }
     100% { background: #1f9d55; }
   }
 
   /* Une mise au point est du mouvement autonome : coupee des que le systeme
      demande moins de mouvement, la page arrive alors simplement nette. */
   @media (prefers-reduced-motion: reduce) {
-    :global(main.af-recherche),
+    :global(main.af-recherche) > *,
     :global(body:has(main.af-recherche)) .viseur,
     :global(body:has(main.af-recherche)) .viseur-point {
       animation: none !important;
@@ -304,9 +338,12 @@ const commentees = vietnam.post.length + indonesie.post.length;
     // Le filtre est RETIRE a la fin : un `filter: blur(0)` laisse en place
     // maintient une couche de composition pour toute la duree de vie de la page
     // et alourdit le defilement pour rien.
+    // L'animation porte maintenant sur les enfants, donc l'evenement REMONTE
+    // jusqu'a <main>. Filtrer sur `e.target === zone` bloquait le retrait de la
+    // classe, et le filtre restait en place.
     zone.addEventListener(
       "animationend",
-      (e) => { if (e.target === zone) zone.classList.remove("af-recherche"); },
+      () => zone.classList.remove("af-recherche"),
       { once: true }
     );
   }
