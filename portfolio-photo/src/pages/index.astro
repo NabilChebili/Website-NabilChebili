@@ -317,20 +317,20 @@ const univers = [
 
      Seuls les FILETS sont rentres, pas les blocs : rentrer aussi leurs marges
      decalait les quatre cartes de 64px supplementaires. */
+  /* Le filet de `.about` — celui qui separe le titre du bloc « qui je suis » —
+     etait le seul de la page a traverser de bord a bord. Il rejoint les autres.
+
+     Un `border-image` avait ete pose ici pour le meme but : il ne servait a
+     RIEN. Verifie au pixel — le filet mesurait toujours 1440px de long. Avec un
+     slice de 1, le degrade est decoupe puis ETIRE sur le bord, donc les arrets
+     exprimes en pixels (64px) ne correspondent plus a rien. Et le filet visible
+     ne venait meme pas de la bordure : `border-top` est transparent, c'est
+     `.about::before` qui dessine le trait. Regle sur le bon element. */
   :global(main.page.home) .section-head::after,
-  :global(main.page.home) .colophon::before {
+  :global(main.page.home) .colophon::before,
+  :global(main.page.home) .about::before {
     left: 64px;
     right: 64px;
-  }
-  :global(main.page.home) .about,
-  :global(main.page.home) .colophon {
-    border-image: linear-gradient(
-        to right,
-        transparent 0 64px,
-        var(--ink) 64px calc(100% - 64px),
-        transparent calc(100% - 64px)
-      )
-      1;
   }
 
   /* Sous 900px il ne reste plus assez de marge pour loger les equerres sans
@@ -339,13 +339,10 @@ const univers = [
   @media (max-width: 900px) {
     .viseur { display: none; }
     :global(main.page.home) .section-head::after,
-    :global(main.page.home) .colophon::before {
+    :global(main.page.home) .colophon::before,
+    :global(main.page.home) .about::before {
       left: 0;
       right: 0;
-    }
-    :global(main.page.home) .about,
-    :global(main.page.home) .colophon {
-      border-image: none;
     }
     :global(main.page.home) {
       --edge: 40px;
