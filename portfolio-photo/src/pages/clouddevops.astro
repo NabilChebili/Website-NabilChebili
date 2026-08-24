@@ -541,14 +541,24 @@ const other = {
      texte : en typographie editoriale un chapeau se compose plus grand que le
      corps qu'il introduit. 19px au lieu de 15 le distingue des descriptions de
      colonne en dessous, qui restent a 15px — la taille de corps documentee
-     dans DESIGN.md §1. Elargir les deux ensemble n'aurait rien hierarchise et
+     dans DESIGN.md §1. 19px avait ete essaye d'abord : juge trop gros. Elargir les deux ensemble n'aurait rien hierarchise et
      aurait desaccorde ce chapitre du reste de la page, ou tout le corps de
      lecture (resumes de mission, puces, notes) tient a 15px.
-     `max-width` en `ch` suit la taille de police, donc la longueur de ligne
-     reste a 68 caracteres — dans la fourchette de Bringhurst. */
+
+     ATTENTION, mesure a corriger un jour : `max-width: 68ch` ne donne PAS 68
+     caracteres par ligne. Le `ch` vaut la largeur du glyphe « 0 », bien plus
+     large que l'avance moyenne d'un caractere en Sofia Sans (10,2px contre
+     7,0px a 17px). Mesure reelle : 99 caracteres par ligne pour ce chapeau, et
+     90 pour les resumes de mission — au-dela des 45-75 de Bringhurst cites en
+     DESIGN.md §8 et des « moins de 90 » annonces en §1. Le defaut PRE-EXISTE
+     et ne vient pas de la taille : `ch` suit la police, donc le nombre de
+     caracteres par ligne est le meme a 15px qu'a 17px. Pour viser 72
+     caracteres il faudrait environ `max-width: 50ch`. Non corrige ici : cela
+     resserrerait la colonne de 694 a ~505px et change la mise en page, donc
+     c'est une decision a prendre, pas un ajustement. */
   .prose {
-    font-size: 19px;
-    line-height: 1.4;
+    font-size: 17px;
+    line-height: 1.45;
   }
 
   .prose p,
