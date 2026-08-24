@@ -250,6 +250,53 @@ Critères passés sur les 16 pages, aux deux largeurs, à chaque changement stru
 un seul `<main>` · zéro `border-radius` · zéro `box-shadow` · aucun `[data-reveal]` ou `.photo-card`
 resté sous `opacity: 0.99` (hors accordéon fermé) · aucun débordement horizontal · aucun
 `text-align: justify` · fond `rgb(244, 244, 242)` · aucune image sans pixels · délai de cascade
-≤ 0,4 s · console sans erreur · aucune réponse HTTP ≥ 400.
+≤ 0,4 s · console sans erreur · aucune réponse HTTP ≥ 400 · contraste ≥ 4,5:1 sur le texte courant
+(≥ 3:1 au-delà de 24px ou 18,5px gras), ≥ 3:1 sur les bordures de contrôle et l'indicateur de focus ·
+cible tactile ≥ 24×24px.
 
 Et avec JavaScript coupé : tout le contenu doit rester lisible.
+
+---
+
+## 8. Repères externes
+
+Les règles des sections 1 et 3 viennent d'un échantillon Awwwards et des seuils de Butterick. Celles
+qui suivent viennent de référentiels publiés (WCAG, Material Design, Bringhurst) : elles couvrent ce
+que le système ne mesurait pas encore — le contraste, la taille des cibles tactiles, la visibilité du
+focus — et sourcent des choix qui existaient déjà sans être justifiés.
+
+### Accessibilité — mesurable, à vérifier comme le reste
+
+| Règle | Seuil | Source |
+|---|---|---|
+| Contraste du texte | ≥ 4,5:1 (texte courant), ≥ 3:1 (texte « grand » : ≥ 24px, ou ≥ 18,5px en gras) | WCAG 2.1 SC 1.4.3 |
+| Contraste des éléments non textuels | ≥ 3:1 contre le fond adjacent — bordures de contrôle, indicateur de focus, icônes porteuses de sens | WCAG 2.1 SC 1.4.11 |
+| Indicateur de focus | Visible au clavier sur tout élément interactif, jamais entièrement masqué par un élément fixe | WCAG 2.4.7 (AA depuis 2.0) et 2.4.11 (AA, WCAG 2.2) |
+| Cible tactile | ≥ 24×24px CSS, sauf exception d'espacement ou cible en ligne dans du texte | WCAG 2.2 SC 2.5.8. La variante renforcée (AAA, SC 2.5.5) exige 44×44px |
+| Mouvement | Respecter `prefers-reduced-motion` partout où l'animation n'est pas essentielle au sens du contenu | WCAG 2.3.3 / 4.1.3 — le déclencheur documenté est vestibulaire (vertige, Menière), pas seulement une préférence de confort |
+
+**Déjà conforme, vérifié dans le code** : `.lien`, `.prose a`, `.bouton` et les liens de nav
+appliquent le même trait au survol et au focus clavier (`:focus-visible` reprend le style de
+`:hover`) — un indicateur réel, pas un `outline: none` silencieux. `prefers-reduced-motion` est câblé
+dans cinq fichiers, jusque dans le script du morphing de particules (`morphOutils.js`), pas seulement
+dans les feuilles de style.
+
+**Trouvé en écrivant cette section, pas encore corrigé** : `.nav-toggle:focus` dans `layout.css`
+pose `outline: 2px solid rgba(0,0,0,0.08)` — mesuré à 1,2:1 de contraste contre le papier, loin des
+3:1 requis par 1.4.11. Le bouton du menu mobile n'a donc, au clavier, pratiquement aucun indicateur
+de focus visible.
+
+### Ce que ces référentiels confirment sur des choix déjà en place
+
+- **La grille de pas** (`--pas-3/6/8/10` = 24/48/64/80px) est un multiple de 8 : la pratique des
+  systèmes de design publiés depuis 2017-2018 (Material en tête), parce que les résolutions d'écran
+  courantes se divisent proprement par 8 et évitent le flou de sous-pixel sur les densités 1x/1.5x/2x/3x.
+- **Toutes les contraintes de mesure du site** (`max-width` en `ch`, de 24 à 74 selon le contexte)
+  tombent dans la fourchette de Bringhurst — 45 à 75 caractères pour une colonne, 66 comme cible.
+  La plupart se regroupent à 68ch, à deux caractères de son optimum.
+- **Les formules `clamp()` des titres** (accueil, `/clouddevops`) sont la technique documentée sous
+  le nom de « fluid typography », popularisée par des outils comme Utopia.fyi : un
+  `clamp(min, val, max)` remplace plusieurs points de rupture fixes par une interpolation continue
+  pilotée par le viewport.
+- **`--duree: 240ms` et `--duree-longue: 560ms`** tombent dans la fourchette 200-500ms que Material
+  Design documente comme la vitesse d'interface optimale — ce que §3 affirmait déjà sans le sourcer.
