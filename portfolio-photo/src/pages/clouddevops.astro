@@ -463,15 +463,22 @@ const other = {
      des trois valeurs plus les ecarts frole la largeur disponible vers 700px, et
      un retour a la ligne est toujours preferable a un debordement. Ici c'est
      structurellement impossible de deborder. */
+  /* Pas de filet noir : ce trait marque ailleurs le DEBUT d'un chapitre
+     numerote (01, 02...), et les reperes ne sont pas un chapitre, ils
+     appartiennent a l'ouverture — meme groupe de reveal que le titre et le
+     sous-titre. Le filet les faisait lire comme une section a part alors
+     qu'ils prolongent l'en-tete. Rapprocher (pas-8 + filet -> pas-6, sans
+     rien) les rattache visuellement au bloc du haut ; le vrai chapitre
+     suivant garde son filet et ses pas-10 de marge, donc la coupure reste
+     lisible la ou elle compte. */
   .reperes {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     column-gap: clamp(28px, 5vw, 80px);
     row-gap: var(--pas-3);
-    margin-top: var(--pas-8);
-    padding: 12px var(--edge) 0;
-    border-top: 1px solid var(--ink);
+    margin-top: var(--pas-6);
+    padding: 0 var(--edge);
   }
   .reperes .repere {
     text-align: center;
