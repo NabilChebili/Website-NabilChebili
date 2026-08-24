@@ -506,7 +506,12 @@ const other = {
     width: 100%;
     max-width: 360px;
     margin: 0;
-    background: var(--block);
+    /* Mat a l'encre plutot qu'en --block : le gris clair lisait comme un
+       gabarit. Le noir donne au portrait le poids d'un tirage encadre, et il
+       apporte a la page son premier aplat fonce — donc il repond aussi au
+       « trop blanc », sans rien enfreindre : c'est un aplat de couleur, pas un
+       degrade, pas une lueur, pas une ombre. */
+    background: var(--ink);
     padding: 20px;
   }
   .ouverture-media img {
@@ -729,7 +734,22 @@ const other = {
     text-transform: uppercase;
     color: var(--ink-55);
   }
+  /* Les outils de la mission passent en etiquettes qui s'enroulent, au lieu
+     d'une liste verticale. La grille etire les deux colonnes a la meme hauteur,
+     et six items empiles rendaient le rail gauche systematiquement plus long
+     que le corps : mesure, cela laissait 107px de vide moyen sous le texte de
+     droite, jusqu'a 153px.
+
+     Piege evite au passage : deplacer STACK dans la colonne de droite semblait
+     supprimer le vide (0px mesure), mais la premiere metrique ne regardait que
+     le cote droit. En mesurant les DEUX colonnes, ce deplacement creusait en
+     fait 151px de vide a GAUCHE — il ne supprimait rien, il deplacait. Les
+     etiquettes, elles, raccourcissent reellement le rail : 57px a droite, 2px a
+     gauche, et la page perd 334px. */
   .rail-liste {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     margin: 8px 0 0;
     padding: 0;
     list-style: none;
@@ -737,8 +757,12 @@ const other = {
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    line-height: 1.9;
+    line-height: 1.4;
     color: var(--ink);
+  }
+  .rail-liste li {
+    border: 1px solid var(--rule);
+    padding: 3px 8px;
   }
 
   /* Missions : la periode et le client a gauche, le detail a droite, un filet
