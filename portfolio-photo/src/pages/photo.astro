@@ -32,6 +32,13 @@ const destinations = [
   { slug: "mariage", title: "Mariage", cover: await firstPhoto(galleries.mariage) },
   { slug: "croatie", title: "Croatie", cover: await firstPhoto(galleries.croatie) },
 ];
+
+// Les photographies commentees : celles des recits Vietnam et Indonesie, les
+// seules a porter une legende. Compte depuis les donnees, donc juste et tenu a
+// jour tout seul. Le total de photos du site n'est PAS affiche ici : il faudrait
+// lister toutes les galeries distantes au build, et le « 958 » de l'accueil est
+// une valeur ecrite en dur que rien ne verifie.
+const commentees = vietnam.post.length + indonesie.post.length;
 ---
 
 <Layout
@@ -39,29 +46,44 @@ const destinations = [
   description="Galeries photo : voyages, villes, portraits et instantanés."
   mainClass="page editorial"
 >
-  <section class="tete-page">
-    <h1 class="titre-page" data-reveal data-groupe="tete">Photographie</h1>
-    <div class="prose" data-reveal data-groupe="tete">
+  {/* Meme ouverture que l'accueil et /clouddevops : de petits faits, le titre
+      plein cadre, puis une seule ligne — la phrase d'intention a gauche, le lien
+      vers la suite a droite. */}
+  <section class="ouverture">
+    <div class="meta-row" data-reveal data-groupe="tete">
+      <span>
+        <b>{destinations.length}</b> galeries &middot; <b>{commentees}</b> photographies commentées
+      </span>
+      <span>Voyages, villes et instantanés</span>
+    </div>
+
+    <h1 class="titre-geant" data-reveal data-groupe="tete">Photographie</h1>
+
+    <div class="ouverture-pied" data-reveal data-groupe="tete">
       <p>
-        Bienvenue dans ma sélection photographique : un aperçu de voyages,
-        moments et instants précieux.
+        Un aperçu de voyages, de moments et d’instants précieux — appareil en
+        main.
       </p>
-      <p>
-        À travers le design et la recherche d’esthétique dans les détails, la
-        photographie s’est rapidement imposée comme un moyen d’expression
-        naturel. Avec le temps, l’envie de capturer le réel m’a poussé à
-        acheter mon premier appareil photo et à voyager, appareil en main.
-        Chaque déplacement est devenu une occasion de raconter une histoire, de
-        figer une ambiance, un regard, un instant.
-      </p>
-      <p>Cliquez sur une destination pour découvrir sa galerie complète.</p>
+      <a class="jump" href="#galeries">Voir les galeries &#8595;</a>
     </div>
   </section>
 
-  <section>
-    <div class="section-head" data-reveal data-groupe="galeries">
-      <span>Galeries</span>
+  <section id="galeries">
+    <div class="section-head grande" data-reveal data-groupe="galeries">
+      <span><i class="section-num">01</i> Galeries</span>
       <span>({destinations.length})</span>
+    </div>
+    <div class="apport">
+      <div class="prose" data-reveal data-groupe="galeries">
+        <p>
+          À travers le design et la recherche d’esthétique dans les détails, la
+          photographie s’est rapidement imposée comme un moyen d’expression
+          naturel. Avec le temps, l’envie de capturer le réel m’a poussé à
+          acheter mon premier appareil photo et à voyager, appareil en main.
+          Chaque déplacement est devenu une occasion de raconter une histoire,
+          de figer une ambiance, un regard, un instant.
+        </p>
+      </div>
     </div>
     <div class="vignettes">
       {
@@ -77,3 +99,77 @@ const destinations = [
     </div>
   </section>
 </Layout>
+
+<style>
+  /* ------------------------------------------------------------ ouverture ---
+     Reprise du registre des deux autres pages : la taille du titre vient d'un
+     rapport MESURE — « PHOTOGRAPHIE » fait 5,487 fois son corps en largeur
+     (contre 5,356 pour « CLOUD DEVOPS » et 4,927 pour « NABIL CHEBILI »). On
+     divise la largeur DISPONIBLE par 8, ce qui donne la meme presence que sur
+     /clouddevops : le titre y occupe 931px pour 1360 disponibles, ici 933. */
+  .ouverture {
+    overflow: clip;
+    padding: 8px var(--edge) 0;
+  }
+  .titre-geant {
+    overflow: clip;
+    margin: 26px 0 0;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / 8), 300px);
+    font-weight: 800;
+    line-height: 0.82;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .ouverture-pied {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 32px;
+    margin-top: 22px;
+    padding-bottom: 4px;
+  }
+  .ouverture-pied p {
+    margin: 0;
+    max-width: 52ch;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-55);
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .apport {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+
+  /* Le texte de LECTURE en Sofia Sans, le mono reserve aux ETIQUETTES — meme
+     partage que sur /clouddevops, ou le mono avait ete juge « pas pro » pour du
+     texte suivi. */
+  .prose p {
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.45;
+  }
+
+  .section-head.grande {
+    margin-top: var(--pas-10);
+  }
+
+  /* L'ancre doit degager le titre de chapitre de la barre fixe de 64px. */
+  #galeries {
+    scroll-margin-top: 88px;
+  }
+
+  @media (max-width: 700px) {
+    .ouverture-pied {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .section-head.grande {
+      margin-top: var(--pas-8);
+    }
+  }
+</style>
