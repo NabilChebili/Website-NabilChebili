@@ -436,9 +436,22 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
     cursor: zoom-in;
   }
 
+  /* La legende est du texte lu, donc Sofia Sans comme .prose — elle heritait
+     du mono, ce qui la rendait illisible sur une colonne de 256px : 22
+     caracteres par ligne, contre les 45-75 de la fourchette de Bringhurst.
+
+     Et elle etait a 15px, exactement la taille de l'intro de la page : une
+     legende aussi forte que le texte qu'elle sert. 13px la remet sous
+     l'intro sans descendre au niveau des etiquettes (11px).
+
+     Pas de margin ici : la carte est un flex column a gap 12px, elle en a
+     donc deja un. J'avais lu `margin-top: 0` et conclu « collee a la
+     photo » sans regarder le conteneur — la marge que j'y avais ajoutee
+     s'empilait sur le gap et portait l'ecart a 22px. */
   .photo-card figcaption {
-    font-size: 15px;
-    line-height: 1.45;
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
     color: var(--ink-55);
   }
 
