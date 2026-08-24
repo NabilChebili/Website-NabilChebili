@@ -342,9 +342,46 @@ disent.
   technologique — mais ça reste un choix de registre, pas un point où ce système rivalise avec le
   haut du panier Awwwards. Le nommer évite de se raconter que « conforme à ce système » équivaut à
   « à l'avant-garde de la tendance ».
-- **Piste non explorée ici, à considérer si la créativité redevient un chantier** : le « scroll comme
-  narration » — le défilement qui pilote un rythme de révélation pensé, pas seulement un déclencheur
-  binaire visible/caché. Le mécanisme de révélation actuel (§5) est un `IntersectionObserver` avec
-  un `once` : chaque bloc apparaît une fois, dans l'ordre du DOM, avec un décalage fixe de 80ms entre
-  voisins. C'est fiable et jamais cassé sans JS — mais ce n'est pas un rythme composé, c'est une
-  temporisation uniforme.
+- **« Scroll comme narration », partiellement appliqué.** Sur `/clouddevops`, deux choses en
+  dépendent maintenant : le morphing des outils ne démarre qu'à l'arrivée de son chapitre dans la
+  fenêtre (son premier instant — la seule fois où une forme naît du vide — se jouait sinon toujours
+  hors champ), et le rail de gauche se remplit à mesure du défilement. Ce qui reste non fait : le
+  mécanisme de révélation général (§5) est encore une temporisation uniforme de 80 ms entre voisins,
+  pas un rythme composé.
+
+### Le cadrage cinématographique de `/clouddevops`
+
+Réponse à un constat de l'utilisateur — « la page est trop blanche » — c'est-à-dire un aplat de
+`#f4f4f2` où chaque filet flottait dans du vide. Trois dispositifs, tous écrits dans le vocabulaire
+du système (des filets de 1px et une texture ; aucun dégradé décoratif, aucune lueur, aucune ombre,
+aucun rayon) :
+
+| Dispositif | Ce que c'est | Où |
+|---|---|---|
+| **Le grain** | Texture de bruit (`feTurbulence` en `fractalNoise`, désaturée) tuilée en data-URI, fusionnée en `overlay`. Donne de la matière au fond sans le colorer | `background-image` sur `main.cdo` |
+| **Le cadre de visée** | Quatre équerres aux angles de l'image, fixes — le repère de cadrage d'un viseur de caméra | `.cadre-vue` |
+| **Le rail** | Le côté gauche du cadre, complet, dont la portion à l'encre suit la progression du défilement. Bord de pellicule, piste de montage. En `animation-timeline: scroll()`, donc sans JavaScript | `.rail-defilement` |
+
+**Trois pièges payés là-dessus, tous invisibles à l'œil et trouvés en mesurant** :
+
+1. **Un grain en `z-index: -1` n'est jamais peint** : il passe derrière le fond opaque de la page.
+   Mesure : écart-type des pixels d'une zone vide **0,00**, une seule valeur distincte. Le grain doit
+   être une `background-image` portée par l'élément — elle se peint au-dessus du `background-color`
+   et sous le contenu.
+2. **Même corrigé, le grain restait invisible** parce que `editorial.css` pose
+   `main > section { background: var(--paper) }` (la règle qui neutralise les fonds alternés
+   hérités) : **chaque section repeignait un aplat opaque par-dessus**. Les rendre transparentes sur
+   cette page ne change aucune couleur et laisse passer la texture.
+3. **Un bruit en superposition normale ne peut que foncer le fond**, et ça casse le contraste : mesuré
+   à 235 de moyenne au lieu de 244, ce qui faisait tomber le libellé des outils de 4,67:1 à
+   **4,32:1**, sous le seuil de 1.4.3. En `overlay` le bruit éclaircit et fonce symétriquement
+   (moyenne 245,7, contraste 4,73:1 — légèrement *meilleur* qu'avant). Pour compenser la faible
+   amplitude qu'`overlay` donne, le contraste du bruit est étiré **dans le SVG**
+   (`feComponentTransfer`, slope 5 centré sur 0,5) plutôt que par l'opacité CSS : l'écart-type passe
+   de 0,98 à 3,69 sans déplacer la moyenne.
+
+**Et un piège de placement** : un cadre posé à `--edge` tombe exactement là où commence le contenu —
+le filet du haut barrait la meta-row, celui de droite tranchait le « S » de « ANS ». À 14px, les bras
+de 22px s'arrêtent à 36px et le contenu commence à 40. Vérifié à 10 largeurs par test de
+chevauchement contre **tous** les nœuds de texte visibles : zéro collision. Sous 700px, `--edge`
+tombe à 20px et il ne resterait que 6px : le cadre et le rail sont masqués, le grain reste.
