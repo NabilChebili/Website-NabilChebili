@@ -543,28 +543,28 @@ const other = {
     font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
   }
 
-  /* Les trois reperes, centres en bloc sous un filet qui court de bord a bord.
-     Avant, c'etait une grille de trois colonnes egales : les valeurs ont des
-     largeurs tres inegales (103, 210 et 227px), donc chacune se collait a
-     gauche de son tiers et le bloc s'arretait a 234px du bord droit alors qu'il
-     partait a 40px du gauche. Il avait l'air aligne a gauche sans l'etre.
+  /* Trois blocs pleins, pas des filets. Le dispositif precedent portait un
+     `border-left` SUR LA BOITE, suivi de 48px de rembourrage interieur : le
+     trait se collait donc au bloc precedent puis laissait un grand vide avant
+     son propre texte. D'ou les deux defauts signales — « un gros espace » et
+     « un trait bizarre » — qui n'en font qu'un : le trait n'etait pas au
+     milieu de l'ecart, il etait tout au bord.
 
-     Centrer en bloc corrigeait la symetrie mais creait un autre defaut : trois
-     etiquettes flottant seules au milieu du vide ne forment pas un ensemble,
-     et DESIGN.md l'interdit explicitement — "tout est cale sur le bord
-     gauche, a --edge", la meme regle qui empeche un titre centre. Le systeme
-     ne structure jamais un groupe de faits par du centrage : `.meta-row`
-     justifie deux blocs aux bords, `.outils-liste` et `.certif` alignent
-     chaque ligne sur un filet. Ici, trois filets VERTICAUX rattachent les
-     reperes en une seule bande calee au meme bord gauche que le titre et le
-     paragraphe au-dessus : ils lisent comme un objet, pas comme trois
-     etiquettes eparpillees. `nowrap` plutot que `wrap` : un retour a la ligne
-     couperait la bande en deux lignes inegales avec un filet orphelin en
-     debut de ligne. La rupture vers l'empilement mobile est nette (766px,
-     mesuree) plutot que graduelle. */
+     Une grille de trois colonnes egales avec un ecart unique regle la
+     repartition, et le fond --block remplace le trait : c'est le meme jeton que
+     le cadre de la photo juste au-dessus, donc le bas de l'ouverture rime avec
+     elle au lieu d'introduire un troisieme vocabulaire.
+
+     Historique, pour ne pas y revenir : trois colonnes egales SANS fond
+     donnaient l'air aligne a gauche sans l'etre (les valeurs font 103, 210 et
+     227px, donc chacune se collait a gauche de son tiers) ; centrer en bloc
+     reglait la symetrie mais ne formait pas un ensemble. Un fond resout les
+     deux : la boite occupe tout son tiers, donc la repartition se voit meme
+     quand le texte est court. */
   .reperes {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
     margin-top: var(--pas-6);
     padding: 0 var(--edge);
   }
@@ -572,13 +572,8 @@ const other = {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding-left: var(--pas-6);
-    border-left: 1px solid var(--rule);
-    white-space: nowrap;
-  }
-  .repere:first-child {
-    padding-left: 0;
-    border-left: 0;
+    background: var(--block);
+    padding: 18px 20px;
   }
   .repere-k {
     font-size: 11px;
@@ -919,29 +914,17 @@ const other = {
       gap: 4px;
     }
   }
-  /* Rupture propre a la bande de reperes, distincte du seuil global de 700px
-     (celui ou --edge passe de 40 a 20). La bande en une ligne (nowrap) exige
-     718px mesures (638px de contenu + 2 x 40px de bord) ; en dessous de 700,
-     --edge tombe a 20 et suffirait a 678px, mais RIEN ne comble l'ecart entre
-     700 et 718 si les deux ruptures restent au meme seuil — la bande
-     deborderait sur cette fenetre de 18px. 780px donne une marge large. */
-  @media (max-width: 780px) {
+  /* Les blocs peuvent retrecir sans deborder (le texte se replie a l'interieur),
+     donc plus besoin du seuil de 780px qu'imposait la bande en une seule ligne.
+     Deux colonnes des que trois deviennent trop etroites, puis une seule. */
+  @media (max-width: 900px) {
     .reperes {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--pas-3);
-      margin-top: var(--pas-6);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .repere {
-      padding-left: 0;
-      border-left: 0;
-      padding-top: var(--pas-3);
-      border-top: 1px solid var(--rule);
-      white-space: normal;
-    }
-    .repere:first-child {
-      padding-top: 0;
-      border-top: 0;
+  }
+  @media (max-width: 560px) {
+    .reperes {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
   @media (max-width: 700px) {
