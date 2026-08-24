@@ -330,6 +330,15 @@ const commentees = vietnam.post.length + indonesie.post.length;
   :global(.colophon)::before {
     left: 64px;
     right: 64px;
+    /* Le filet attend que la vague des vignettes soit passee.
+       Mesure : le dernier bloc de contenu se revele a y=600 et le bloc contact
+       a y=925, soit 325px d'ecart contre 450 sur l'accueil — page plus courte,
+       tout arrive plus groupe. Or la cascade des vignettes ajoute jusqu'a 400ms
+       de decalage a une animation de 560, donc elle debordait sur le trace du
+       filet : deux mouvements concurrents a l'ecran. 700ms le fait passer
+       apres, sans jamais faire attendre puisqu'il n'est de toute facon visible
+       qu'une fois le bloc atteint. */
+    transition-delay: 700ms;
   }
   @media (max-width: 900px) {
     :global(.colophon)::before {
