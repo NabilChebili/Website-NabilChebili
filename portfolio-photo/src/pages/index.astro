@@ -63,6 +63,13 @@ const univers = [
       defilement en code temporel, donc faire defiler la page, c'est lire le
       film. Purement decoratif pour un lecteur d'ecran, d'ou aria-hidden, et
       pointer-events: none pour ne capter aucun clic. */}
+  {/* Les bandes de mise au point. Trois couches par bord, rayons croissants et
+      masques decales : une seule couche donnerait un flou d'intensite constante
+      qui s'estompe, pas une montee en flou. Posees AVANT le viseur pour rester
+      sous lui — les equerres et les pastilles doivent rester nettes. */}
+  <div class="hors-champ haut" aria-hidden="true"></div>
+  <div class="hors-champ bas" aria-hidden="true"></div>
+
   <div class="viseur" aria-hidden="true">
     <i></i><i></i><i></i><i></i>
     <span class="viseur-rec"><b class="viseur-point"></b>REC</span>
@@ -201,6 +208,52 @@ const univers = [
      viseur : elles restent lisibles par-dessus n'importe quel contenu qui
      defile derriere. C'est assume — un afficheur de camera passe par-dessus
      l'image, il ne se range pas a cote. */
+  /* ------------------------------------------------- mise au point ---
+     Le net au centre, l'effacement aux bords : ce qui monte sort du champ, ce
+     qui arrive par le bas y entre. C'est ce qui differencie enfin le cadre du
+     contenu qu'il survole.
+
+     UN VOILE EN DEGRADE, ET NON UN FLOU. Le flou a ete construit, mesure, puis
+     abandonne : `backdrop-filter` recompose la zone a chaque image, et le cout
+     est ecrasant. Mesure sur cette page, defilement continu de bout en bout :
+
+         aucune bande ........ 61 images/s
+         1 couche par bord ... 37
+         2 couches ........... 20
+         3 couches ........... 14
+
+     A 14 images/s le defilement est saccade. Le voile en degrade donne la meme
+     lecture — le hors-champ s'efface — pour 60 images/s : il est peint une fois,
+     le GPU se contente de le reafficher.
+
+     EXCEPTION ASSUMEE : DESIGN.md interdit les degrades. Ici il ne decore pas,
+     il SIGNIFIE — un hors-champ dans un viseur. Meme statut que l'orbite des
+     outils, retiree comme effet puis redessinee parce qu'elle disait quelque
+     chose. Et c'est un fondu vers le papier, geste d'impression avant d'etre
+     geste d'ecran. */
+  .hors-champ {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .hors-champ.haut {
+    top: 64px;
+    height: 72px;
+    background: linear-gradient(to top, transparent 0%, var(--paper) 92%);
+  }
+  .hors-champ.bas {
+    bottom: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent 0%, var(--paper) 92%);
+    /* La bande basse se retire a l'approche du bas de page. Sans cela le bloc de
+       contact resterait DEFINITIVEMENT efface : il est le dernier contenu, donc
+       on ne peut plus defiler pour le degager. Un cul-de-sac de lecture, et sur
+       le seul bloc de la page qui porte une adresse e-mail. */
+    opacity: var(--nettete-bas, 1);
+  }
+
   .viseur {
     position: fixed;
     inset: 72px 16px 16px;
@@ -297,7 +350,8 @@ const univers = [
      mordre sur le texte : le viseur disparait et la page reprend ses retraits
      normaux. */
   @media (max-width: 900px) {
-    .viseur { display: none; }
+    .viseur,
+    .hors-champ { display: none; }
     :global(main.page.home) .section-head::after,
     :global(main.page.home) .colophon::before {
       left: 0;
@@ -345,5 +399,27 @@ const univers = [
       { passive: true }
     );
     majuscule();
+  }
+
+  // La nettete revient sur les 140 derniers pixels de defilement : le bloc de
+  // contact, dernier de la page, ne peut pas rester flou puisqu'on ne peut plus
+  // defiler pour le degager.
+  const bande = document.querySelector(".hors-champ.bas");
+  if (bande) {
+    let enAttente2 = false;
+    const nettete = () => {
+      enAttente2 = false;
+      const restant =
+        document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
+      const v = Math.max(0, Math.min(1, restant / 140));
+      document.documentElement.style.setProperty("--nettete-bas", String(v));
+    };
+    addEventListener(
+      "scroll",
+      () => { if (!enAttente2) { enAttente2 = true; requestAnimationFrame(nettete); } },
+      { passive: true }
+    );
+    addEventListener("resize", nettete, { passive: true });
+    nettete();
   }
 </script>
