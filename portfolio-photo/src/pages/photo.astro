@@ -310,6 +310,14 @@ const commentees = vietnam.post.length + indonesie.post.length;
     aspect-ratio: 4 / 3;
   }
 
+  /* De l'air entre la derniere rangee et le filet du bloc contact. Mesure : il
+     n'y en avait AUCUN — 0px entre le libelle de la derniere vignette et le
+     trait, contre 78 sur /clouddevops et 80 sur l'accueil. Le filet collait aux
+     legendes. */
+  .vignettes {
+    padding-bottom: var(--pas-10);
+  }
+
   .section-head.grande {
     margin-top: var(--pas-10);
   }
@@ -327,6 +335,13 @@ const commentees = vietnam.post.length + indonesie.post.length;
 
      Son filet superieur s'arrete au cadre du viseur, comme tous les autres
      filets des pages qui l'affichent. */
+  /* TOUS les filets s'arretent au cadre, pas seulement celui du bloc contact.
+     J'avais pose le viseur sur cette page sans rentrer les filets de section
+     comme je l'avais fait sur l'accueil : mesure, le filet de « 01 Galeries »
+     courait de 0 a 1440 et traversait les equerres de part en part, alors que
+     le meme filet s'arrete a 64px sur l'accueil. Un cadre traverse par un trait
+     n'est plus un cadre. */
+  :global(main.page.editorial) .section-head::after,
   :global(.colophon)::before {
     left: 64px;
     right: 64px;
@@ -341,6 +356,7 @@ const commentees = vietnam.post.length + indonesie.post.length;
     transition-delay: 700ms;
   }
   @media (max-width: 900px) {
+    :global(main.page.editorial) .section-head::after,
     :global(.colophon)::before {
       left: 0;
       right: 0;
