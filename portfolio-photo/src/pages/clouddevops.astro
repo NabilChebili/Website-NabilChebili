@@ -362,7 +362,7 @@ const other = {
     if (toile) {
       const outils = JSON.parse(toile.dataset.outils);
       const liste = document.getElementById("outils-liste");
-      const bloc = toile.parentElement;
+      const chapitre = document.getElementById("outils");
 
       // L'element courant de la liste s'allume avec l'animation : c'est ce qui
       // relie le morphing au contenu au lieu d'en faire un ornement.
@@ -387,7 +387,37 @@ const other = {
       };
 
       let taille = calculer();
-      let arreter = await morphOutils(toile, taille, outils, allumer);
+      let arreter = null;
+
+      // Le morphing ne demarre qu'a l'arrivee du chapitre dans la fenetre, pas
+      // au chargement de la page. Avant, le premier logo se formait pendant que
+      // le lecteur lisait encore l'ouverture, 1000px plus haut : ce premier
+      // instant — le seul moment ou une forme nait du vide plutot que d'en
+      // succeder une autre — se jouait toujours hors champ. Le declencher a
+      // l'arrivee en fait un temps fort du defilement plutot qu'un minuteur
+      // arbitraire, et economise le calcul tant que personne ne le voit — le
+      // meme rootMargin que le systeme de revelation (header.astro) pour que le
+      // chapitre s'anime au moment ou son contenu apparait, pas avant ni apres.
+      const demarrer = async () => {
+        if (arreter) return;
+        arreter = (await morphOutils(toile, taille, outils, allumer)) || (() => {});
+      };
+
+      if (chapitre && "IntersectionObserver" in window) {
+        const dio = new IntersectionObserver(
+          (entrees) => {
+            entrees.forEach((e) => {
+              if (!e.isIntersecting) return;
+              dio.unobserve(e.target);
+              demarrer();
+            });
+          },
+          { rootMargin: "0px 0px -120px 0px", threshold: 0 }
+        );
+        dio.observe(chapitre);
+      } else {
+        demarrer();
+      }
 
       let minuteur = 0;
       addEventListener("resize", () => {
@@ -396,8 +426,11 @@ const other = {
           const t = calculer();
           if (Math.abs(t - taille) < 8) return;
           taille = t;
-          arreter && arreter();
-          arreter = await morphOutils(toile, taille, outils, allumer);
+          // Pas encore demarre (chapitre jamais atteint) : la nouvelle taille
+          // sera prise en compte au premier passage dans la fenetre.
+          if (!arreter) return;
+          arreter();
+          arreter = (await morphOutils(toile, taille, outils, allumer)) || (() => {});
         }, 250);
       });
     }
