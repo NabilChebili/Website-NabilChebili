@@ -187,57 +187,65 @@ const commentees = vietnam.post.length + indonesie.post.length;
   }
 
   /* ------------------------------------------------------------ autofocus ---
-     Chaque vignette fait sa mise au point en arrivant : l'image entre floue et
-     legerement trop grande, puis se pose nette. C'est le seul endroit du site ou
-     un flou est justifie — il ne decore pas, il DIT « pas encore au point », et
-     il disparait. Le collimateur qui se resserre par-dessus est le repere que le
-     boitier affiche pendant la recherche.
+     La PAGE ENTIERE fait sa mise au point au chargement : elle arrive floue et
+     legerement trop grande, puis se pose nette pendant que les equerres du
+     viseur se resserrent et que le temoin passe au vert. C'est un seul geste a
+     l'echelle de la page, et non onze mises au point vignette par vignette —
+     un boitier fait le point sur une scene, pas sur chaque objet l'un apres
+     l'autre.
 
-     Le flou porte sur l'IMAGE et non sur son arriere-plan : `filter` sur un
-     element est peint une fois par image d'animation, la ou `backdrop-filter`
-     recompose toute la zone — c'est ce qui avait fait tomber l'accueil a 14
-     images/s. La cadence est verifiee plus bas.
+     1500ms, dont 30% de maintien au flou avant la resolution : une mise au
+     point qui claque en 600ms ne se lit pas, on la rate.
 
-     La cascade de 80ms du systeme de revelation fait accrocher les vignettes
-     l'une apres l'autre, comme un boitier qui balaie la scene. */
-  .vignette-visuel {
-    position: relative;
+     C'EST LE SEUL FLOU JUSTIFIE DU SITE. Il ne decore pas, il dit « pas encore
+     au point », et il disparait. Quatre tentatives de flou ont ete ecartees sur
+     l'accueil parce qu'elles n'exprimaient rien.
+
+     LE FILTRE EST RETIRE A LA FIN, par le script plus bas. Laisser un
+     `filter: blur(0)` en place maintient une couche de composition pour toute
+     la duree de vie de la page et alourdit le defilement pour rien.
+
+     Pose par une classe ajoutee en JavaScript : sans JavaScript, la page arrive
+     simplement nette. Rien n'est jamais masque par defaut. */
+  :global(main.af-recherche) {
+    animation: page-au-point 1500ms cubic-bezier(0.22, 0, 0, 1) both;
   }
-  .vignette-visuel::after {
-    content: "";
-    position: absolute;
-    inset: 12%;
-    border: 1px solid transparent;
-    opacity: 0;
-    pointer-events: none;
+  @keyframes page-au-point {
+    0% { filter: blur(13px); transform: scale(1.012); }
+    30% { filter: blur(11px); transform: scale(1.01); }
+    100% { filter: blur(0); transform: scale(1); }
   }
-  :global(.reveal-ok) .vignette .vignette-visuel img {
-    opacity: 0;
+  :global(main.af-recherche) ~ .viseur,
+  .viseur {
+    transform-origin: 50% 50%;
   }
-  :global(.reveal-ok) .vignette.vu .vignette-visuel img {
-    animation: mise-au-point 620ms cubic-bezier(0.2, 0, 0, 1) both;
+  :global(body:has(main.af-recherche)) .viseur {
+    animation: viseur-au-point 1500ms cubic-bezier(0.22, 0, 0, 1) both;
   }
-  :global(.reveal-ok) .vignette.vu .vignette-visuel::after {
-    animation: collimateur 620ms cubic-bezier(0.2, 0, 0, 1) both;
+  @keyframes viseur-au-point {
+    0% { transform: scale(1.035); opacity: 0.45; }
+    30% { transform: scale(1.03); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
   }
-  @keyframes mise-au-point {
-    0% { opacity: 0; filter: blur(9px); transform: scale(1.06); }
-    18% { opacity: 1; filter: blur(9px); transform: scale(1.06); }
-    100% { opacity: 1; filter: blur(0); transform: scale(1); }
+  /* Le temoin reste neutre pendant la recherche et passe au vert a l'accroche,
+     comme sur un boitier. */
+  :global(body:has(main.af-recherche)) .viseur-point {
+    animation: temoin-accroche 1500ms steps(1, end) both;
   }
-  @keyframes collimateur {
-    0% { opacity: 0; inset: 2%; border-color: var(--paper); }
-    18% { opacity: 0.9; inset: 2%; border-color: var(--paper); }
-    72% { opacity: 0.9; inset: 16%; border-color: var(--paper); }
-    82% { opacity: 1; inset: 16%; border-color: #1f9d55; }
-    100% { opacity: 0; inset: 16%; border-color: #1f9d55; }
+  @keyframes temoin-accroche {
+    0% { background: var(--rule); }
+    82% { background: var(--rule); }
+    100% { background: #1f9d55; }
   }
+
   /* Une mise au point est du mouvement autonome : coupee des que le systeme
-     demande moins de mouvement, l'image arrive alors simplement nette. */
+     demande moins de mouvement, la page arrive alors simplement nette. */
   @media (prefers-reduced-motion: reduce) {
-    :global(.reveal-ok) .vignette .vignette-visuel img { opacity: 1; }
-    :global(.reveal-ok) .vignette.vu .vignette-visuel img,
-    :global(.reveal-ok) .vignette.vu .vignette-visuel::after { animation: none; }
+    :global(main.af-recherche),
+    :global(body:has(main.af-recherche)) .viseur,
+    :global(body:has(main.af-recherche)) .viseur-point {
+      animation: none !important;
+    }
   }
 
   /* Sous 900px il ne reste plus assez de marge pour les equerres. */
@@ -285,3 +293,21 @@ const commentees = vietnam.post.length + indonesie.post.length;
     }
   }
 </style>
+
+<script>
+  // La mise au point de la page. Posee en JavaScript, donc sans JavaScript la
+  // page arrive simplement nette — rien n'est jamais masque par defaut.
+  const zone = document.querySelector("main");
+  const reduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (zone && !reduit) {
+    zone.classList.add("af-recherche");
+    // Le filtre est RETIRE a la fin : un `filter: blur(0)` laisse en place
+    // maintient une couche de composition pour toute la duree de vie de la page
+    // et alourdit le defilement pour rien.
+    zone.addEventListener(
+      "animationend",
+      (e) => { if (e.target === zone) zone.classList.remove("af-recherche"); },
+      { once: true }
+    );
+  }
+</script>
