@@ -300,3 +300,51 @@ de focus visible.
   pilotée par le viewport.
 - **`--duree: 240ms` et `--duree-longue: 560ms`** tombent dans la fourchette 200-500ms que Material
   Design documente comme la vitesse d'interface optimale — ce que §3 affirmait déjà sans le sourcer.
+
+### Direction créative — ce qui distingue « propre » de « mémorable »
+
+Tout ce qui précède garantit un site cohérent. Ça ne garantit pas qu'il soit intéressant : un site
+qui coche toutes les cases ci-dessus peut rester fade. C'est un défaut déjà nommé pour ce site
+(« la page me paraît un peu fade niveau créativité ») — voici ce que les référentiels externes en
+disent.
+
+- **Un site propre mais oubliable manque d'un moment.** La grille de notation Awwwards pondère la
+  créativité (motifs d'interaction propres, 20 %) séparément du design (hiérarchie, typographie,
+  40 %) — un site peut réussir le premier sans le second. Un guide d'analyse des sites primés le dit
+  sans détour : « techniquement compétent mais oubliable » signifie « aucune interaction dont on se
+  souvienne ». Ce que ce site a construit sans le nommer — le morphing de particules promu de
+  simple ornement à chapitre `02 Outils` — est exactement ce moment.
+- **Un seul moment, pas plusieurs effets.** Le même guide insiste sur la « retenue intentionnelle » :
+  un signature moment par page, pas une addition d'effets. Ça confirme un principe que le système
+  applique déjà sans le sourcer — les titres bimodaux (§1, « L'unique moment display » en
+  commentaire de code) et l'interdiction des dégradés/lueurs/verre dépoli (§1) vont dans le même sens.
+  L'effet de Von Restorff (Hedwig von Restorff, 1933 — l'élément qui détonne dans une série
+  d'éléments semblables est celui qu'on retient) explique pourquoi ça fonctionne : le morphing de
+  particules ne se remarque que parce qu'il est seul à bouger et seul en couleur saturée, au milieu
+  d'un système fixe, à l'encre, sans effet. Le dupliquer sur plusieurs chapitres annulerait l'effet.
+- **Rompre la règle une fois se lit comme une intention ; la rompre plusieurs fois se lit comme une
+  incohérence.** Principe classique de rupture de grille, formulé ainsi dans plusieurs analyses de
+  layouts éditoriaux. La rupture ici n'est pas une bordure ou une colonne — le système ne bascule
+  jamais hors de `--edge` — mais l'échelle : un titre à 130-245px contre un corps à 15px. La règle
+  s'applique quand même : une seule rupture d'échelle par page, jamais deux titres géants qui se
+  disputent l'attention.
+- **La performance est une discipline créative, pas un compromis qui la limite.** Un effet qui rame
+  n'est pas mémorable, il est agaçant. Le plafond de ratio de la toile du morphing
+  (`ratioMax = taille > 340 ? 1.5 : 2` dans `morphOutils.js`) a été choisi précisément pour ça :
+  sans lui, une toile de 460px à ratio 2 tombait à 34 img/s ; avec lui, 60 img/s à toutes les tailles
+  mesurées.
+- **Ce que ce système ne fait délibérément pas.** La tendance de tête des sites primés en 2026 est
+  l'expérience 3D immersive : 61 % des « Site of the Day » Awwwards du premier trimestre en
+  intègrent une, contre 23 % deux ans plus tôt — WebGL/WebGPU et Three.js comme moteur de rendu
+  principal, pas comme enrichissement. Ce site n'y va pas : aucun WebGL, un canvas 2D pour toute
+  animation, et l'interdiction des effets (§1) exclut une bonne partie du vocabulaire visuel de cette
+  tendance (verre, lueur, profondeur). C'est cohérent avec l'objet du site — un CV, pas une vitrine
+  technologique — mais ça reste un choix de registre, pas un point où ce système rivalise avec le
+  haut du panier Awwwards. Le nommer évite de se raconter que « conforme à ce système » équivaut à
+  « à l'avant-garde de la tendance ».
+- **Piste non explorée ici, à considérer si la créativité redevient un chantier** : le « scroll comme
+  narration » — le défilement qui pilote un rythme de révélation pensé, pas seulement un déclencheur
+  binaire visible/caché. Le mécanisme de révélation actuel (§5) est un `IntersectionObserver` avec
+  un `once` : chaque bloc apparaît une fois, dans l'ordre du DOM, avec un décalage fixe de 80ms entre
+  voisins. C'est fiable et jamais cassé sans JS — mais ce n'est pas un rythme composé, c'est une
+  temporisation uniforme.
