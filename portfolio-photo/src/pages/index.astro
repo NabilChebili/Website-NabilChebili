@@ -297,11 +297,11 @@ const univers = [
      exprimes en pixels (64px) ne correspondent plus a rien. Et le filet visible
      ne venait meme pas de la bordure : `border-top` est transparent, c'est
      `.about::before` qui dessine le trait. Regle sur le bon element. */
-  :global(main.page.home) .section-head::after,
-  :global(main.page.home) .colophon::before,
+  /* --edge vaut 64 sur cette page, et le systeme cale desormais ses filets
+     dessus : seul .about::before, propre a l'accueil, reste a aligner. */
   :global(main.page.home) .about::before {
-    left: 64px;
-    right: 64px;
+    left: var(--edge);
+    right: var(--edge);
   }
 
   /* Sous 900px il ne reste plus assez de marge pour loger les equerres sans
@@ -309,12 +309,6 @@ const univers = [
      normaux. */
   @media (max-width: 900px) {
     .viseur { display: none; }
-    :global(main.page.home) .section-head::after,
-    :global(main.page.home) .colophon::before,
-    :global(main.page.home) .about::before {
-      left: 0;
-      right: 0;
-    }
     :global(main.page.home) {
       --edge: 40px;
       padding-top: 64px;

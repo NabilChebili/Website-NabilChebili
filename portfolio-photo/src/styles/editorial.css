@@ -382,12 +382,22 @@ html {
   border-bottom-color: transparent;
 }
 
+/* Le filet s'arrete la ou le texte commence. Il etait a 0/0, donc il debordait
+   du contenu de --edge de chaque cote : sur une galerie, le trait courait de 0
+   a 1440 pendant que « Photographies » et son compteur tenaient entre 40 et
+   1400. Un filet de section souligne un titre, il ne traverse pas la page.
+
+   Corrige ici et non page par page : la meme rustine avait deja ete posee en
+   dur a 64px sur l'accueil puis sur /photo, chaque fois pour la meme raison, et
+   les onze galeries plus /clouddevops gardaient le defaut. En var(--edge) il
+   suit automatiquement les paliers (64 sur les pages a viseur, 40, puis 20 en
+   dessous de 700px) sans qu'aucune page ait a le redire. */
 .section-head::after,
 .colophon::before {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
+  left: var(--edge);
+  right: var(--edge);
   height: 1px;
   background: var(--ink);
   transform: scaleX(0);
@@ -479,9 +489,19 @@ html {
 /* Aligne a gauche et sous 90 caracteres. La justification sans cesure maitrisee
    produit des rivieres de blanc en francais sur colonne etroite, et c'est ce que
    faisaient les pages heritees. */
+/* Le texte de LECTURE est en Sofia Sans, le mono reste aux ETIQUETTES.
+   La regle etait posee en local sur /clouddevops puis sur /photo, chaque fois
+   pour la meme raison — le mono ne fait pas serieux sur du texte suivi — mais
+   les onze galeries, /musique, /gaming et les recits gardaient le mono. Elle
+   monte donc dans le systeme : un seul endroit, toutes les pages.
+
+   Ce qui reste en JetBrains Mono : meta-row, libelles, numeros de chapitre,
+   periodes, etiquettes, compteurs. Le partage est fonctionnel — on lit les
+   phrases, on repere les etiquettes. */
 .prose {
   max-width: 68ch;
   margin: var(--pas-3) 0 0;
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.45;
   text-align: left;

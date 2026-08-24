@@ -339,16 +339,8 @@ const commentees = vietnam.post.length + indonesie.post.length;
 
      Son filet superieur s'arrete au cadre du viseur, comme tous les autres
      filets des pages qui l'affichent. */
-  /* TOUS les filets s'arretent au cadre, pas seulement celui du bloc contact.
-     J'avais pose le viseur sur cette page sans rentrer les filets de section
-     comme je l'avais fait sur l'accueil : mesure, le filet de « 01 Galeries »
-     courait de 0 a 1440 et traversait les equerres de part en part, alors que
-     le meme filet s'arrete a 64px sur l'accueil. Un cadre traverse par un trait
-     n'est plus un cadre. */
   :global(main.page.editorial) .section-head::after,
   :global(.colophon)::before {
-    left: 64px;
-    right: 64px;
     /* Le filet attend que la vague des vignettes soit passee.
        Mesure : le dernier bloc de contenu se revele a y=600 et le bloc contact
        a y=925, soit 325px d'ecart contre 450 sur l'accueil — page plus courte,
@@ -359,14 +351,6 @@ const commentees = vietnam.post.length + indonesie.post.length;
        qu'une fois le bloc atteint. */
     transition-delay: 700ms;
   }
-  @media (max-width: 900px) {
-    :global(main.page.editorial) .section-head::after,
-    :global(.colophon)::before {
-      left: 0;
-      right: 0;
-    }
-  }
-
   @media (max-width: 700px) {
     .ouverture-pied {
       flex-direction: column;
