@@ -56,6 +56,19 @@ const univers = [
   webfont={true}
   mainClass="page home editorial"
 >
+  {/* Le viseur. Le cadre est FIXE et le contenu defile derriere : c'est ce qui
+      le rend honnete plutot que decoratif — il cadre reellement une image qui
+      bouge, au lieu d'etre un autocollant pose autour d'une page immobile. Le
+      compteur en bas est la tete de lecture : il traduit la position de
+      defilement en code temporel, donc faire defiler la page, c'est lire le
+      film. Purement decoratif pour un lecteur d'ecran, d'ou aria-hidden, et
+      pointer-events: none pour ne capter aucun clic. */}
+  <div class="viseur" aria-hidden="true">
+    <i></i><i></i><i></i><i></i>
+    <span class="viseur-rec"><b class="viseur-point"></b>REC</span>
+    <span class="viseur-tc">00:00:00</span>
+  </div>
+
   <section class="opening">
     <div class="meta-row" data-reveal data-groupe="manchette">
       <span><b>958</b> photographies &middot; <b>11</b> galeries</span>
@@ -165,3 +178,132 @@ const univers = [
     </div>
   </section>
 </Layout>
+
+<style>
+  /* --------------------------------------------------------------- viseur ---
+     Quatre equerres epaisses aux angles, fixes au cadre de la fenetre.
+
+     GEOMETRIE, calculee pour qu'aucune equerre ne touche jamais le texte : les
+     equerres occupent les carres d'angle de 16 a 60px (retrait 16 + bras 44).
+     Le contenu commence donc a --edge: 64px sur cette page au lieu de 40 — 24px
+     de retrait en plus de chaque cote, et il n'y a AUCUN recouvrement horizontal
+     possible, quelle que soit la position de defilement. C'est bien moins cher
+     que de resserrer la page en colonne centree, qui aurait coute 200px et
+     renonce au bord a bord dont tout le systeme depend.
+
+     Le rembourrage haut de <main> passe a 112px : sans cela la pastille REC,
+     posee juste sous l'equerre superieure gauche, tombait sur la meta-row.
+     Il faut `main.page.home` et non `main.home` : `.page.editorial` pese
+     0-2-0 contre 0-1-1, donc il gagnait et la regle etait sans effet — mesure
+     a l'appui, le rembourrage restait a 64px.
+
+     Les deux pastilles sont a fond --ink comme les cartouches noirs d'un vrai
+     viseur : elles restent lisibles par-dessus n'importe quel contenu qui
+     defile derriere. C'est assume — un afficheur de camera passe par-dessus
+     l'image, il ne se range pas a cote. */
+  .viseur {
+    position: fixed;
+    inset: 72px 16px 16px;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .viseur i {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+  }
+  .viseur i:nth-child(1) { top: 0; left: 0; border-top: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+  .viseur i:nth-child(2) { top: 0; right: 0; border-top: 3px solid var(--ink); border-right: 3px solid var(--ink); }
+  .viseur i:nth-child(3) { right: 0; bottom: 0; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
+  .viseur i:nth-child(4) { bottom: 0; left: 0; border-bottom: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+
+  .viseur-rec,
+  .viseur-tc {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 5px 9px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+  }
+  .viseur-rec { top: 0; left: 58px; }
+  .viseur-tc {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    letter-spacing: 0.18em;
+  }
+  /* Le seul point de couleur du site. Un temoin d'enregistrement est rouge ou
+     n'est pas — c'est ce qui fait lire « REC » comme un etat et non comme un
+     mot. Jeton local et unique, il n'entre pas dans la palette. */
+  .viseur-point {
+    width: 7px;
+    height: 7px;
+    background: #e0301e;
+    animation: viseur-clignote 1.7s steps(1, end) infinite;
+  }
+  @keyframes viseur-clignote {
+    0%, 55% { opacity: 1; }
+    56%, 100% { opacity: 0.18; }
+  }
+  /* Un temoin qui clignote est du mouvement autonome : coupe des que le
+     systeme demande moins de mouvement. Le point reste, fixe. */
+  @media (prefers-reduced-motion: reduce) {
+    .viseur-point { animation: none; }
+  }
+
+  :global(main.page.home) {
+    --edge: 64px;
+    padding-top: 112px;
+  }
+
+  /* Sous 900px il ne reste plus assez de marge pour loger les equerres sans
+     mordre sur le texte : le viseur disparait et la page reprend ses retraits
+     normaux. */
+  @media (max-width: 900px) {
+    .viseur { display: none; }
+    :global(main.page.home) {
+      --edge: 40px;
+      padding-top: 64px;
+    }
+  }
+  @media (max-width: 700px) {
+    :global(main.page.home) {
+      --edge: 20px;
+      padding-top: 56px;
+    }
+  }
+</style>
+
+<script>
+  // Le code temporel EST la position de defilement : un pixel = une image, lues
+  // a 24 images par seconde. Faire defiler la page revient donc a deplacer la
+  // tete de lecture, ce qui est le seul rapport honnete entre un compteur et
+  // une page — un compteur qui tournerait tout seul mesurerait le temps passe,
+  // pas le film.
+  const tc = document.querySelector(".viseur-tc");
+  if (tc) {
+    const deux = (n) => String(n).padStart(2, "0");
+    let enAttente = false;
+    const majuscule = () => {
+      enAttente = false;
+      const images = Math.max(0, Math.round(window.scrollY));
+      const secondes = Math.floor(images / 24);
+      tc.textContent =
+        deux(Math.floor(secondes / 60)) + ":" + deux(secondes % 60) + ":" + deux(images % 24);
+    };
+    // Passif et amorti par requestAnimationFrame : le defilement ne doit jamais
+    // attendre le compteur.
+    addEventListener(
+      "scroll",
+      () => { if (!enAttente) { enAttente = true; requestAnimationFrame(majuscule); } },
+      { passive: true }
+    );
+    majuscule();
+  }
+</script>

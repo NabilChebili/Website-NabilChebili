@@ -178,15 +178,15 @@ const outils = await Promise.all(
 
 const other = {
   languages: [{ k: "Anglais", v: "Courant (TOEIC 830)" }],
-  // Reperes DERIVES des donnees deja presentes plus haut dans ce fichier, pas
-  // ajoutes de nulle part : le nombre de clients vient de `missions`, les roles
-  // sont ceux qui figurent deja dans les missions (Team Lead & PO sur Societe
-  // Generale, Designer UX & Developpeur FullStack sur Bouygues), et 2020 est
-  // l'annee de la mission la plus ancienne. Les secteurs sont la seule
-  // inference : ils qualifient les clients listes, ils ne sont ecrits nulle
-  // part ailleurs.
+  // Reperes DERIVES des donnees deja presentes plus haut dans ce fichier : les
+  // roles sont ceux qui figurent deja dans les missions (Team Lead & PO sur
+  // Societe Generale, Designer UX & Developpeur FullStack sur Bouygues). Les
+  // secteurs sont la seule inference : ils qualifient les clients listes, ils
+  // ne sont ecrits nulle part ailleurs.
+  // Un repere « Clients : 7 depuis 2020 » a ete essaye puis retire : c'etait
+  // une redite du chapitre 03 juste en dessous, ET de la meta-row en haut de
+  // page qui affiche deja « 7 missions ».
   reperes: [
-    { k: "Clients", v: `${missions.length} depuis 2020` },
     { k: "Rôles", v: "Ingénieur · Team Lead · Product Owner" },
     { k: "Secteurs", v: "Énergie · Banque · Fintech · Télécom · Environnement" },
   ],
