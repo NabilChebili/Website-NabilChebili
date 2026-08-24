@@ -2,7 +2,8 @@
 import "../styles/global.css";
 import Layout from "../layouts/header.astro";
 import Colophon from "../components/Colophon.astro";
-import { getImage } from "astro:assets";
+import { getImage, Image } from "astro:assets";
+import photoPro from "../assets/nabil-ishane.jpg";
 import logoAzure from "../assets/devops/azure.png";
 import logoTerraform from "../assets/devops/terraform.png";
 import logoKube from "../assets/devops/kube.png";
@@ -204,8 +205,13 @@ const other = {
     <h1 class="titre-geant" data-reveal data-groupe="tete">{profile.title}</h1>
 
     <div class="ouverture-pied" data-reveal data-groupe="tete">
-      <p>{profile.subtitle}</p>
-      <a class="jump" href="#missions">Voir les missions &#8595;</a>
+      <div class="ouverture-texte">
+        <p>{profile.subtitle}</p>
+        <a class="jump" href="#missions">Voir les missions &#8595;</a>
+      </div>
+      <figure class="ouverture-media">
+        <Image src={photoPro} alt="Nabil Chebili" width={720} densities={[1, 2]} />
+      </figure>
     </div>
   </section>
 
@@ -469,13 +475,47 @@ const other = {
     color: var(--ink);
     white-space: nowrap;
   }
+  /* La photo passe a droite, dans le meme dispositif que le bloc « qui je suis »
+     de l'accueil : deux colonnes, la seconde fixe a 360px, le visuel dans un
+     cadre a fond --block avec 20px de marge interieure.
+     Pleine largeur, la photo etait inutilisable : le fichier source ne fait que
+     800x408, donc a 1440 elle etait interpolee 1,8x et le flou se voyait sur les
+     lattes de bois. Dans une colonne de 360px (soit 320px d'image), elle est
+     rendue en dessous de sa resolution natale — nette, et le vide a droite de la
+     phrase d'intention se remplit du meme coup. */
   .ouverture-pied {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 52px;
+    /* `start` et non `center` comme sur l'accueil : la-bas le texte est un
+       paragraphe entier, donc les deux colonnes ont des hauteurs comparables.
+       Ici l'intro fait trois lignes contre 280px de photo — centre, le texte
+       descendait au milieu de la rangee et creusait un vide sous le titre. */
+    align-items: start;
     margin-top: 22px;
     padding-bottom: 4px;
+  }
+  .ouverture-texte {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .ouverture-media {
+    box-sizing: border-box;
+    justify-self: end;
+    width: 100%;
+    max-width: 360px;
+    margin: 0;
+    background: var(--block);
+    padding: 20px;
+  }
+  .ouverture-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
   }
   .ouverture-pied p {
     margin: 0;
@@ -483,6 +523,23 @@ const other = {
     font-size: 15px;
     line-height: 1.5;
     color: var(--ink-55);
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Le texte de LECTURE passe en Sofia Sans ; le mono reste aux ETIQUETTES.
+     C'est la distinction qui rend le changement intentionnel plutot qu'une
+     simple substitution de police : tout ce qui se lit en phrases (intro de
+     chapitre, descriptions, resumes de mission, puces, details de
+     certification, notes) prend la meme fonte que la phrase sous le titre, et
+     tout ce qui sert de reperage (meta-row, libelles des reperes, STACK,
+     periodes, numeros de chapitre, tags, roles des outils) garde le mono. */
+  .prose p,
+  .bloc p,
+  .mission-corps h3,
+  .mission-corps p,
+  .puces,
+  .certif-detail,
+  .notes p {
     font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
   }
 
@@ -897,9 +954,11 @@ const other = {
       gap: var(--pas-3);
     }
     .ouverture-pied {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 14px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--pas-3);
+    }
+    .ouverture-media {
+      justify-self: start;
     }
     .section-head.grande {
       margin-top: var(--pas-8);
