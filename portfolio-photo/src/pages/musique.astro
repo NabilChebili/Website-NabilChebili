@@ -223,16 +223,22 @@ const idVideo = (url) =>
 			const lecture = svg.querySelector(".note-lue");
 			const NOMS = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
 
-			// Case survolee. Avant la premiere frette c'est la corde a vide ; au
-			// dela, la case n est celle qui suit la frette n.
+			// Case survolee. Le doigt se pose DERRIERE une frette et la corde est
+			// arretee par celle-ci : l'espace compris entre la frette n-1 (ou le
+			// sillet) et la frette n est donc la case n.
+			//
+			// La version precedente comptait les frettes situees avant le pointeur,
+			// ce qui decalait tout d'un cran — le point de la 3e case annoncait
+			// « case 2 ». Et ma verification ne l'a pas vu parce qu'elle placait le
+			// pointeur avec la meme convention fausse : les deux erreurs
+			// s'annulaient. On teste desormais contre la position des reperes, qui
+			// sont, eux, poses par une autre fonction.
 			function caseSous(x) {
-				if (x < FRETTES[0]) return 0;
-				let n = 0;
-				for (let i = 0; i < FRETTES.length; i++) if (x >= FRETTES[i]) n = i + 1;
-				return n;
+				for (let i = 0; i < FRETTES.length; i++) if (x < FRETTES[i]) return i + 1;
+				return FRETTES.length;
 			}
-			// Le sillet pour la corde a vide, sinon la frette qui arrete la corde.
-			const depart = (n) => (n === 0 ? NUT : FRETTES[n - 1]);
+			// La frette qui arrete la corde : tout ce qui est derriere elle est mort.
+			const depart = (n) => FRETTES[n - 1];
 
 			// Les navigateurs refusent de jouer un son tant que la page n'a recu
 			// aucun geste, et un survol n'en est pas un. Le contexte est donc cree
@@ -365,7 +371,7 @@ const idVideo = (url) =>
 					sonne(440 * Math.pow(2, (midi - 69) / 12));
 					if (lecture) {
 						lecture.textContent =
-							NOMS[midi % 12] + (Math.floor(midi / 12) - 1) + (n ? "  case " + n : "  à vide");
+							NOMS[midi % 12] + (Math.floor(midi / 12) - 1) + "  case " + n;
 						clearTimeout(lisible);
 						lisible = setTimeout(() => (lecture.textContent = ""), 2200);
 					}
