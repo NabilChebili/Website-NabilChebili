@@ -28,8 +28,14 @@ const previewPhotos = photos.slice(0, 4);
   .etape {
     border-top: 1px solid var(--rule);
   }
+
+  /* La premiere etape ne porte pas de filet : celui de « Les etapes du
+     voyage » est juste au-dessus et borne deja la liste. Elle en avait un a
+     l'encre — donc deux traits noirs pleine largeur a 23px d'ecart, pour une
+     seule frontiere. Le filet de section ferme l'entete, les filets gris
+     separent les etapes entre elles ; personne n'a besoin des deux. */
   .etape:first-of-type {
-    border-top-color: var(--ink);
+    border-top: none;
   }
 
   .etape-tete {
