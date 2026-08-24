@@ -178,6 +178,18 @@ const outils = await Promise.all(
 
 const other = {
   languages: [{ k: "Anglais", v: "Courant (TOEIC 830)" }],
+  // Reperes DERIVES des donnees deja presentes plus haut dans ce fichier, pas
+  // ajoutes de nulle part : le nombre de clients vient de `missions`, les roles
+  // sont ceux qui figurent deja dans les missions (Team Lead & PO sur Societe
+  // Generale, Designer UX & Developpeur FullStack sur Bouygues), et 2020 est
+  // l'annee de la mission la plus ancienne. Les secteurs sont la seule
+  // inference : ils qualifient les clients listes, ils ne sont ecrits nulle
+  // part ailleurs.
+  reperes: [
+    { k: "Clients", v: `${missions.length} depuis 2020` },
+    { k: "Rôles", v: "Ingénieur · Team Lead · Product Owner" },
+    { k: "Secteurs", v: "Énergie · Banque · Fintech · Télécom · Environnement" },
+  ],
   notes: [
     "J’aime les environnements complexes et la qualité d’exécution (clarté, standards, sécurité).",
     "Je privilégie la documentation courte, utile, et des templates réutilisables pour accélérer les équipes.",
@@ -341,19 +353,22 @@ const other = {
   <section>
     <div class="section-head grande" data-reveal data-groupe="reperes">
       <span><i class="section-num">05</i> Quelques repères</span>
-      <span>({other.languages.length + other.notes.length})</span>
+      <span>({other.languages.length + other.reperes.length + 1})</span>
     </div>
     <div class="certifs">
       {
-        other.languages.map((l) => (
+        [...other.languages, ...other.reperes].map((l) => (
           <div class="certif" data-reveal data-groupe="reperes">
             <span class="certif-nom">{l.k}</span>
             <span class="certif-detail">{l.v}</span>
           </div>
         ))
       }
-      <div class="notes" data-reveal data-groupe="reperes">
-        {other.notes.map((n) => <p>{n}</p>)}
+      <div class="certif" data-reveal data-groupe="reperes">
+        <span class="certif-nom">Approche</span>
+        <div class="notes">
+          {other.notes.map((n) => <p>{n}</p>)}
+        </div>
       </div>
     </div>
   </section>
@@ -696,6 +711,17 @@ const other = {
     scroll-margin-top: 88px;
   }
 
+  /* L'air avant le colophon etait porte par `.notes`, qui n'est plus un bloc
+     pleine largeur mais le contenu d'une ligne du rail. Il passe donc sur le
+     conteneur du chapitre.
+     `:has(.notes)` et non `section:last-of-type` : le colophon est lui aussi
+     une <section>, donc `last-of-type` visait le colophon et la regle ne
+     s'appliquait nulle part — mesure a l'appui, il restait 14px avant le filet
+     au lieu des 64 voulus. */
+  .certifs:has(.notes) {
+    padding-bottom: var(--pas-8);
+  }
+
   /* ------------------------------------------------------- ce que j'apporte --- */
   .apport,
   .missions,
@@ -915,24 +941,28 @@ const other = {
     color: var(--ink-55);
   }
 
-  /* Le chapitre 05 reprend le rail des certifications juste au-dessus : meme
-     colonne de 260px, meme filet, meme depart a --edge. Avant, c'etait le seul
-     bloc a puces de la page, et son retrait de 18px le sortait du guide gauche
-     que tous les autres blocs respectent. */
+  /* Le chapitre 05 portait deux natures de contenu sous un seul en-tete, sans
+     dire laquelle est laquelle : une competence mesurable (Anglais, TOEIC 830)
+     et deux enonces de methode. Pire, « Anglais » heritait des classes des
+     certifications du chapitre 04, donc une langue avait exactement l'allure
+     d'une certification, et les deux phrases arrivaient derriere un filet sans
+     etiquette.
+
+     Les deux blocs sont maintenant des lignes du meme rail, chacune nommee par
+     sa colonne de gauche : ANGLAIS d'un cote, APPROCHE de l'autre. La colonne
+     de gauche devient une vraie colonne d'etiquettes et le lecteur sait a
+     chaque ligne ce qu'il regarde. Aucun vocabulaire nouveau : c'est la grille
+     `.certif` deja en place.
+
+     Les notes s'empilent au lieu de tenir sur deux colonnes : elles occupent
+     desormais la colonne de droite d'une ligne, pas la pleine largeur. */
   .notes {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--pas-6);
-    /* Le bas : l'air entre chapitres vient de `.section-head.grande
-       { margin-top }`. Le dernier bloc n'est suivi d'aucun en-tete mais du
-       colophon, qui n'apporte pas cette marge : ses phrases arrivaient a 15px
-       du filet, contre 100px partout ailleurs. */
-    padding: 14px 0 var(--pas-8);
-    border-top: 1px solid var(--rule);
+    gap: 10px;
   }
   .notes p {
     margin: 0;
-    max-width: 46ch;
+    max-width: 68ch;
     font-size: 15px;
     line-height: 1.5;
     color: var(--ink-55);
