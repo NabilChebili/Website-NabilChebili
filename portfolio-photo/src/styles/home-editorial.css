@@ -55,12 +55,14 @@
 }
 
 /* L'unique moment display. Bord a bord : la taille est pilotee par la largeur
-   du viewport, pas par une echelle de pas. */
+   du viewport, pas par une echelle de pas. Reduit de 18.7vw a 13vw (~-30%) :
+   le titre prenait 221px de haut a 1440px, contre 114px de meta-row au-dessus
+   et une simple phrase en dessous — trop de poids pour l'ouverture. */
 .mega {
   overflow: clip;
   margin: 26px 0 0;
   font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-  font-size: clamp(44px, 18.7vw, 420px);
+  font-size: clamp(44px, 13vw, 300px);
   font-weight: 800;
   line-height: 0.82;
   letter-spacing: -0.02em;
@@ -266,9 +268,10 @@
   }
 .mega {
     /* Sur un ecran etroit, un nom bord a bord devient illisible : on autorise
-       le retour a la ligne et on reduit la casse de l'echelle. */
+       le retour a la ligne et on reduit la casse de l'echelle. Meme reduction
+       proportionnelle que la regle de base (~-30%). */
     white-space: normal;
-    font-size: clamp(44px, 17vw, 92px);
+    font-size: clamp(44px, 12vw, 64px);
     line-height: 0.88;
   }
 .opening-foot {
