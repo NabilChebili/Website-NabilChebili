@@ -187,15 +187,8 @@ const other = {
 <Layout
   title={profile.title}
   description={profile.subtitle}
-  mainClass="page editorial cdo"
+  mainClass="page editorial"
 >
-  {/* Cadre de visee et rail de defilement : deux calques fixes qui donnent a la
-      page son cadrage cinematographique. Purement decoratifs, donc aria-hidden
-      et pointer-events: none — ils n'entrent pas dans l'arbre d'accessibilite
-      et ne captent aucun clic. */}
-  <div class="cadre-vue" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-  <div class="rail-defilement" aria-hidden="true"></div>
-
   {/* Ouverture au rythme de celle de l'accueil : de petits faits d'abord, qui
       donnent envie de lire, puis le titre bord a bord qui accroche l'oeil, puis
       une seule ligne — la phrase d'intention a gauche, le lien vers la suite a
@@ -445,178 +438,11 @@ const other = {
 </Layout>
 
 <style>
-  /* =========================================================== cadrage ===
-     La page etait « trop blanche » : un aplat de #f4f4f2 sans matiere, ou
-     chaque filet flottait dans du vide. Trois dispositifs y repondent, tous
-     ecrits dans le vocabulaire du systeme — des filets de 1px et une texture,
-     aucun degrade decoratif, aucune lueur, aucune ombre, aucun rayon.
-
-     1. LE GRAIN. Une texture de bruit (feTurbulence en fractalNoise, desaturee
-        par feColorMatrix) tuilee et fixee : elle ne defile pas avec le contenu,
-        donc elle se lit comme un grain d'image et non comme un papier imprime.
-        Deux decisions importantes :
-        - Le grain est DERRIERE le contenu (z-index: -1), pas en surimpression.
-          Un calque de bruit par-dessus le texte changerait le contraste rendu,
-          et les mesures de contraste documentees dans DESIGN.md §8 (4,66:1 sur
-          le libelle des outils, etc.) ne seraient plus valables. Derriere, elles
-          le restent exactement.
-        - La texture est un data-URI tuile, pas un filtre CSS applique en direct.
-          La recette repandue (`filter: contrast(170%) brightness(1000%)` sur un
-          SVG vivant) fait recalculer le filtre a chaque peinture ; ici le SVG
-          est rasterise une fois puis tuile.
-
-     2. LE CADRE DE VISEE. Quatre equerres aux angles de la zone de contenu,
-        fixes. C'est le repere de cadrage d'un viseur de camera, et c'est aussi
-        exactement ce que l'utilisateur a dessine (┐). Elles marquent le cadre de
-        l'image au lieu de laisser le contenu flotter jusqu'au bord.
-
-     3. LE RAIL. Un filet vertical dans la marge gauche, dont la portion a
-        l'encre suit la progression du defilement. Bord de pellicule, piste de
-        montage : le seul endroit de la page ou l'on voit OU on en est. Pilote
-        par `animation-timeline: scroll()`, donc sans JavaScript et hors du fil
-        principal ; sous `@supports`, les navigateurs sans le support gardent le
-        filet statique. */
-
-  .cadre-vue,
-  .rail-defilement {
-    position: fixed;
-    pointer-events: none;
-    z-index: 1;
-  }
-  /* 14px du bord, PAS --edge. A --edge (40px) le cadre tombait exactement la
-     ou commence le contenu : le filet du haut barrait la meta-row (« 7 MISSIONS »
-     et « +4 ANS » traverses par un trait) et le filet de droite tranchait le
-     « S » de « ANS ». A 14px, les bras de 22px s'arretent a 36px — le contenu
-     commence a 40. Aucune collision possible, et le cadre se lit comme le bord
-     de l'image plutot que comme une bordure du texte. */
-  .cadre-vue {
-    inset: 76px 14px 14px;
-  }
-  .cadre-vue i {
-    position: absolute;
-    width: 22px;
-    height: 22px;
-  }
-  .cadre-vue i:nth-child(1) {
-    top: 0;
-    left: 0;
-    border-top: 1px solid var(--rule);
-    border-left: 1px solid var(--rule);
-  }
-  .cadre-vue i:nth-child(2) {
-    top: 0;
-    right: 0;
-    border-top: 1px solid var(--rule);
-    border-right: 1px solid var(--rule);
-  }
-  .cadre-vue i:nth-child(3) {
-    right: 0;
-    bottom: 0;
-    border-right: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
-  }
-  .cadre-vue i:nth-child(4) {
-    bottom: 0;
-    left: 0;
-    border-bottom: 1px solid var(--rule);
-    border-left: 1px solid var(--rule);
-  }
-
-  /* Le rail ne vit plus dans sa propre colonne : il RELIE les deux equerres
-     de gauche. Avant, a 20px alors que le cadre etait a 40, deux filets
-     verticaux presque paralleles se lisaient comme une erreur d'alignement.
-     Aligne sur le cadre (14px) et cale entre les bras des equerres (22px + 8
-     de jeu), le cote gauche devient un trait continu : c'est le bord de
-     pellicule, et c'est le seul cote complet du cadre — les trois autres ne
-     sont marques qu'aux angles. */
-  .rail-defilement {
-    top: 106px;
-    bottom: 44px;
-    left: 14px;
-    width: 1px;
-    background: var(--rule);
-    overflow: hidden;
-  }
-  .rail-defilement::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--ink);
-    transform: scaleY(0);
-    transform-origin: top;
-  }
-  @supports (animation-timeline: scroll()) {
-    .rail-defilement::after {
-      animation: rail-remplir linear;
-      animation-timeline: scroll(root block);
-    }
-  }
-  @keyframes rail-remplir {
-    from {
-      transform: scaleY(0);
-    }
-    to {
-      transform: scaleY(1);
-    }
-  }
-  /* La portion a l'encre suit le defilement, que l'utilisateur pilote lui-meme —
-     ce n'est pas du mouvement autonome. On la neutralise quand meme sous
-     mouvement reduit : le filet statique reste, la progression disparait. */
-  @media (prefers-reduced-motion: reduce) {
-    .rail-defilement::after {
-      animation: none;
-      opacity: 0;
-    }
-  }
-
   /* ------------------------------------------------------------ ouverture ---
      Reprend le registre de l'accueil : le titre bord a bord est l'unique moment
      display de la page, sa taille pilotee par la largeur du viewport et non par
      l'echelle de pas. Les regles sont locales a cette page : celles de l'accueil
      vivent dans home-editorial.css et n'ont pas a etre partagees pour l'instant. */
-  /* Le grain, mesure et non estime a l'oeil. Trois corrections par rapport a
-     une premiere version qui ne se voyait pas du tout (ecart-type des pixels
-     d'une zone vide : 0,00, une seule valeur distincte) :
-
-     - PAS de pseudo-element en `z-index: -1`. Il passait derriere le fond
-       opaque de la page et n'etait jamais peint. Le grain est donc une
-       `background-image` portee par l'element lui-meme : elle se peint
-       au-dessus du `background-color` et SOUS le contenu, ce qui est
-       exactement ce qu'on veut.
-
-     - `background-blend-mode: overlay` et non une simple superposition. En
-       superposition normale, un bruit gris ne peut que FONCER le fond : mesure
-       a 235 de moyenne au lieu de 244, ce qui faisait tomber le contraste du
-       libelle des outils de 4,67:1 a 4,32:1 — sous le seuil WCAG 1.4.3
-       documente dans DESIGN.md §8. En `overlay`, le bruit eclaircit et fonce
-       symetriquement : moyenne 245,7 (donc contraste 4,73:1, legerement
-       MEILLEUR qu'avant), pour un grain bien present.
-
-     - Le contraste du bruit est etire dans le SVG (`feComponentTransfer`,
-       slope 5 centre sur 0,5) plutot que joue sur l'opacite CSS. En `overlay`
-       l'amplitude visible depend de l'ecart du bruit a 128 : etirer le bruit
-       fait passer l'ecart-type de 0,98 a 3,69 sans deplacer la moyenne.
-
-     Le SVG est un data-URI tuile, rasterise une fois : pas de `filter` CSS
-     recalcule a chaque peinture, et pas de `background-attachment: fixed` dont
-     le cout de repeinture au defilement ne valait pas la nuance. */
-  :global(main.cdo) {
-    background-color: var(--paper);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='5' intercept='-2'/%3E%3CfeFuncG type='linear' slope='5' intercept='-2'/%3E%3CfeFuncB type='linear' slope='5' intercept='-2'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
-    background-blend-mode: overlay;
-  }
-  /* Sans ceci, le grain est invisible et la cause est introuvable a l'oeil :
-     `editorial.css` pose `main > section { background: var(--paper) }` (la regle
-     qui neutralise les fonds alternes herites), donc CHAQUE section repeignait
-     un aplat opaque par-dessus le grain de `main`. Mesure : ecart-type 0,00 et
-     une seule valeur de pixel sur une zone vide, alors que la propriete etait
-     bien appliquee sur `main`. Les rendre transparentes ne change aucune
-     couleur — c'est deja --paper juste en dessous — mais laisse passer la
-     texture. */
-  :global(main.cdo) > section {
-    background: transparent;
-  }
-
   .ouverture {
     overflow: clip;
     padding: 8px var(--edge) 0;
@@ -1061,14 +887,7 @@ const other = {
       border-top: 0;
     }
   }
-  /* Sous 700px, --edge tombe a 20px : un cadre a 14px ne laisserait que 6px
-     avant le texte, et un decor de marge n'a pas sa place sur un ecran de cette
-     largeur. Le grain, lui, reste — il ne coute aucune place. */
   @media (max-width: 700px) {
-    .cadre-vue,
-    .rail-defilement {
-      display: none;
-    }
     .colonnes {
       grid-template-columns: minmax(0, 1fr);
       gap: var(--pas-3);
