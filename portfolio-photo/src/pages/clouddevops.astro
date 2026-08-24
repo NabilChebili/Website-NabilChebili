@@ -207,6 +207,16 @@ const other = {
     <div class="ouverture-pied" data-reveal data-groupe="tete">
       <div class="ouverture-texte">
         <p>{profile.subtitle}</p>
+        <div class="reperes">
+          {
+            profile.stats.map((s) => (
+              <div class="repere">
+                <span class="repere-k">{s.k}</span>
+                <span class="repere-v">{s.v}</span>
+              </div>
+            ))
+          }
+        </div>
         <a class="jump" href="#missions">Voir les missions &#8595;</a>
       </div>
       <figure class="ouverture-media">
@@ -214,17 +224,6 @@ const other = {
       </figure>
     </div>
   </section>
-
-  <div class="reperes" data-reveal data-groupe="tete">
-    {
-      profile.stats.map((s) => (
-        <div class="repere">
-          <span class="repere-k">{s.k}</span>
-          <span class="repere-v">{s.v}</span>
-        </div>
-      ))
-    }
-  </div>
 
   <section>
     <div class="section-head grande" data-reveal data-groupe="apport">
@@ -499,7 +498,7 @@ const other = {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: var(--pas-3);
   }
   .ouverture-media {
     box-sizing: border-box;
@@ -561,12 +560,21 @@ const other = {
      reglait la symetrie mais ne formait pas un ensemble. Un fond resout les
      deux : la boite occupe tout son tiers, donc la repartition se voit meme
      quand le texte est court. */
+  /* `auto-fit` plutot que trois colonnes fixes avec des seuils devines. Les
+     reperes vivent dans la colonne de gauche, dont la largeur est le viewport
+     MOINS la photo (360px), l'ecart (52px) et les deux bords (80px) : 948px a
+     1440, mais seulement 408px a 900. Avec des seuils fixes, la mesure a montre
+     du texte tronque entre 701 et 900px — deux colonnes n'y laissaient que
+     154px utiles pour « AGILE (SCRUM/SAFE) » qui en fait 227.
+     280px = 227px de texte le plus large + les 40px de rembourrage + du jeu.
+     La grille compte elle-meme combien de colonnes tiennent, a toute largeur et
+     quel que soit l'espace que prend la photo. `min(..., 100%)` evite le
+     debordement quand le conteneur est plus etroit que le minimum. */
   .reperes {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
     gap: 20px;
-    margin-top: var(--pas-6);
-    padding: 0 var(--edge);
+    width: 100%;
   }
   .repere {
     display: flex;
@@ -917,16 +925,7 @@ const other = {
   /* Les blocs peuvent retrecir sans deborder (le texte se replie a l'interieur),
      donc plus besoin du seuil de 780px qu'imposait la bande en une seule ligne.
      Deux colonnes des que trois deviennent trop etroites, puis une seule. */
-  @media (max-width: 900px) {
-    .reperes {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  @media (max-width: 560px) {
-    .reperes {
-      grid-template-columns: minmax(0, 1fr);
-    }
-  }
+
   @media (max-width: 700px) {
     .colonnes {
       grid-template-columns: minmax(0, 1fr);
