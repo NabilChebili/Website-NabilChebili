@@ -122,21 +122,9 @@ const commentees = vietnam.post.length + indonesie.post.length;
     overflow: clip;
     padding: 8px var(--edge) 0;
   }
+  /* Declaration montee dans editorial.css ; 8 pour « PHOTOGRAPHIE ». */
   .titre-geant {
-    overflow: clip;
-    /* 64px et non 26 : avec un interlignage de 0,82 les lettres DEBORDENT de
-       leur boite. Mesure de texte a texte — la seule qui dise ce que l'oeil
-       voit — les ecarts au bandeau et a l'intro etaient de -6 et -8px,
-       donc le titre chevauchait ses voisins. */
-    margin: 64px 0 0;
-    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-    font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / 8), 300px);
-    font-weight: 800;
-    line-height: 0.82;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    color: var(--ink);
-    white-space: nowrap;
+    --titre-div: 8;
   }
   .ouverture-pied {
     display: flex;

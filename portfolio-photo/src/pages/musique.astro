@@ -14,6 +14,13 @@ const videos = [
 	"https://www.youtube.com/watch?v=6gsqAnGUTvw",
 ];
 
+// Trois faits, tous tires du recit ci-dessous — rien d'invente.
+const reperes = [
+	{ k: "Instrument", v: "Guitare" },
+	{ k: "Apprentissage", v: "Autodidacte" },
+	{ k: "Premier riff", v: "Come As You Are" },
+];
+
 const idVideo = (url) =>
 	url.includes("v=") ? url.split("v=")[1].split("&")[0] : url.split("/").pop();
 ---
@@ -23,17 +30,38 @@ const idVideo = (url) =>
 	description="Guitare, vidéos et progression autodidacte — une page dédiée à la musique."
 	mainClass="page editorial"
 >
-	<section class="tete-page">
-		<h1 class="titre-page" data-reveal data-groupe="tete">Musique</h1>
-		<div class="prose" data-reveal data-groupe="tete">
+	<section class="ouverture">
+		<div class="meta-row" data-reveal data-groupe="tete">
+			<span><b>{videos.length}</b> vidéos &middot; <b>1</b> recueil de tablatures</span>
+			<span>Guitare &middot; Autodidacte</span>
+		</div>
+
+		<h1 class="titre-geant" data-reveal data-groupe="tete">Musique</h1>
+
+		<div class="ouverture-pied" data-reveal data-groupe="tete">
 			<p>
 				Cette page est dédiée à ma passion pour la musique, en particulier la
 				guitare.
 			</p>
+			<div class="reperes">
+				{
+					reperes.map((r) => (
+						<div class="repere">
+							<span class="repere-k">{r.k}</span>
+							<span class="repere-v">{r.v}</span>
+						</div>
+					))
+				}
+			</div>
+			<a class="jump" href="#videos">Voir les vidéos &#8595;</a>
 		</div>
 	</section>
 
-	<section class="duo">
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="recit">
+			<span><i class="section-num">01</i> Le récit</span>
+		</div>
+	<div class="duo">
 		<div class="prose" data-reveal data-groupe="recit">
 			<p>
 				J’ai commencé la guitare presque par hasard, en apprenant le riff de
@@ -60,11 +88,12 @@ const idVideo = (url) =>
 				decoding="async"
 			/>
 		</figure>
+	</div>
 	</section>
 
-	<section>
-		<div class="section-head" data-reveal data-groupe="videos">
-			<span>Vidéos</span>
+	<section id="videos">
+		<div class="section-head grande" data-reveal data-groupe="videos">
+			<span><i class="section-num">02</i> Vidéos</span>
 			<span>({videos.length})</span>
 		</div>
 
@@ -99,8 +128,8 @@ const idVideo = (url) =>
 	</section>
 
 	<section>
-		<div class="section-head" data-reveal data-groupe="tablatures">
-			<span>Tablatures</span>
+		<div class="section-head grande" data-reveal data-groupe="tablatures">
+			<span><i class="section-num">03</i> Tablatures</span>
 			<span>(1)</span>
 		</div>
 		<div class="bloc-tab" data-reveal data-groupe="tablatures">
@@ -174,6 +203,63 @@ const idVideo = (url) =>
 </Layout>
 
 <style>
+	/* ------------------------------------------------------------ ouverture ---
+	   Le patron de /clouddevops : ligne de meta, titre geant, chapo, repères,
+	   lien de saut. La page n'avait qu'une `.tete-page` de 211px la ou les
+	   trois autres pages de section ouvrent sur un bloc complet.
+
+	   Pas de photo ici, contrairement a /clouddevops : la guitare reste dans
+	   le recit, ou elle illustre le texte qu'elle accompagne. L'ouverture est
+	   donc en une seule colonne, et ce sont les repères qui occupent la
+	   largeur. */
+	.ouverture {
+		overflow: clip;
+		padding: 8px var(--edge) 0;
+	}
+	/* 7,8 comme /clouddevops : « MUSIQUE » est plus court que « CLOUD DEVOPS »,
+	   donc aucun risque de rognage, et le titre rend a la meme taille que sur
+	   les pages voisines. */
+	.titre-geant {
+		--titre-div: 7.8;
+	}
+	.ouverture-pied {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--pas-3);
+		margin-top: 64px;
+		padding-bottom: 4px;
+	}
+	/* Sofia Sans et 15px, comme le chapo de /clouddevops : `body` est en
+	   JetBrains Mono, donc un paragraphe sans famille declaree herite du mono. */
+	.ouverture-pied p {
+		margin: 0;
+		max-width: 52ch;
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+		font-size: 15px;
+		line-height: 1.5;
+		color: var(--ink-55);
+	}
+
+	/* Passe-partout a l'encre sur la guitare, comme le portrait de
+	   /clouddevops : la photo etait nue sur le papier. */
+	.duo-media {
+		box-sizing: border-box;
+		background: var(--ink);
+		padding: 20px;
+	}
+
+	/* Plus d'air entre les chapitres, comme sur /clouddevops. */
+	.section-head.grande {
+		margin-top: var(--pas-10);
+	}
+
+	/* La barre du haut est fixe sur 64px : sans cette marge, l'ancre depose le
+	   titre du chapitre derriere elle. */
+	#videos {
+		scroll-margin-top: 88px;
+	}
+
 	.zone-carrousel,
 	.bloc-tab {
 		padding: var(--pas-3) var(--edge) 0;
@@ -193,8 +279,11 @@ const idVideo = (url) =>
 		gap: var(--pas-3);
 		max-width: 68ch;
 	}
+	/* Reste en JetBrains Mono : ce bloc ne s'appelle pas `.prose`, le correctif
+	   de police du systeme ne l'atteignait donc pas. */
 	.bloc-tab p {
 		margin: 0;
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
 		font-size: 15px;
 		line-height: 1.45;
 		color: var(--ink-55);
@@ -257,15 +346,24 @@ const idVideo = (url) =>
 		background: var(--block);
 	}
 
+	/* C'est une phrase d'instruction, pas une etiquette : elle etait en mono
+	   11px tout en capitales, sur 88 caracteres par ligne. En capitales et sur
+	   cette longueur, elle se lisait moins bien que le texte qu'elle sert.
+	   (Deux blocs `.aide` se suivaient ici, le second ne redefinissant que la
+	   marge — fusionnes.) */
 	.aide {
-		margin: var(--pas-3) 0 0;
-		font-size: 11px;
-		letter-spacing: 0.09em;
-		text-transform: uppercase;
+		margin: 12px 0 0;
+		max-width: 62ch;
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+		font-size: 13px;
+		line-height: 1.5;
 		color: var(--ink-55);
 	}
 
-	.aide {
-		margin-top: 12px;
+	/* Le bouton des tablatures touchait le filet du colophon — ecart mesure a
+	   0px, la ou /photo et /clouddevops en laissent 64. C'est le dernier bloc
+	   de la page, l'air lui revient. */
+	.bloc-tab {
+		padding-bottom: var(--pas-8);
 	}
 </style>

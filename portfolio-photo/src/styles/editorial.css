@@ -486,6 +486,72 @@ html {
   color: var(--ink);
 }
 
+/* ------------------------------------------------ titre geant d'ouverture ---
+   Le titre des pages de SECTION — celles qui ouvrent un domaine plutot que de
+   presenter un contenu. Il etait recopie a l'identique dans /clouddevops puis
+   dans /photo ; /musique en aurait fait une troisieme copie, donc il monte ici.
+
+   La taille se calcule sur la largeur DISPONIBLE (viewport moins les deux
+   retraits de bord) divisee par --titre-div, et non en vw : un vw ignore
+   --edge, qui vaut 40 sur les pages ordinaires et 64 sur celles qui portent le
+   viseur. Le diviseur reste page par page parce qu'il depend du mot : « CLOUD
+   DEVOPS » fait 5,356 fois son corps en largeur, contre 4,927 pour « NABIL
+   CHEBILI » — des O, U et D contre des I et des L. A diviseur egal, un mot
+   large deborde et un mot etroit paraitrait petit.
+
+   `overflow: clip` et `white-space: nowrap` : le titre ne se coupe jamais en
+   deux lignes, il retrecit. */
+.titre-geant {
+  --titre-div: 7.8;
+  overflow: clip;
+  /* 64px et non la valeur du pas : avec un interlignage de 0,82 les lettres
+     DEBORDENT de leur boite. Mesure de texte a texte — la seule qui dise ce
+     que l'oeil voit — les ecarts aux voisins etaient negatifs, donc le titre
+     les chevauchait. */
+  margin: 64px 0 0;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / var(--titre-div)), 300px);
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- reperes ---
+   Trois a quatre faits courts poses sous le chapo d'ouverture : une etiquette
+   et une valeur en gros. Meme raison de monter ici que le titre geant — le
+   dispositif etait ne sur /clouddevops et /musique le reprend tel quel. */
+.reperes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 20px;
+  width: 100%;
+}
+.repere {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--block);
+  padding: 18px 20px;
+}
+.repere-k {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+.repere-v {
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
 /* Aligne a gauche et sous 90 caracteres. La justification sans cesure maitrisee
    produit des rivieres de blanc en francais sur colonne etroite, et c'est ce que
    faisaient les pages heritees. */

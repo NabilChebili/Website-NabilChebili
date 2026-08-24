@@ -467,31 +467,11 @@ const other = {
     overflow: clip;
     padding: 8px var(--edge) 0;
   }
+  /* Declaration montee dans editorial.css : seul le diviseur reste ici, il
+     depend du mot. 7,8 pour « CLOUD DEVOPS », qui fait 5,356 fois son corps
+     en largeur. */
   .titre-geant {
-    overflow: clip;
-    /* 64px et non 26 : avec un interlignage de 0,82 les lettres DEBORDENT de
-       leur boite. Mesure de texte a texte — la seule qui dise ce que l'oeil
-       voit — les ecarts au bandeau et a l'intro etaient de -8 et -9px,
-       donc le titre chevauchait ses voisins. */
-    margin: 64px 0 0;
-    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-    /* Le 18,7vw de l'accueil coupait ce titre : « CLOUD DEVOPS » fait 5,356
-       fois son corps en largeur contre 4,927 pour « NABIL CHEBILI » — des O, U
-       et D contre des I et L. A 1440px, 82px depassaient et le S final etait
-       rogne. On divise donc la largeur DISPONIBLE (viewport moins les deux
-       retraits de bord) par ce rapport mesure : le titre tient exactement, a
-       toute largeur.
-       Diviseur porte de 5,4 a 7,8 pour suivre la meme reduction que le titre
-       de l'accueil (18,7vw -> 13vw, environ -30%) : a 1440px le titre passe de
-       252px a 174px. Le rapport texte/corps (5,356) ne change pas, donc la
-       marge de non-rognage grandit d'autant — aucun risque de recoupe. */
-    font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / 7.8), 300px);
-    font-weight: 800;
-    line-height: 0.82;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    color: var(--ink);
-    white-space: nowrap;
+    --titre-div: 7.8;
   }
   /* La photo passe a droite, dans le meme dispositif que le bloc « qui je suis »
      de l'accueil : deux colonnes, la seconde fixe a 360px, le visuel dans un
@@ -618,34 +598,6 @@ const other = {
      La grille compte elle-meme combien de colonnes tiennent, a toute largeur et
      quel que soit l'espace que prend la photo. `min(..., 100%)` evite le
      debordement quand le conteneur est plus etroit que le minimum. */
-  .reperes {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-    gap: 20px;
-    width: 100%;
-  }
-  .repere {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: var(--block);
-    padding: 18px 20px;
-  }
-  .repere-k {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--ink-55);
-  }
-  .repere-v {
-    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
-    font-size: 30px;
-    font-weight: 800;
-    line-height: 1.05;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
 
   /* --------------------------------------------------------------- outils ---
      La toile a gauche, calee sur le bord comme tout le reste de la page, et la
