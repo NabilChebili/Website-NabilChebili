@@ -153,6 +153,16 @@ const commentees = vietnam.post.length + indonesie.post.length;
     line-height: 1.45;
   }
 
+  /* Les vignettes en 4:3 plutot qu'en 4:5. Le portrait imposait 434px de haut
+     par vignette et 2183px de page ; en 4:3 elles tombent a 244px d'image et la
+     page a 1614. Surtout, un cadre portrait coupait en plein milieu les vues
+     larges — un paysage, une scene, une salle — qui sont l'essentiel de ces
+     galeries. Quatre colonnes conservees : avec 11 galeries, cinq colonnes
+     laissent une vignette orpheline sur la derniere rangee. */
+  .vignette-visuel {
+    aspect-ratio: 4 / 3;
+  }
+
   .section-head.grande {
     margin-top: var(--pas-10);
   }
