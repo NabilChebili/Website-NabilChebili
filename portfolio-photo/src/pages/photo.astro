@@ -5,6 +5,7 @@ import galleries from "../data/galleries.json";
 import vietnam from "../data/vietnam.json";
 import indonesie from "../data/indonesie.json";
 import { listBlobsFromPublicContainer } from "../lib/blobList.js";
+import Colophon from "../components/Colophon.astro";
 
 const fallbackCover = "/photos/A7401177.jpg";
 
@@ -106,6 +107,8 @@ const commentees = vietnam.post.length + indonesie.post.length;
       }
     </div>
   </section>
+
+  <Colophon />
 </Layout>
 
 <style>
@@ -314,6 +317,25 @@ const commentees = vietnam.post.length + indonesie.post.length;
   /* L'ancre doit degager le titre de chapitre de la barre fixe de 64px. */
   #galeries {
     scroll-margin-top: 88px;
+  }
+
+  /* Le bloc de contact clot la page, comme sur l'accueil et /clouddevops.
+     /photo etait la seule des trois a passer directement de son dernier bloc au
+     pied de page — d'ou un ecart de 56px la ou l'accueil en a 120, et surtout
+     une fin abrupte. Aucun doublon : le pied de page du gabarit ne porte que la
+     mention de copyright.
+
+     Son filet superieur s'arrete au cadre du viseur, comme tous les autres
+     filets des pages qui l'affichent. */
+  :global(.colophon)::before {
+    left: 64px;
+    right: 64px;
+  }
+  @media (max-width: 900px) {
+    :global(.colophon)::before {
+      left: 0;
+      right: 0;
+    }
   }
 
   @media (max-width: 700px) {
