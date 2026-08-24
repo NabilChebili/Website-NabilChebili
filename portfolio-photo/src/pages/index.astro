@@ -63,10 +63,6 @@ const univers = [
       defilement en code temporel, donc faire defiler la page, c'est lire le
       film. Purement decoratif pour un lecteur d'ecran, d'ou aria-hidden, et
       pointer-events: none pour ne capter aucun clic. */}
-  {/* Les bandes de hors-champ. */}
-  <div class="voile haut" aria-hidden="true"></div>
-  <div class="voile bas" aria-hidden="true"></div>
-
   <div class="viseur" aria-hidden="true">
     <i></i><i></i><i></i><i></i>
     <span class="viseur-rec"><b class="viseur-point"></b>REC</span>
@@ -206,56 +202,37 @@ const univers = [
      defile derriere. C'est assume — un afficheur de camera passe par-dessus
      l'image, il ne se range pas a cote. */
   /* ------------------------------------------------- mise au point ---
-     Le contenu s'estompe en montant vers le cadre et se revele en arrivant par
-     le bas.
+     PAS DE FONDU AUX BORDS. Trois approches ont ete construites et mesurees,
+     les trois echouent. A ne pas reproposer sans lever la contrainte de fond.
 
-     DEUX REGLES QUI ONT COUTE CHER, A NE PAS DEFAIRE.
+     1. FLOU en `backdrop-filter`. Trop cher : defilement continu de bout en
+        bout, 61 images/s sans bande, 37 a une couche par bord, 20 a deux, 14 a
+        trois. A 14 c'est saccade.
 
-     1. AUCUN PALIER DANS LE DEGRADE. Une premiere version montait a l'opacite
-        pleine sur les 64 premiers pixels puis redescendait : ce palier produit
-        une ARETE FRANCHE. Sur le titre geant, haut de 187px, elle coupait au
-        milieu des lettres — ca ne se lit pas comme un fondu, ca se lit comme un
-        rendu casse. Le degrade va donc de transparent a opaque de facon
-        continue sur toute la bande, sans plateau.
+     2. FONDU PAR ELEMENT en `animation-timeline: view()`. La plage depend de la
+        HAUTEUR du bloc, or ils vont de 40 a 400px : un bloc haut sort bien
+        avant d'atteindre le cadre, un bloc court bien apres. Regle pour
+        disparaitre a temps, il efface le texte au centre de l'ecran —
+        retrait 200/160 : 7 blocs touchent encore le cadre, opacite mini 0,84 ;
+        300/220 : 3 blocs, 0,48 ; 420/300 : 0 bloc, 0,00 (illisible).
 
-     2. LE CONTENU DEMARRE SOUS LA BANDE. `padding-top: 200px` contre 136px de
-        bande : la meta-row (« 958 photographies · 11 galeries ») tombe juste
-        en dessous. Avec 112px elle etait DANS la zone opaque et se trouvait
-        effacee DES LE CHARGEMENT, sans avoir defile — du contenu permanent
-        perdu. Verifie au pixel : contraste 234 au chargement, donc intacte.
+     3. VOILE FIXE en degrade. Le seul a satisfaire la mesure au pixel (0 d'ecart
+        au papier dans la bande des equerres) mais il casse le rendu de deux
+        facons visibles uniquement a l'oeil, pas dans mes chiffres :
+        - la meta-row (« 958 photographies · 11 galeries ») tombe a y=112, en
+          pleine zone opaque du voile : elle est effacee DES LE CHARGEMENT, sans
+          avoir defile. Du contenu permanent perdu.
+        - le titre geant fait 187px de haut ; un voile qui l'efface sur ses 64
+          premiers pixels le COUPE au milieu des lettres. Ca ne se lit pas comme
+          un fondu, ca se lit comme un rendu casse.
 
-     Deux autres approches essayees et abandonnees, pour ne pas les reproposer :
-     - flou en `backdrop-filter` : 14 img/s a trois couches par bord contre 61
-       sans. Recompose a chaque image.
-     - fondu par element en `animation-timeline: view()` : sa plage depend de la
-       HAUTEUR du bloc, or ils vont de 40 a 400px. Regle pour disparaitre a
-       temps, il efface le texte au centre de l'ecran (opacite mini 0,00).
-     Le fondu doit dependre de la position A L'ECRAN, donc d'une bande fixe.
+     LA CONTRAINTE DE FOND : le cadre est a 72px, le chrome a 64px, le contenu
+     commence a 112px. Il reste 40px entre le contenu et le cadre — aucune zone
+     de fondu ne tient dans 40px sans mordre sur ce qu'il faut lire.
 
-     Le degrade est interdit par DESIGN.md. Ici il ne decore pas : il signifie un
-     hors-champ, et c'est un fondu vers le papier — geste d'impression avant
-     d'etre geste d'ecran. */
-  .voile {
-    position: fixed;
-    left: 0;
-    right: 0;
-    z-index: 2;
-    pointer-events: none;
-  }
-  .voile.haut {
-    top: 64px;
-    height: 136px;
-    background: linear-gradient(to top, rgba(244, 244, 242, 0) 0%, rgb(244, 244, 242) 100%);
-  }
-  .voile.bas {
-    bottom: 0;
-    height: 146px;
-    background: linear-gradient(to bottom, rgba(244, 244, 242, 0) 0%, rgb(244, 244, 242) 100%);
-    /* La bande basse se retire a l'approche du bas de page : sinon le bloc de
-       contact resterait definitivement estompe, puisqu'on ne peut plus defiler
-       pour le degager — et c'est le seul bloc qui porte une adresse e-mail. */
-    opacity: var(--nettete-bas, 1);
-  }
+     Et accessoirement, un vrai viseur ne floute pas son image aux bords :
+     l'affichage se superpose a une image nette partout. Le hors-champ etait une
+     invention, pas une convention du sujet. */
 
   .viseur {
     position: fixed;
@@ -315,9 +292,7 @@ const univers = [
 
   :global(main.page.home) {
     --edge: 64px;
-    /* 200 et non 112 : voir la regle 2 ci-dessus, le contenu doit demarrer sous
-       la bande de fondu (64 + 136 = 200). */
-    padding-top: 200px;
+    padding-top: 112px;
   }
 
   /* Les filets s'arretent AU cadre au lieu de le traverser.
@@ -355,8 +330,7 @@ const univers = [
      mordre sur le texte : le viseur disparait et la page reprend ses retraits
      normaux. */
   @media (max-width: 900px) {
-    .viseur,
-    .voile { display: none; }
+    .viseur { display: none; }
     :global(main.page.home) .section-head::after,
     :global(main.page.home) .colophon::before {
       left: 0;
@@ -406,25 +380,4 @@ const univers = [
     majuscule();
   }
 
-  // La nettete revient sur les 140 derniers pixels de defilement.
-  const bande = document.querySelector(".voile.bas");
-  if (bande) {
-    let enAttente2 = false;
-    const nettete = () => {
-      enAttente2 = false;
-      const restant =
-        document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
-      document.documentElement.style.setProperty(
-        "--nettete-bas",
-        String(Math.max(0, Math.min(1, restant / 140)))
-      );
-    };
-    addEventListener(
-      "scroll",
-      () => { if (!enAttente2) { enAttente2 = true; requestAnimationFrame(nettete); } },
-      { passive: true }
-    );
-    addEventListener("resize", nettete, { passive: true });
-    nettete();
-  }
 </script>
