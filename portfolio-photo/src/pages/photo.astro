@@ -46,6 +46,14 @@ const commentees = vietnam.post.length + indonesie.post.length;
   description="Galeries photo : voyages, villes, portraits et instantanés."
   mainClass="page editorial"
 >
+  {/* Le viseur de l'accueil, en mode mise au point : le temoin rouge d'un
+      enregistrement devient le point vert d'une mise au point confirmee — c'est
+      le signal qu'affiche un boitier quand l'autofocus a accroche. */}
+  <div class="viseur" aria-hidden="true">
+    <i></i><i></i><i></i><i></i>
+    <span class="viseur-info viseur-af"><b class="viseur-point"></b>AF-S</span>
+  </div>
+
   {/* Meme ouverture que l'accueil et /clouddevops : de petits faits, le titre
       plein cadre, puis une seule ligne — la phrase d'intention a gauche, le lien
       vers la suite a droite. */}
@@ -151,6 +159,100 @@ const commentees = vietnam.post.length + indonesie.post.length;
     font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
     font-size: 17px;
     line-height: 1.45;
+  }
+
+  /* ------------------------------------------------------------- viseur ---
+     Le cadre et le gabarit des cartouches viennent de la primitive partagee
+     d'editorial.css ; ne restent ici que le cartouche propre a cette page et la
+     geometrie qu'il impose.
+
+     Les equerres occupent les carres d'angle jusqu'a 60px, donc --edge doit
+     passer a 64px, et le rembourrage haut a 112 pour que le cartouche AF ne
+     tombe pas sur la meta-row. Mesure, pas estime — c'est la meme contrainte
+     que sur l'accueil. */
+  .viseur-af {
+    top: 0;
+    left: 58px;
+  }
+  /* Vert et non rouge : un boitier allume un temoin vert quand la mise au point
+     est confirmee. C'est le seul point de couleur de la page, et il remplace le
+     rouge de l'accueil au lieu de s'y ajouter — une couleur d'accent par page. */
+  .viseur-point {
+    background: #1f9d55;
+  }
+
+  :global(main.page.editorial) {
+    --edge: 64px;
+    padding-top: 112px;
+  }
+
+  /* ------------------------------------------------------------ autofocus ---
+     Chaque vignette fait sa mise au point en arrivant : l'image entre floue et
+     legerement trop grande, puis se pose nette. C'est le seul endroit du site ou
+     un flou est justifie — il ne decore pas, il DIT « pas encore au point », et
+     il disparait. Le collimateur qui se resserre par-dessus est le repere que le
+     boitier affiche pendant la recherche.
+
+     Le flou porte sur l'IMAGE et non sur son arriere-plan : `filter` sur un
+     element est peint une fois par image d'animation, la ou `backdrop-filter`
+     recompose toute la zone — c'est ce qui avait fait tomber l'accueil a 14
+     images/s. La cadence est verifiee plus bas.
+
+     La cascade de 80ms du systeme de revelation fait accrocher les vignettes
+     l'une apres l'autre, comme un boitier qui balaie la scene. */
+  .vignette-visuel {
+    position: relative;
+  }
+  .vignette-visuel::after {
+    content: "";
+    position: absolute;
+    inset: 12%;
+    border: 1px solid transparent;
+    opacity: 0;
+    pointer-events: none;
+  }
+  :global(.reveal-ok) .vignette .vignette-visuel img {
+    opacity: 0;
+  }
+  :global(.reveal-ok) .vignette.vu .vignette-visuel img {
+    animation: mise-au-point 620ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  :global(.reveal-ok) .vignette.vu .vignette-visuel::after {
+    animation: collimateur 620ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  @keyframes mise-au-point {
+    0% { opacity: 0; filter: blur(9px); transform: scale(1.06); }
+    18% { opacity: 1; filter: blur(9px); transform: scale(1.06); }
+    100% { opacity: 1; filter: blur(0); transform: scale(1); }
+  }
+  @keyframes collimateur {
+    0% { opacity: 0; inset: 2%; border-color: var(--paper); }
+    18% { opacity: 0.9; inset: 2%; border-color: var(--paper); }
+    72% { opacity: 0.9; inset: 16%; border-color: var(--paper); }
+    82% { opacity: 1; inset: 16%; border-color: #1f9d55; }
+    100% { opacity: 0; inset: 16%; border-color: #1f9d55; }
+  }
+  /* Une mise au point est du mouvement autonome : coupee des que le systeme
+     demande moins de mouvement, l'image arrive alors simplement nette. */
+  @media (prefers-reduced-motion: reduce) {
+    :global(.reveal-ok) .vignette .vignette-visuel img { opacity: 1; }
+    :global(.reveal-ok) .vignette.vu .vignette-visuel img,
+    :global(.reveal-ok) .vignette.vu .vignette-visuel::after { animation: none; }
+  }
+
+  /* Sous 900px il ne reste plus assez de marge pour les equerres. */
+  @media (max-width: 900px) {
+    .viseur { display: none; }
+    :global(main.page.editorial) {
+      --edge: 40px;
+      padding-top: 64px;
+    }
+  }
+  @media (max-width: 700px) {
+    :global(main.page.editorial) {
+      --edge: 20px;
+      padding-top: 56px;
+    }
   }
 
   /* Les vignettes en 4:3 plutot qu'en 4:5. Le portrait imposait 434px de haut

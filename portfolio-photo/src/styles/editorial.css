@@ -677,3 +677,52 @@ html {
   letter-spacing: 0.09em;
   color: var(--ink-55);
 }
+
+/* --------------------------------------------------------------- viseur ---
+   Quatre equerres epaisses aux angles de la fenetre, fixes, le contenu defilant
+   derriere. Primitive partagee : aucune page ne l'affiche sans poser le
+   balisage `<div class="viseur"><i></i>x4</div>`, donc la porter ici ne coute
+   rien aux quatorze autres.
+
+   GEOMETRIE. Les equerres occupent les carres d'angle de 16 a 60px (retrait 16
+   + bras 44). Une page qui les affiche doit donc porter `--edge: 64px` au
+   minimum, sinon elles mordent sur le texte — c'est mesure, pas estime.
+
+   Chaque page fournit ses propres cartouches d'affichage en enfants
+   supplementaires : elles se superposent au contenu comme l'afficheur d'une
+   camera, et c'est voulu. */
+.viseur {
+  position: fixed;
+  inset: 72px 16px 16px;
+  pointer-events: none;
+  z-index: 3;
+}
+.viseur i {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+}
+.viseur i:nth-child(1) { top: 0; left: 0; border-top: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+.viseur i:nth-child(2) { top: 0; right: 0; border-top: 3px solid var(--ink); border-right: 3px solid var(--ink); }
+.viseur i:nth-child(3) { right: 0; bottom: 0; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
+.viseur i:nth-child(4) { bottom: 0; left: 0; border-bottom: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+
+/* Le cartouche d'affichage : fond a l'encre pour rester lisible par-dessus
+   n'importe quel contenu qui defile derriere. */
+.viseur-info {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 5px 9px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.viseur-point {
+  width: 7px;
+  height: 7px;
+}

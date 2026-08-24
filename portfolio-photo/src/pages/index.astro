@@ -65,8 +65,8 @@ const univers = [
       pointer-events: none pour ne capter aucun clic. */}
   <div class="viseur" aria-hidden="true">
     <i></i><i></i><i></i><i></i>
-    <span class="viseur-rec"><b class="viseur-point"></b>REC</span>
-    <span class="viseur-tc">00:00:00</span>
+    <span class="viseur-info viseur-rec"><b class="viseur-point"></b>REC</span>
+    <span class="viseur-info viseur-tc">00:00:00</span>
   </div>
 
   <section class="opening">
@@ -241,36 +241,9 @@ const univers = [
      invention, pas une convention du sujet — ce qui explique peut-etre pourquoi
      aucune des quatre versions n'a convaincu. */
 
-  .viseur {
-    position: fixed;
-    inset: 72px 16px 16px;
-    pointer-events: none;
-    z-index: 3;
-  }
-  .viseur i {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-  }
-  .viseur i:nth-child(1) { top: 0; left: 0; border-top: 3px solid var(--ink); border-left: 3px solid var(--ink); }
-  .viseur i:nth-child(2) { top: 0; right: 0; border-top: 3px solid var(--ink); border-right: 3px solid var(--ink); }
-  .viseur i:nth-child(3) { right: 0; bottom: 0; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
-  .viseur i:nth-child(4) { bottom: 0; left: 0; border-bottom: 3px solid var(--ink); border-left: 3px solid var(--ink); }
-
-  .viseur-rec,
-  .viseur-tc {
-    position: absolute;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--ink);
-    color: var(--paper);
-    padding: 5px 9px;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-  }
+  /* Le cadre lui-meme et le gabarit des cartouches vivent dans editorial.css :
+     /photo les reutilise avec un autre affichage. Ne restent ici que les
+     cartouches propres a l'accueil. */
   .viseur-rec { top: 0; left: 58px; }
   .viseur-tc {
     bottom: 0;
@@ -282,8 +255,6 @@ const univers = [
      n'est pas — c'est ce qui fait lire « REC » comme un etat et non comme un
      mot. Jeton local et unique, il n'entre pas dans la palette. */
   .viseur-point {
-    width: 7px;
-    height: 7px;
     background: #e0301e;
     animation: viseur-clignote 1.7s steps(1, end) infinite;
   }
