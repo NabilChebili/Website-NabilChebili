@@ -2,26 +2,737 @@
 import "../styles/global.css";
 import Layout from "../layouts/header.astro";
 import Colophon from "../components/Colophon.astro";
+
+/* Relevé Steam local (localconfig.vdf + appmanifest), arrêté au 25/08/2026.
+   Les heures sont celles du compte, pas une estimation. Le classement du
+   chapitre 02 exclut Rocket League : à l'échelle, sa barre écrase les onze
+   autres au point de les rendre illisibles — l'anomalie a donc son propre
+   chapitre, et le classement redevient lisible sans elle. */
+
+const TOTAL_H = 4635;
+const RL_H = 2440;
+const RESTE_H = TOTAL_H - RL_H;
+
+const classement = [
+	{ nom: "Counter-Strike 2", h: 652, note: "FPS compétitif" },
+	{ nom: "Phasmophobia", h: 177, note: "Horreur coopérative" },
+	{ nom: "Brawlhalla", h: 112, note: "Combat en plateforme" },
+	{ nom: "Satisfactory", h: 102, note: "Usine" },
+	{ nom: "Among Us", h: 79, note: "Déduction sociale" },
+	{ nom: "Fall Guys", h: 72, note: "Party game" },
+	{ nom: "Garry's Mod", h: 51, note: "Bac à sable" },
+	{ nom: "Lethal Company", h: 44, note: "Horreur coopérative" },
+	{ nom: "Street Fighter 6", h: 43, note: "Combat" },
+	{ nom: "TrackMania² Stadium", h: 40, note: "Course au chrono" },
+	{ nom: "Just Cause 3", h: 35, note: "Action solo" },
+	{ nom: "Paladins", h: 34, note: "Tir par héros" },
+];
+const ECHELLE = classement[0].h;
+
+const horreur = [
+	{ nom: "Phasmophobia", h: "177 h" },
+	{ nom: "Lethal Company", h: "44 h" },
+	{ nom: "Content Warning", h: "22 h" },
+	{ nom: "Escape the Backrooms", h: "17 h" },
+	{ nom: "Labyrinthine", h: "9,6 h" },
+	{ nom: "Backrooms : Escape Together", h: "6,6 h" },
+	{ nom: "DEVOUR", h: "6,4 h" },
+	{ nom: "Inside the Backrooms", h: "6,3 h" },
+	{ nom: "Demonologist", h: "5,8 h" },
+	{ nom: "REANIMAL", h: "4,2 h" },
+	{ nom: "PANICORE", h: "2,4 h" },
+	{ nom: "The Joy of Creation", h: "démo" },
+];
+
+const salon = [
+	{ nom: "Among Us", h: "79 h" },
+	{ nom: "Fall Guys", h: "72 h" },
+	{ nom: "PEAK", h: "17 h" },
+	{ nom: "Escape Simulator", h: "14 h" },
+	{ nom: "Portal 2", h: "11 h" },
+	{ nom: "Unrailed!", h: "9,8 h" },
+	{ nom: "Chained Together", h: "9,6 h" },
+	{ nom: "Escape Simulator 2", h: "8,6 h" },
+	{ nom: "Golf It!", h: "3 h" },
+	{ nom: "Overcooked! 2", h: "Epic" },
+	{ nom: "Moving Out", h: "Epic" },
+	{ nom: "Escape Academy", h: "Epic" },
+];
+
+const construire = [
+	{ nom: "Satisfactory", h: "102 h" },
+	{ nom: "shapez 2", h: "20 h" },
+	{ nom: "Civilization VI", h: "14 h" },
+	{ nom: "Crusader Kings III", h: "12 h" },
+];
+
+const versions = [
+	"1.8.9",
+	"1.18.1",
+	"1.18.2",
+	"1.19.2",
+	"1.19.4",
+	"1.20.1",
+	"1.20.2",
+	"1.21.1",
+	"1.21.5",
+	"1.21.11",
+	"26.1",
+	"26.2",
+	"26.3",
+];
+
+const ailleurs = [
+	{ plateforme: "Riot", titres: "League of Legends · VALORANT · Teamfight Tactics" },
+	{ plateforme: "Epic", titres: "Overcooked! 2 · Escape Academy · Moving Out · The Escapists 2 · Orcs Must Die! 3 · Bendy and the Ink Machine · Fear the Spotlight · Doors – Paradox · Sonic Mania · 911 Operator · shapez" },
+	{ plateforme: "GOG", titres: "Golf With Your Friends" },
+	{ plateforme: "Réalité virtuelle", titres: "Half-Life: Alyx · 30 h de SteamVR" },
+];
 ---
 
 <Layout
 	title="Gaming"
-	description="Jeux vidéo, streaming et contenus gaming — en construction."
+	description="4 635 heures de jeu relevées sur 101 titres : le classement, l'anomalie Rocket League, l'étagère horreur coopérative et le reste de la bibliothèque."
 	mainClass="page editorial"
 >
 	<section class="tete-page">
 		<h1 class="titre-page" data-reveal data-groupe="tete">Gaming</h1>
 		<div class="prose" data-reveal data-groupe="tete">
 			<p>
-				Travail en cours — cette page est en construction. Bientôt des retours
-				sur le streaming, mes jeux favoris et quelques captures.
+				Relevé du compte Steam, arrêté au 25 août 2026 : <b>4 635 heures</b> sur
+				<b>101 jeux</b> lancés depuis 2015. Ce ne sont pas des estimations, c'est
+				le compteur.
 			</p>
 			<p>
-				En attendant, la galerie <a class="lien" href="/photo">Photographie</a> est
-				en ligne, et le bloc Contact plus bas permet de me joindre.
+				Ce que la liste raconte tient en deux phrases. Un seul titre pèse plus que
+				les cent autres réunis. Et presque tout le reste se joue à plusieurs — la
+				bibliothèque est moins une collection de jeux qu'une liste de choses à
+				faire avec des gens.
 			</p>
 		</div>
+
+		<div class="reperes reperes-page" data-reveal data-groupe="tete">
+			<div class="repere">
+				<span class="repere-k">Heures cumulées</span>
+				<span class="repere-v">4 635</span>
+			</div>
+			<div class="repere">
+				<span class="repere-k">Jeux lancés</span>
+				<span class="repere-v">101</span>
+			</div>
+			<div class="repere">
+				<span class="repere-k">Part de Rocket League</span>
+				<span class="repere-v">52,6 %</span>
+			</div>
+			<div class="repere">
+				<span class="repere-k">Profondeur du relevé</span>
+				<span class="repere-v">11 ans</span>
+			</div>
+		</div>
+	</section>
+
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="anomalie">
+			<span><i class="section-num">01</i>L'anomalie</span>
+			<span>2 440 h</span>
+		</div>
+
+		<div class="prose bloc-prose" data-reveal data-groupe="anomalie">
+			<p>
+				<b>Rocket League</b> représente <b>52,6 %</b> de tout le temps de jeu
+				relevé. Un titre sorti en 2015, toujours lancé cette semaine, qui pèse à
+				lui seul plus lourd que les cent autres jeux de la bibliothèque
+				additionnés.
+			</p>
+			<p>
+				Deux mille quatre cent quarante heures, c'est <b>101 jours</b> pleins. Le
+				jeu tient en une phrase — des voitures, une balle — et c'est précisément
+				pour ça qu'on y reste : le plafond technique ne se touche jamais, il n'y a
+				rien à débloquer, juste un geste à améliorer.
+			</p>
+		</div>
+
+		{/* Le moment de la page : une seule barre, coupee a la moitie exacte. Un
+		    jeu passe la barre des 50 % a lui seul — c'est tout ce qu'il y a a
+		    lire, et ca se lit sans legende. */}
+		<figure class="partage" data-reveal data-groupe="anomalie">
+			<figcaption>Répartition des 4 635 heures relevées</figcaption>
+
+			<div class="partage-piste">
+				<i class="partage-part" style={`--p:${((RL_H / TOTAL_H) * 100).toFixed(1)}%`}></i>
+				<span class="partage-mediane" aria-hidden="true"></span>
+			</div>
+			<div class="partage-mediane-k" aria-hidden="true"><span>la moitié</span></div>
+
+			<div class="partage-legende">
+				<div class="partage-bloc">
+					<b>Rocket League</b>
+					<em>2 440 h · 52,6 %</em>
+				</div>
+				<div class="partage-bloc partage-bloc-fin">
+					<b>Les 100 autres jeux</b>
+					<em>{RESTE_H.toLocaleString("fr-FR")} h · 47,4 %</em>
+				</div>
+			</div>
+		</figure>
+	</section>
+
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="classement">
+			<span><i class="section-num">02</i>Le classement</span>
+			<span>hors Rocket League</span>
+		</div>
+
+		<div class="prose bloc-prose" data-reveal data-groupe="classement">
+			<p>
+				À l'échelle, la barre de Rocket League réduit les onze suivantes à des
+				traits illisibles. Elle est donc sortie du classement : ci-dessous, la
+				référence pleine largeur est Counter-Strike 2 et ses 652 heures.
+			</p>
+		</div>
+
+		<ol class="rangs">
+			{
+				classement.map((jeu, i) => (
+					<li class="rang" data-reveal data-groupe="rangs">
+						<span class="rang-n">{String(i + 2).padStart(2, "0")}</span>
+						<span class="rang-nom">{jeu.nom}<em class="rang-note">{jeu.note}</em></span>
+						<span class="rang-piste">
+							<i style={`--p:${((jeu.h / ECHELLE) * 100).toFixed(1)}%`}></i>
+						</span>
+						<span class="rang-h">{jeu.h.toLocaleString("fr-FR")} h</span>
+					</li>
+				))
+			}
+		</ol>
+	</section>
+
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="horreur">
+			<span><i class="section-num">03</i>La peur, à plusieurs</span>
+			<span>12 titres · 301 h</span>
+		</div>
+
+		<div class="prose bloc-prose" data-reveal data-groupe="horreur">
+			<p>
+				C'est le rayon le plus fourni de la bibliothèque, et le plus révélateur :
+				douze jeux d'horreur, tous coopératifs, aucun solo. <b>Phasmophobia</b>
+				en concentre 177 à lui seul et tourne encore ce mois-ci.
+			</p>
+			<p>
+				L'intérêt n'est pas d'avoir peur — c'est d'entendre quelqu'un d'autre
+				avoir peur. Le jeu ne sert que de prétexte à la salle vocale.
+			</p>
+		</div>
+
+		<ul class="jeux">
+			{
+				horreur.map((jeu) => (
+					<li class="jeu" data-reveal data-groupe="horreur-liste">
+						<span class="jeu-nom">{jeu.nom}</span>
+						<span class="jeu-h">{jeu.h}</span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="salon">
+			<span><i class="section-num">04</i>Le salon</span>
+			<span>12 titres</span>
+		</div>
+
+		<div class="prose bloc-prose" data-reveal data-groupe="salon">
+			<p>
+				Les jeux qu'on lance à quatre un soir sans rien prévoir : party games,
+				salles d'énigmes, coopération obligatoire. Ils ont en commun de ne rien
+				valoir seul — <b>Chained Together</b> attache littéralement les joueurs
+				les uns aux autres.
+			</p>
+		</div>
+
+		<ul class="jeux">
+			{
+				salon.map((jeu) => (
+					<li class="jeu" data-reveal data-groupe="salon-liste">
+						<span class="jeu-nom">{jeu.nom}</span>
+						<span class="jeu-h">{jeu.h}</span>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="construire">
+			<span><i class="section-num">05</i>Construire</span>
+			<span>Minecraft depuis 1.8.9</span>
+		</div>
+
+		<div class="duo bloc-construire">
+			<div class="prose" data-reveal data-groupe="construire">
+				<p>
+					L'autre versant : les jeux où l'on optimise une chaîne de production
+					plutôt qu'un score. <b>Satisfactory</b> y a pris 102 heures, et
+					<b>shapez 2</b> tournait encore ce mois-ci.
+				</p>
+				<p>
+					En arrière-plan de tout ça, <b>Minecraft</b> depuis la 1.8.9 — soit
+					2015. Treize versions installées, jusqu'aux instantanés de la 26.3,
+					27 mods sous Fabric, et deux mondes qui ont survécu à toutes les
+					migrations.
+				</p>
+			</div>
+
+			<div class="cote" data-reveal data-groupe="construire">
+				<div class="cote-bloc">
+					<span class="cote-k">Usines</span>
+					<ul class="jeux jeux-serre">
+						{
+							construire.map((jeu) => (
+								<li class="jeu">
+									<span class="jeu-nom">{jeu.nom}</span>
+									<span class="jeu-h">{jeu.h}</span>
+								</li>
+							))
+						}
+					</ul>
+				</div>
+				<div class="cote-bloc">
+					<span class="cote-k">Versions Minecraft installées</span>
+					<div class="versions">
+						{versions.map((v) => <span class="version">{v}</span>)}
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="ailleurs">
+			<span><i class="section-num">06</i>Ailleurs</span>
+			<span>4 entrées</span>
+		</div>
+
+		<dl class="ailleurs">
+			{
+				ailleurs.map((bloc) => (
+					<div class="ailleurs-ligne" data-reveal data-groupe="ailleurs-liste">
+						<dt>{bloc.plateforme}</dt>
+						<dd>{bloc.titres}</dd>
+					</div>
+				))
+			}
+		</dl>
 	</section>
 
 	<Colophon />
 </Layout>
+
+<style>
+	/* Le retrait de bord descend d'un niveau, jamais sur la <section> : la
+	   .section-head porte son propre padding et son filet doit courir de bord
+	   a bord. */
+	.reperes-page {
+		margin-top: var(--pas-6);
+	}
+
+	.bloc-prose {
+		padding: var(--pas-3) var(--edge) 0;
+		margin-top: 0;
+	}
+
+	.bloc-construire {
+		grid-template-columns: minmax(0, 1fr) 420px;
+	}
+
+	/* Meme respiration que /clouddevops : a --pas-6 les chapitres se collent au
+	   bloc precedent et le squelette de la page disparait. */
+	.section-head.grande {
+		margin-top: var(--pas-10);
+	}
+
+	/* ------------------------------------------------------------- partage ---
+	   Une seule barre pleine largeur, coupee a 50 % par un filet. La part a
+	   l'encre depasse la coupe : c'est tout le propos du chapitre, et il se lit
+	   sans avoir a comparer deux longueurs. Aucun rayon, aucune ombre, aucun
+	   degrade — un aplat et deux filets. */
+	.partage {
+		margin: var(--pas-6) 0 0;
+		padding: 0 var(--edge);
+	}
+
+	.partage figcaption {
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink-55);
+		margin-bottom: 12px;
+	}
+
+	.partage-piste {
+		position: relative;
+		height: 74px;
+		border: 1px solid var(--ink);
+	}
+
+	.partage-part {
+		display: block;
+		width: var(--p);
+		height: 100%;
+		background: var(--ink);
+		transform-origin: left center;
+	}
+
+	/* La mediane : un filet de 1px a 50 % pile, qui traverse l'aplat en papier
+	   et le vide en encre. Elle doit rester lisible des deux cotes, d'ou les
+	   deux moities de couleurs inversees. */
+	.partage-mediane {
+		position: absolute;
+		top: -1px;
+		bottom: -1px;
+		left: 50%;
+		width: 1px;
+		background: var(--paper);
+	}
+
+	.partage-mediane-k {
+		position: relative;
+		height: 18px;
+		margin-top: 6px;
+	}
+
+	.partage-mediane-k span {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		padding-top: 5px;
+		border-top: 1px solid var(--ink);
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 10px;
+		font-weight: 500;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink-55);
+		white-space: nowrap;
+	}
+
+	.partage-legende {
+		display: grid;
+		grid-template-columns: 52.6% 47.4%;
+		margin-top: 14px;
+	}
+
+	.partage-bloc {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		border-top: 1px solid var(--ink);
+		padding: 10px 14px 0 0;
+	}
+
+	.partage-bloc-fin {
+		padding-left: 14px;
+		border-left: 1px solid var(--rule);
+	}
+
+	.partage-bloc b {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.partage-bloc em {
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-style: normal;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.09em;
+		color: var(--ink-55);
+	}
+
+	.rang-piste i {
+		display: block;
+		width: var(--p);
+		min-width: 2px;
+		height: 100%;
+		background: var(--ink);
+		transform-origin: left center;
+	}
+
+	/* ------------------------------------------------------------- rangs --- */
+	.rangs {
+		list-style: none;
+		margin: 0;
+		padding: var(--pas-3) var(--edge) 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.rang {
+		display: grid;
+		grid-template-columns: 34px minmax(0, 200px) minmax(0, 1fr) 74px;
+		align-items: center;
+		gap: 18px;
+		padding: 13px 0;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.rang:first-child {
+		border-top: 1px solid var(--ink);
+	}
+
+	.rang-n {
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.09em;
+		color: var(--ink-55);
+	}
+
+	.rang-nom {
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.rang-note {
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 400;
+		letter-spacing: 0;
+		text-transform: none;
+		color: var(--ink-55);
+	}
+
+	.rang-piste {
+		display: block;
+		height: 10px;
+	}
+
+	.rang-h {
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.09em;
+		color: var(--ink-55);
+		text-align: right;
+	}
+
+	/* La barre se trace au premier passage dans la fenetre. Conditionnee a
+	   .reveal-ok : sans JavaScript la barre est simplement pleine, jamais a
+	   zero — le meme repli que le systeme de revelation. */
+	:global(.reveal-ok) .rang[data-reveal] .rang-piste i,
+	:global(.reveal-ok) .partage[data-reveal] .partage-part {
+		transform: scaleX(0);
+		transition: transform var(--duree-longue) var(--sortie);
+	}
+
+	:global(.reveal-ok) .rang[data-reveal].vu .rang-piste i,
+	:global(.reveal-ok) .partage[data-reveal].vu .partage-part {
+		transform: scaleX(1);
+	}
+
+	/* ------------------------------------------------------------- listes --- */
+	.jeux {
+		list-style: none;
+		margin: 0;
+		padding: var(--pas-3) var(--edge) 0;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 0 var(--pas-6);
+	}
+
+	.jeu {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 14px;
+		padding: 12px 0;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.jeu-nom {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.jeu-h {
+		flex: none;
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.09em;
+		color: var(--ink-55);
+	}
+
+	/* ------------------------------------------------------------- cote --- */
+	.cote {
+		display: flex;
+		flex-direction: column;
+		gap: var(--pas-3);
+	}
+
+	.cote-bloc {
+		border-top: 1px solid var(--ink);
+		padding-top: 14px;
+	}
+
+	.cote-k {
+		display: block;
+		margin-bottom: 4px;
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink-55);
+	}
+
+	.jeux-serre {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 0;
+	}
+
+	.versions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 10px;
+	}
+
+	.version {
+		border: 1px solid var(--rule);
+		padding: 5px 8px;
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.06em;
+		color: var(--ink-55);
+	}
+
+	/* ---------------------------------------------------------- ailleurs --- */
+	.ailleurs {
+		margin: 0;
+		padding: var(--pas-3) var(--edge) 0;
+	}
+
+	.ailleurs-ligne {
+		display: grid;
+		grid-template-columns: 200px minmax(0, 1fr);
+		gap: 18px;
+		padding: 16px 0;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.ailleurs-ligne:first-child {
+		border-top: 1px solid var(--ink);
+	}
+
+	.ailleurs dt {
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.ailleurs dd {
+		margin: 0;
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+		font-size: 15px;
+		line-height: 1.45;
+		color: var(--ink-55);
+	}
+
+	@media (max-width: 1100px) {
+		.jeux {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 0 var(--pas-3);
+		}
+	}
+
+	@media (max-width: 900px) {
+		.bloc-construire {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		/* .duo fait passer le visuel avant le texte ; ici la colonne de droite
+		   porte des donnees de second rang, le texte doit garder la main. */
+		.cote {
+			order: 0;
+		}
+		.partage-piste {
+			height: 56px;
+		}
+	}
+
+	@media (max-width: 700px) {
+		.jeux {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		/* Sous 700px la piste passe sous la ligne nom + heures, pleine largeur,
+		   plutot que de se comprimer a quelques pixels entre deux colonnes. */
+		.rang {
+			grid-template-columns: 26px minmax(0, 1fr) auto;
+			gap: 4px 12px;
+			padding: 14px 0;
+		}
+		.rang-n {
+			grid-row: 1;
+		}
+		.rang-nom {
+			grid-row: 1;
+		}
+		.rang-h {
+			grid-row: 1;
+		}
+		.rang-piste {
+			grid-column: 2 / 4;
+			grid-row: 2;
+			height: 8px;
+			margin-top: 2px;
+		}
+		/* Deux libelles cote a cote sous 700px tiennent sur 160px chacun : les
+		   noms de jeux y cassent en trois lignes. Ils passent l'un sous l'autre,
+		   la barre gardant seule la comparaison. */
+		.partage-legende {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 0;
+		}
+		.partage-bloc-fin {
+			padding-left: 0;
+			border-left: 0;
+			border-top-color: var(--rule);
+			margin-top: 12px;
+		}
+		.partage-piste {
+			height: 48px;
+		}
+		.ailleurs-ligne {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 8px;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(.reveal-ok) .rang[data-reveal] .rang-piste i,
+		:global(.reveal-ok) .partage[data-reveal] .partage-part {
+			transform: none;
+			transition: none;
+		}
+	}
+</style>
