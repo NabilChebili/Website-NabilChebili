@@ -415,10 +415,11 @@ const idVideo = (url) =>
 				next.setAttribute("aria-disabled", String(index >= items.length - 1));
 			}
 
+			// La mesure est prise au moment du clic, sur la piste elle-meme : elle
+			// est donc toujours a jour, quoi qu'il soit arrive a la mise en page.
 			function scrollToIndex(i) {
-				const w = carousel.getBoundingClientRect().width;
 				index = clamp(i);
-				track.scrollTo({ left: index * w, behavior: "smooth" });
+				track.scrollTo({ left: index * track.clientWidth, behavior: "smooth" });
 				majEtat();
 			}
 
@@ -438,22 +439,16 @@ const idVideo = (url) =>
 			track.addEventListener("scroll", () => {
 				if (minuteur) clearTimeout(minuteur);
 				minuteur = setTimeout(() => {
-					const w = carousel.getBoundingClientRect().width;
-					index = Math.round(track.scrollLeft / w);
+					index = clamp(Math.round(track.scrollLeft / track.clientWidth));
 					majEtat();
 				}, 120);
 			});
 
-			function redimensionne() {
-				const w = carousel.getBoundingClientRect().width;
-				items = Array.from(track.querySelectorAll(".carousel-item"));
-				items.forEach((it) => {
-					it.style.width = w + "px";
-				});
-				scrollToIndex(index);
-			}
-			window.addEventListener("resize", redimensionne);
-			redimensionne();
+			// Un changement de largeur ne casse plus rien (le CSS s'en charge), mais
+			// la position de defilement, elle, est en pixels : on la recale.
+			addEventListener("resize", () => {
+				track.scrollTo({ left: index * track.clientWidth });
+			});
 			majEtat();
 		})();
 	</script>
@@ -603,14 +598,22 @@ const idVideo = (url) =>
 		padding: var(--pas-3) var(--edge) 0;
 	}
 
-	/* Sans plafond, une video 16:9 sur toute la largeur atteignait 690px de haut
-	   et ecrasait le reste de la page. */
-	/* Centre dans la colonne de contenu plutot que cale a gauche : a 880px de
-	   large dans 1360 disponibles, il laissait 480px de vide d'un seul cote.
-	   Centre, le vide se partage et le bloc se lit comme un lecteur. */
+	/* Le lecteur prend toute la colonne de contenu, moins la reserve des deux
+	   fleches. Il plafonnait a 960px pour empecher une video 16:9 d'atteindre
+	   690px de haut — la hauteur est assumee, elle vient avec la largeur.
+	   68px de reserve = 48 de bouton + 20 d'air : la fleche vient alors se caler
+	   exactement sur --edge, comme le titre, le chapo et le manche. */
 	.zone-carrousel {
 		box-sizing: border-box;
-		max-width: 960px;
+		padding-inline: calc(var(--edge) + 68px);
+	}
+	/* Pleine largeur, une video 16:9 grandit sans fin : a 1800px de fenetre elle
+	   atteignait 891px de haut et ne tenait plus a l'ecran. On la borne donc par
+	   la HAUTEUR disponible plutot que par une largeur arbitraire — le ratio est
+	   conserve, et sur un ecran normal la contrainte ne mord pas.
+	   Les fleches suivent : elles sont posees par rapport a ce bloc. */
+	.video-carousel {
+		max-width: min(100%, calc((100vh - 280px) * 16 / 9));
 		margin-inline: auto;
 	}
 
@@ -646,12 +649,10 @@ const idVideo = (url) =>
 	   `position: relative`. */
 	.commandes {
 		position: absolute;
-		/* En DEHORS du lecteur : -54px de chaque cote, soit 14px d'air entre le
-		   bouton et l'image. Le lecteur etant centre, il reste 200px de marge de
-		   part et d'autre — largement de quoi les loger sans deborder. */
+		/* Dans la reserve, donc jamais sur l'image. */
 		top: 50%;
-		left: -76px;
-		right: -76px;
+		left: -68px;
+		right: -68px;
 		transform: translateY(-50%);
 		display: flex;
 		align-items: center;
@@ -664,16 +665,19 @@ const idVideo = (url) =>
 	.commandes .car-btn {
 		pointer-events: auto;
 	}
-	/* Les loger dehors suppose de la marge. Le lecteur plafonne a 960px et se
-	   centre, donc la marge disponible vaut (contenu - 960) / 2 : elle tombe
-	   sous les 76px necessaires des que la fenetre passe sous ~1120px, et les
-	   fleches debordaient alors de la page — mesure, 14px a 820 et 34px a 500
-	   quand elles n'etaient qu'a 54px. En dessous du seuil elles reviennent a
-	   l'interieur du lecteur, ou les 48px de cible restent confortables. */
-	@media (max-width: 1120px) {
+	/* Sur telephone la reserve couterait 136px sur 280 a 372 de large : il ne
+	   resterait presque plus de video. Les fleches passent donc SOUS le lecteur,
+	   centrees — jamais posees sur l'image. */
+	@media (max-width: 760px) {
+		.zone-carrousel {
+			padding-inline: var(--edge);
+		}
 		.commandes {
-			left: 14px;
-			right: 14px;
+			position: static;
+			transform: none;
+			justify-content: center;
+			gap: 12px;
+			margin-top: 14px;
 		}
 	}
 
@@ -741,8 +745,15 @@ const idVideo = (url) =>
 		display: none;
 	}
 
+	/* La largeur vient d'ici, plus du JavaScript. Elle y etait posee en pixels
+	   par un `redimensionne()` appele au chargement et sur `resize` — donc elle
+	   se desynchronisait des que la mise en page changeait SANS evenement resize
+	   (rechargement a chaud, arrivee d'une police, zoom, apparition d'une barre
+	   de defilement) : les elements gardaient leur ancienne largeur et deux
+	   videos s'affichaient cote a cote. `100%` du conteneur ne peut pas mentir. */
 	.carousel-item {
-		flex: 0 0 auto;
+		flex: 0 0 100%;
+		min-width: 0;
 		scroll-snap-align: start;
 		box-sizing: border-box;
 	}
