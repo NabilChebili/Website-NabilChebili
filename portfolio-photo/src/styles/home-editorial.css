@@ -128,10 +128,12 @@
   height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  /* Le sujet est a 45 % de la largeur dans la photo d'origine, et le recadrage
-     4:3 rogne 11 % de la largeur — a position centree il tombait a 44 %. En
-     decalant la fenetre a 8 %, le visage revient a 49,6 % du cadre. */
-  object-position: 8% 50%;
+  /* Le decalage de 8 % qui etait ici avait ete calcule pour la photo
+     precedente, dont le sujet tenait a 45 % de la largeur. Sur celle-ci le
+     visage est deja centre, et le cadrage 4:3 ne rogne que 4,3 % de la largeur
+     (2200x1579, soit un rapport de 1,393 contre 1,333) : garder le decalage
+     aurait pousse le sujet vers la droite. Fenetre centree, donc. */
+  object-position: 50% 50%;
 }
 
 .about-title {
