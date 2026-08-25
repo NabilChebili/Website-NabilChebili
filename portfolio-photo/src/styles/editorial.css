@@ -793,6 +793,77 @@ html {
 .viseur i:nth-child(3) { right: 0; bottom: 0; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
 .viseur i:nth-child(4) { bottom: 0; left: 0; border-bottom: 3px solid var(--ink); border-left: 3px solid var(--ink); }
 
+/* Sur petit ecran le viseur ne disparait pas, il retrecit. Il etait masque sous
+   900px faute de place pour des equerres de 44px a 16px du bord — mais c'est le
+   dispositif qui donne son identite a l'accueil et a /photo, et le supprimer la
+   ou la majorite des visites arrive revenait a ne pas l'avoir.
+
+   Tout est reduit dans les memes proportions : bras de 30px au lieu de 44,
+   trait de 2px au lieu de 3, cartouches d'un cran plus petits. Le cadre se
+   rapproche du bord (10px puis 8) pour laisser au texte le retrait qui lui
+   revient. */
+/* La regle qui dimensionne tout : le bras horizontal d'une equerre ne doit
+   jamais entrer dans la colonne de texte, donc `retrait du cadre + longueur du
+   bras` reste inferieur a --edge. Le cadre etant fixe, le contenu defile
+   indefiniment sous les equerres du bas — un bras trop long finirait par
+   traverser un paragraphe. C'est deja le calcul du bureau : 16 + 44 = 60, pour
+   un --edge de 64. */
+@media (max-width: 900px) {
+  .viseur {
+    inset: 70px 10px 10px;
+  }
+  /* 10 + 26 = 36, pour un --edge de 40. */
+  .viseur i {
+    width: 26px;
+    height: 26px;
+  }
+  .viseur i:nth-child(1),
+  .viseur i:nth-child(2),
+  .viseur i:nth-child(3),
+  .viseur i:nth-child(4) {
+    border-width: 2px;
+  }
+  .viseur-info {
+    gap: 5px;
+    padding: 4px 7px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .viseur-point {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* L'entete fixe tombe de 64 a 56px sous 768px : le cadre suit. */
+@media (max-width: 768px) {
+  .viseur {
+    inset: 62px 8px 8px;
+  }
+}
+
+/* Sur telephone, --edge passe a 28px sur ces deux pages : 6 + 20 = 26, le bras
+   reste dehors. C'est la plus petite equerre qui se lit encore comme un coin de
+   cadre — en deca, ce ne sont plus que deux traits. */
+@media (max-width: 700px) {
+  .viseur {
+    /* La barre de geste des telephones recents mange le bas de l'ecran : sans
+       cette reserve, l'equerre inferieure et le compteur passent dessous. */
+    inset: 62px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .viseur i {
+    width: 20px;
+    height: 20px;
+  }
+  /* Le cartouche etait pose a 58px du coin, une distance calee sur le bras de
+     44px du bureau. Avec un bras de 20px il flottait loin du cadre au lieu d'y
+     etre accroche. */
+  .viseur-rec,
+  .viseur-af {
+    left: 30px;
+  }
+}
+
 /* Le cartouche d'affichage : fond a l'encre pour rester lisible par-dessus
    n'importe quel contenu qui defile derriere. */
 .viseur-info {
