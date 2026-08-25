@@ -5,106 +5,128 @@ const { id = "section", title = "", photos = [] } = Astro.props;
 const previewPhotos = photos.slice(0, 4);
 ---
 
-<details class="accordion-section" id={id}>
-  <summary class="accordion-summary">
-    <div class="accordion-summary-left">
-      <span class="accordion-chevron" aria-hidden="true">›</span>
-      <h3 class="accordion-title">{title}</h3>
-      <span class="accordion-count">{photos.length} photos</span>
-    </div>
-    <div class="accordion-preview" aria-hidden="true">
-      {previewPhotos.map((p) => <img src={p} alt="" loading="lazy" />)}
-    </div>
+<details class="etape" id={id}>
+  <summary class="etape-tete">
+    <span class="etape-gauche">
+      <span class="etape-signe" aria-hidden="true"></span>
+      <span class="etape-titre">{title}</span>
+      <span class="etape-compte">{photos.length} photos</span>
+    </span>
+    <span class="etape-apercu" aria-hidden="true">
+      {previewPhotos.map((p) => <img src={p} alt="" loading="lazy" decoding="async" />)}
+    </span>
   </summary>
-  <div class="accordion-body">
+  <div class="etape-corps">
     <PhotoGrid photos={photos} name={title} />
   </div>
 </details>
 
 <style>
-  .accordion-section {
-    max-width: 1200px;
-    margin: 0 auto 16px;
-    padding: 0 24px;
+  /* Une etape est une ligne de sommaire, pas une carte : un filet, aucun fond,
+     aucun rayon, aucune ombre. Le degrade, les coins arrondis et les ombres
+     portees de la version precedente sont ce que le systeme interdit. */
+  .etape {
+    border-top: 1px solid var(--rule);
   }
 
-  .accordion-summary {
+  /* La premiere etape ne porte pas de filet : celui de « Les etapes du
+     voyage » est juste au-dessus et borne deja la liste. Elle en avait un a
+     l'encre — donc deux traits noirs pleine largeur a 23px d'ecart, pour une
+     seule frontiere. Le filet de section ferme l'entete, les filets gris
+     separent les etapes entre elles ; personne n'a besoin des deux. */
+  .etape:first-of-type {
+    border-top: none;
+  }
+
+  .etape-tete {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 16px 20px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(250, 250, 252, 0.75));
-    border: 1px solid rgba(2, 6, 23, 0.06);
-    border-radius: 14px;
+    padding: 14px 0;
     cursor: pointer;
     list-style: none;
-    box-shadow: 0 4px 18px rgba(2, 6, 23, 0.04);
-    transition: box-shadow 0.2s ease;
   }
-  .accordion-summary::-webkit-details-marker {
+  .etape-tete::-webkit-details-marker {
     display: none;
   }
-  .accordion-summary:hover {
-    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
-  }
 
-  .accordion-summary-left {
+  .etape-gauche {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: baseline;
+    gap: 14px;
     min-width: 0;
   }
 
-  .accordion-chevron {
-    font-size: 1.3rem;
-    line-height: 1;
-    transition: transform 0.25s ease;
-    color: var(--accent, #0b1220);
+  /* Un signe + qui devient − a l'ouverture. Dessine en CSS : deux filets, donc
+     rien a charger et une rotation nette. */
+  .etape-signe {
+    position: relative;
+    flex: 0 0 auto;
+    width: 11px;
+    height: 11px;
+    align-self: center;
   }
-  .accordion-section[open] .accordion-chevron {
+  .etape-signe::before,
+  .etape-signe::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 1px;
+    background: var(--ink);
+    transition: transform var(--duree) var(--sortie);
+  }
+  .etape-signe::after {
     transform: rotate(90deg);
   }
+  .etape[open] .etape-signe::after {
+    transform: rotate(0deg);
+  }
 
-  .accordion-title {
-    font-size: 1.05rem;
+  .etape-titre {
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .etape-compte {
+    font-size: 11px;
     font-weight: 700;
-    margin: 0;
-    color: #0b1220;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
     white-space: nowrap;
   }
 
-  .accordion-count {
-    font-size: 0.85rem;
-    color: #6b7280;
-    white-space: nowrap;
-  }
-
-  .accordion-preview {
+  .etape-apercu {
     display: flex;
-    gap: 6px;
     flex-shrink: 0;
+    gap: 6px;
   }
-  .accordion-preview img {
-    width: 44px;
-    height: 44px;
+  .etape-apercu img {
+    display: block;
+    width: 40px;
+    height: 40px;
     object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.1);
+    background: var(--block);
   }
-  .accordion-section[open] .accordion-preview {
+  .etape[open] .etape-apercu {
     display: none;
   }
 
-  .accordion-body {
+  .etape-corps {
     padding-top: 4px;
   }
 
-  @media (max-width: 600px) {
-    .accordion-section {
-      padding: 0 16px;
+  @media (max-width: 700px) {
+    .etape-titre {
+      font-size: 20px;
     }
-    .accordion-preview img:nth-child(n + 3) {
+    .etape-apercu img:nth-child(n + 3) {
       display: none;
     }
   }

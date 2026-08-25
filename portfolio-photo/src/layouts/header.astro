@@ -1,5 +1,6 @@
 ---
 import "../styles/layout.css";
+import "../styles/editorial.css";
 
 const {
 	title = "Nabil Chebili",
@@ -7,6 +8,13 @@ const {
 		"Portfolio de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
 	image = "/LogoRond.svg",
 	ogType = "website",
+	// Les deux familles du systeme editorial. Chargees partout depuis que le
+	// style couvre l'ensemble du site : la pile systeme ne ferait plus le
+	// travail sur aucune page.
+	webfont = true,
+	// Classe portee par le <main>. Les pages n'emettent plus le leur : il y en
+	// avait deux imbriques sur chaque page, ce que le HTML interdit.
+	mainClass = "page",
 } = Astro.props;
 
 const siteUrl = Astro.site ?? new URL("https://www.nabilchebili.fr");
@@ -14,6 +22,17 @@ const canonicalUrl = Astro.url && siteUrl ? new URL(Astro.url.pathname, siteUrl)
 const ogImageUrl = siteUrl ? new URL(image, siteUrl).href : image;
 
 const fullTitle = String(title).includes("Nabil Chebili") ? String(title) : `${title} — Nabil Chebili`;
+
+// Les crochets de la nav signalent une destination. L'entree de la page ouverte
+// n'en porte donc pas — on y est deja — et ne se souligne pas au survol. La
+// correspondance est exacte : /vietnam ne marque pas /photo comme courant.
+const chemin = (Astro.url?.pathname ?? "/").replace(/\/+$/, "") || "/";
+const sections = [
+	{ href: "/clouddevops", label: "Cloud DevOps" },
+	{ href: "/photo", label: "Photo" },
+	{ href: "/musique", label: "Musique" },
+	{ href: "/gaming", label: "Gaming" },
+];
 
 const schemaPerson = {
 	"@context": "https://schema.org",
@@ -40,6 +59,19 @@ const schemaWebsite = {
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/LogoRond.svg" />
 		<meta name="generator" content={Astro.generator} />
+
+		{
+			webfont ? (
+				<>
+					<link rel="preconnect" href="https://fonts.googleapis.com" />
+					<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+					<link
+						href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sofia+Sans:wght@400;600&family=Sofia+Sans+Condensed:wght@800&display=swap"
+						rel="stylesheet"
+					/>
+				</>
+			) : null
+		}
 		<title>{fullTitle}</title>
 		<meta name="description" content={description} />
 		<meta name="robots" content="index,follow" />
@@ -59,6 +91,11 @@ const schemaWebsite = {
 
 		<script type="application/ld+json">{JSON.stringify(schemaPerson)}</script>
 		<script type="application/ld+json">{JSON.stringify(schemaWebsite)}</script>
+		<script is:inline>
+			// Pose avant le rendu : les elements a reveler ne sont masques que si le
+			// script tourne. Sans JavaScript, rien n'est cache.
+			document.documentElement.classList.add("reveal-ok");
+		</script>
 	</head>
 	<body>
 		<header class="site-header">
@@ -67,21 +104,25 @@ const schemaWebsite = {
 					<a href="/">Nabil Chebili</a>
 				</div>
 				<div class="nav-wrap">
-					<a class="nav-home" href="/">Accueil</a>
+					<a class="nav-home" href="/" aria-current={chemin === "/" ? "page" : undefined}>Accueil</a>
 					<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu">
 						<span class="hamburger" aria-hidden="true">☰</span>
 					</button>
 					<nav id="site-nav" class="site-nav" aria-label="Sections">
-						<a href="/clouddevops">Cloud DevOps</a>
-						<a href="/photo">Photo</a>
-						<a href="/musique">Musique</a>
-						<a href="/gaming">Gaming</a>
+						{
+							sections.map((s) => (
+								// Aucun blanc entre <a> et <span> : Astro ne le supprime pas,
+								// et il se voit comme un decalage du libelle sur l entree
+								// courante, qui n a pas de crochet pour l absorber.
+								<a href={s.href} aria-current={chemin === s.href ? "page" : undefined}><span>{s.label}</span></a>
+							))
+						}
 					</nav>
 				</div>
 			</div>
 		</header>
 
-		<main>
+		<main class={mainClass}>
 			<slot />
 		</main>
 
@@ -112,6 +153,61 @@ const schemaWebsite = {
 					wrap.classList.toggle('open');
 				});
 			})();
+		</script>
+		<script>
+		// Revelation au premier passage, jamais annulee. C'est le motif d'AOS et de
+		// Motion : `once: true`. Une timeline de defilement, elle, remet l'element
+		// dans son etat initial des qu'il sort de la plage — donc le texte
+		// redevenait invisible. Ici l'observateur retire sa surveillance apres le
+		// premier passage : plus rien ne peut re-masquer un contenu.
+		(function () {
+		const cibles = Array.from(document.querySelectorAll("[data-reveal]"));
+		if (!cibles.length) return;
+
+		const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+		const montre = (el) => el.classList.add("vu");
+
+		if (reduit || !("IntersectionObserver" in window)) {
+		cibles.forEach(montre);
+		return;
+		}
+
+		// Cascade de 80ms a l'interieur d'un meme groupe, plafonnee : une liste
+		// longue avec un decalage cumulatif finirait par durer plusieurs secondes.
+		const rangs = new Map();
+		const rang = (el) => {
+		const g = el.dataset.groupe || "seul";
+		const n = rangs.get(g) || 0;
+		rangs.set(g, n + 1);
+		return Math.min(n, 5);
+		};
+
+		const io = new IntersectionObserver(
+		(entrees) => {
+		entrees.forEach((e) => {
+		if (!e.isIntersecting) return;
+		io.unobserve(e.target);
+		e.target.style.transitionDelay = rang(e.target) * 80 + "ms";
+		// Le texte se revele tout de suite : le prendre en otage d'une image
+		// le rendrait invisible pendant tout un chargement lent.
+		montre(e.target);
+		// L'obturateur, lui, n'attend que son image. Il ne s'ouvre donc
+		// jamais sur un cadre vide, et une image en echec l'ouvre quand meme
+		// plutot que de laisser un rectangle gris definitif.
+		e.target.querySelectorAll("img").forEach((im) => {
+		const prete = () => e.target.classList.add("img-prete");
+		if (im.complete) return prete();
+		im.addEventListener("load", prete, { once: true });
+		im.addEventListener("error", prete, { once: true });
+		});
+		});
+		},
+		// 120px d'avance avant de declencher, la valeur par defaut d'AOS
+		{ rootMargin: "0px 0px -120px 0px", threshold: 0 }
+		);
+
+		cibles.forEach((el) => io.observe(el));
+		})();
 		</script>
 	</body>
 </html>

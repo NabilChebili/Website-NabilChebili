@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
 import PhotoGrid from "../components/PhotoGrid.astro";
 import AccordionSection from "../components/AccordionSection.astro";
@@ -34,31 +33,50 @@ const labels = {
 <Layout
   title="Indonésie"
   description="Récit photo d'un voyage à Bali et Lombok : temples, volcans, rizières et plages."
+  mainClass="page editorial"
 >
-  <main class="page">
-    <h1 class="page-title fade-in">Indonésie</h1>
-    <p class="paragraph-center fade-in page-intro">
-      Bali et Lombok : temples flottants, volcans noirs, rizières en terrasses et falaises
-      face à l'océan.
-    </p>
+  <section class="tete-page">
+    <a class="retour" href="/photo">← Toutes les galeries</a>
+    <h1 class="titre-page" data-reveal data-groupe="tete">Indonésie</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p>
+        Bali et Lombok : temples flottants, volcans noirs, rizières en terrasses et falaises
+        face à l'océan.
+      </p>
+    </div>
+  </section>
 
-    <PhotoGrid photos={indonesie.post} name="Indonesie" />
+  <section>
+    <div class="section-head" data-reveal data-groupe="recit">
+      <span>Le récit</span>
+      <span>({indonesie.post.length})</span>
+    </div>
+    <div class="galerie">
+      <PhotoGrid photos={indonesie.post} name="Indonesie" />
+    </div>
+  </section>
 
-    <h2 class="page-title fade-in" style="text-align:center; margin: 20px 0 24px; font-size: 1.4rem;">
-      Les étapes du voyage
-    </h2>
-
-    {Object.keys(indonesie.galleries).map((key) => (
-      <AccordionSection id={key} title={labels[key] ?? key} photos={photosByKey[key]} />
-    ))}
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const title = document.querySelector('.page-title');
-        const intro = document.querySelector('.page-intro');
-        if (title) setTimeout(() => title.classList.add('is-visible'), 120);
-        if (intro) setTimeout(() => intro.classList.add('is-visible'), 420);
-      });
-    </script>
-  </main>
+  <section>
+    <div class="section-head" data-reveal data-groupe="etapes">
+      <span>Les étapes du voyage</span>
+      <span>({Object.keys(indonesie.galleries).length})</span>
+    </div>
+    <div class="etapes">
+      {
+        Object.keys(indonesie.galleries).map((key) => (
+          <AccordionSection id={key} title={labels[key] ?? key} photos={photosByKey[key]} />
+        ))
+      }
+    </div>
+  </section>
 </Layout>
+
+<style>
+  .galerie,
+  .etapes {
+    padding: 0 var(--edge);
+  }
+  .etapes {
+    padding-top: var(--pas-3);
+  }
+</style>

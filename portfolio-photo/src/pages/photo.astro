@@ -1,11 +1,11 @@
 ---
 import "../styles/global.css";
-import "../styles/photo.css";
 import Layout from "../layouts/header.astro";
 import galleries from "../data/galleries.json";
 import vietnam from "../data/vietnam.json";
 import indonesie from "../data/indonesie.json";
 import { listBlobsFromPublicContainer } from "../lib/blobList.js";
+import Colophon from "../components/Colophon.astro";
 
 const fallbackCover = "/photos/A7401177.jpg";
 
@@ -15,11 +15,16 @@ async function firstPhoto(url) {
   return list[0] || fallbackCover;
 }
 
+// Couverture choisie a la main pour la carte Event Databricks : photo portrait, elle tient dans
+// le cadre 4:5 des cartes sans recadrage agressif (les vues larges de l'auditorium se font
+// couper en plein milieu par object-fit: cover).
+const eventDatabricksCover = `${galleries.eventDatabricks}A7405096.jpg`;
+
 const destinations = [
-  { slug: "event-databricks", title: "Event Databricks I-Shane", cover: await firstPhoto(galleries.eventDatabricks) },
-  { slug: "supersonic", title: "SuperSonic", cover: await firstPhoto(galleries.superSonic) },
-  { slug: "vietnam", title: "Vietnam", cover: vietnam.post[0]?.url },
   { slug: "indonesie", title: "Indonésie", cover: indonesie.post[0]?.url },
+  { slug: "vietnam", title: "Vietnam", cover: vietnam.post[0]?.url },
+  { slug: "supersonic", title: "SuperSonic", cover: await firstPhoto(galleries.superSonic) },
+  { slug: "event-databricks", title: "Event Databricks I-Shane", cover: eventDatabricksCover },
   { slug: "illumination", title: "Illumination", cover: await firstPhoto(galleries.illumination) },
   { slug: "londres", title: "Londres", cover: await firstPhoto(galleries.londres) },
   { slug: "gr1-1", title: "GR1 (1)", cover: await firstPhoto(galleries.paris) },
@@ -28,114 +33,344 @@ const destinations = [
   { slug: "mariage", title: "Mariage", cover: await firstPhoto(galleries.mariage) },
   { slug: "croatie", title: "Croatie", cover: await firstPhoto(galleries.croatie) },
 ];
+
+// Les photographies commentees : celles des recits Vietnam et Indonesie, les
+// seules a porter une legende. Compte depuis les donnees, donc juste et tenu a
+// jour tout seul. Le total de photos du site n'est PAS affiche ici : il faudrait
+// lister toutes les galeries distantes au build, et le « 958 » de l'accueil est
+// une valeur ecrite en dur que rien ne verifie.
+const commentees = vietnam.post.length + indonesie.post.length;
 ---
 
 <Layout
   title="Photographie"
   description="Galeries photo : voyages, villes, portraits et instantanés."
+  mainClass="page editorial"
 >
-  <main class="page">
-    <h1 class="page-title fade-in">Photographie</h1>
-    <p class="paragraph-center fade-in page-intro">
-      Bienvenue dans ma sélection photographique : un aperçu de voyages, moments et instants précieux.
-      <br><br>
+  {/* Le viseur de l'accueil, en mode mise au point : le temoin rouge d'un
+      enregistrement devient le point vert d'une mise au point confirmee — c'est
+      le signal qu'affiche un boitier quand l'autofocus a accroche. */}
+  <div class="viseur" aria-hidden="true">
+    <i></i><i></i><i></i><i></i>
+    <span class="viseur-info viseur-af"><b class="viseur-point"></b>AF-S</span>
+  </div>
 
-      A travers le design et la recherche d’esthétique dans les détails, la photographie s’est rapidement imposée comme un moyen d’expression naturel.
-
-      Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main.
-      Chaque déplacement est devenu une occasion de raconter une histoire, de figer une ambiance, un regard, un instant.
-
-      <br><br>
-
-      Cliquez sur une destination pour découvrir sa galerie complète.
-    </p>
-
-    <div class="destination-grid fade-in">
-      {destinations.map((d) => (
-        <a class="destination-card" href={`/${d.slug}`}>
-          <img src={d.cover} alt="" loading="lazy" />
-          <span class="destination-title">{d.title}</span>
-        </a>
-      ))}
+  {/* Meme ouverture que l'accueil et /clouddevops : de petits faits, le titre
+      plein cadre, puis une seule ligne — la phrase d'intention a gauche, le lien
+      vers la suite a droite. */}
+  <section class="ouverture">
+    <div class="meta-row" data-reveal data-groupe="tete">
+      <span>
+        <b>{destinations.length}</b> galeries &middot; <b>{commentees}</b> photographies commentées
+      </span>
+      <span>Voyages, villes et instantanés</span>
     </div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const title = document.querySelector(".page-title");
-        const intro = document.querySelector(".page-intro");
-        const grid = document.querySelector(".destination-grid");
-        if (title) setTimeout(() => title.classList.add("is-visible"), 120);
-        if (intro) setTimeout(() => intro.classList.add("is-visible"), 420);
-        if (grid) setTimeout(() => grid.classList.add("is-visible"), 700);
-      });
-    </script>
-  </main>
+    <h1 class="titre-geant" data-reveal data-groupe="tete">Photographie</h1>
+
+    <div class="ouverture-pied" data-reveal data-groupe="tete">
+      <p>
+        Un aperçu de voyages, de moments et d’instants précieux — appareil en
+        main.
+      </p>
+      <a class="jump" href="#galeries">Voir les galeries &#8595;</a>
+    </div>
+  </section>
+
+  <section id="galeries">
+    <div class="section-head grande" data-reveal data-groupe="galeries">
+      <span><i class="section-num">01</i> Galeries</span>
+      <span>({destinations.length})</span>
+    </div>
+    <div class="apport">
+      <div class="prose" data-reveal data-groupe="galeries">
+        <p>
+          À travers le design et la recherche d’esthétique dans les détails, la
+          photographie s’est rapidement imposée comme un moyen d’expression
+          naturel. Avec le temps, l’envie de capturer le réel m’a poussé à
+          acheter mon premier appareil photo et à voyager, appareil en main.
+          Chaque déplacement est devenu une occasion de raconter une histoire,
+          de figer une ambiance, un regard, un instant.
+        </p>
+      </div>
+    </div>
+    <div class="vignettes">
+      {
+        destinations.map((d) => (
+          <a class="vignette" href={`/${d.slug}`} data-reveal data-groupe="vignettes">
+            <span class="vignette-visuel">
+              <img src={d.cover} alt="" loading="lazy" decoding="async" />
+            </span>
+            <span class="vignette-titre">{d.title}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <Colophon />
 </Layout>
 
 <style>
-  .destination-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: 32px auto 40px;
-    padding: 0 24px;
+  /* ------------------------------------------------------------ ouverture ---
+     Reprise du registre des deux autres pages : la taille du titre vient d'un
+     rapport MESURE — « PHOTOGRAPHIE » fait 5,487 fois son corps en largeur
+     (contre 5,356 pour « CLOUD DEVOPS » et 4,927 pour « NABIL CHEBILI »). On
+     divise la largeur DISPONIBLE par 8, ce qui donne la meme presence que sur
+     /clouddevops : le titre y occupe 931px pour 1360 disponibles, ici 933. */
+  .ouverture {
+    overflow: clip;
+    padding: 8px var(--edge) 0;
+  }
+  /* Declaration montee dans editorial.css ; 8 pour « PHOTOGRAPHIE ». */
+  .titre-geant {
+    --titre-div: 8;
+  }
+  .ouverture-pied {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 32px;
+    margin-top: 64px;
+    padding-bottom: 4px;
+  }
+  .ouverture-pied p {
+    margin: 0;
+    max-width: 52ch;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-55);
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
   }
 
-  .destination-card {
-    position: relative;
-    display: block;
-    aspect-ratio: 4 / 5;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 12px 30px rgba(17, 24, 39, 0.14);
-    text-decoration: none;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-  .destination-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 44px rgba(17, 24, 39, 0.22);
+  .apport {
+    padding: var(--pas-3) var(--edge) 0;
   }
 
-  .destination-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.4s ease;
-  }
-  .destination-card:hover img {
-    transform: scale(1.06);
+  /* Le texte de LECTURE en Sofia Sans, le mono reserve aux ETIQUETTES — meme
+     partage que sur /clouddevops, ou le mono avait ete juge « pas pro » pour du
+     texte suivi. */
+  .prose p {
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.45;
   }
 
-  .destination-card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.65) 100%);
+  /* ------------------------------------------------------------- viseur ---
+     Le cadre et le gabarit des cartouches viennent de la primitive partagee
+     d'editorial.css ; ne restent ici que le cartouche propre a cette page et la
+     geometrie qu'il impose.
+
+     Les equerres occupent les carres d'angle jusqu'a 60px, donc --edge doit
+     passer a 64px, et le rembourrage haut a 112 pour que le cartouche AF ne
+     tombe pas sur la meta-row. Mesure, pas estime — c'est la meme contrainte
+     que sur l'accueil. */
+  .viseur-af {
+    top: 0;
+    left: 58px;
+  }
+  /* Vert et non rouge : un boitier allume un temoin vert quand la mise au point
+     est confirmee. C'est le seul point de couleur de la page, et il remplace le
+     rouge de l'accueil au lieu de s'y ajouter — une couleur d'accent par page. */
+  .viseur-point {
+    background: #1f9d55;
   }
 
-  .destination-title {
-    position: absolute;
-    left: 18px;
-    bottom: 16px;
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.15rem;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
-    z-index: 1;
+  :global(main.page.editorial) {
+    --edge: 64px;
+    padding-top: 112px;
   }
 
-  @media (max-width: 600px) {
-    .destination-grid {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
-      padding: 0 16px;
+  /* ------------------------------------------------------------ autofocus ---
+     La PAGE ENTIERE fait sa mise au point au chargement : elle arrive floue et
+     legerement trop grande, puis se pose nette pendant que les equerres du
+     viseur se resserrent et que le temoin passe au vert. C'est un seul geste a
+     l'echelle de la page, et non onze mises au point vignette par vignette —
+     un boitier fait le point sur une scene, pas sur chaque objet l'un apres
+     l'autre.
+
+     1500ms, dont 30% de maintien au flou avant la resolution : une mise au
+     point qui claque en 600ms ne se lit pas, on la rate.
+
+     C'EST LE SEUL FLOU JUSTIFIE DU SITE. Il ne decore pas, il dit « pas encore
+     au point », et il disparait. Quatre tentatives de flou ont ete ecartees sur
+     l'accueil parce qu'elles n'exprimaient rien.
+
+     LE FILTRE EST RETIRE A LA FIN, par le script plus bas. Laisser un
+     `filter: blur(0)` en place maintient une couche de composition pour toute
+     la duree de vie de la page et alourdit le defilement pour rien.
+
+     Pose par une classe ajoutee en JavaScript : sans JavaScript, la page arrive
+     simplement nette. Rien n'est jamais masque par defaut. */
+  /* Le filtre porte sur les ENFANTS de <main>, pas sur <main> lui-meme, et le
+     viseur en est exclu. Deux raisons, la seconde invisible a l'oeil :
+
+     1. Le cadre est un enfant de <main> : le flouter avec le reste revenait a
+        flouter l'afficheur du boitier, ce qu'aucun viseur ne fait.
+     2. Un `filter` sur un ancetre en fait le BLOC CONTENEUR de ses descendants
+        en `position: fixed`. Le cadre etait donc positionne par rapport a
+        <main> pendant toute l'animation, puis resautait au cadre de la fenetre
+        a la fin — un deplacement que la mesure d'opacite ne voit pas. */
+  :global(main.af-recherche) > *:not(.viseur) {
+    animation: page-au-point 1200ms linear both;
+  }
+  /* LA RECHERCHE. Un autofocus ne va pas du flou au net d'un trait : il
+     s'approche, DEPASSE le point, revient, redepasse un peu moins, puis
+     accroche. Sans ce va-et-vient on lit une simple apparition, pas une mise
+     au point.
+
+     `linear` et non une courbe d'amorti : c'est le mouvement d'un moteur, pas
+     celui d'une interface. La courbe est deja dans les paliers.
+
+     1200ms et non 1500 : a 1500 la recherche trainait. */
+  @keyframes page-au-point {
+    0%   { filter: blur(14px);  transform: scale(1.014); }
+    8%   { filter: blur(13px);  transform: scale(1.013); }
+    26%  { filter: blur(1.4px); transform: scale(1.004); }
+    37%  { filter: blur(6.5px); transform: scale(1.008); }
+    58%  { filter: blur(0.5px); transform: scale(1.001); }
+    69%  { filter: blur(2.8px); transform: scale(1.003); }
+    88%  { filter: blur(0);     transform: scale(1); }
+    100% { filter: blur(0);     transform: scale(1); }
+  }
+  :global(main.af-recherche) ~ .viseur,
+  .viseur {
+    transform-origin: 50% 50%;
+  }
+  :global(body:has(main.af-recherche)) .viseur {
+    animation: viseur-au-point 1200ms linear both;
+  }
+  /* Le cadre ne bouge PAS. Une premiere version le faisait se resserrer d'un
+     scale(1.035) : joli en principe, faux en pratique — sur un boitier, le
+     viseur est un repere fixe, ce sont les collimateurs et les temoins qui
+     reagissent. Et le scale poussait les equerres hors de l'ecran (mesure :
+     bord gauche a -6px pendant l'animation, 16px apres). Il ne reste que la
+     montee en presence. */
+  @keyframes viseur-au-point {
+    0% { opacity: 0.45; }
+    30% { opacity: 0.72; }
+    100% { opacity: 1; }
+  }
+  /* Le temoin reste neutre pendant la recherche et passe au vert a l'accroche,
+     comme sur un boitier. */
+  /* Le temoin reste GRIS pendant toute la recherche et ne passe au vert qu'a
+     l'accroche. Une premiere version le faisait virer au vert a chaque
+     approche du point : c'est faux — un temoin de mise au point confirme une
+     mise au point, il ne commente pas la recherche. Tant que l'image est
+     floue, il reste eteint. */
+  :global(body:has(main.af-recherche)) .viseur-point {
+    animation: temoin-accroche 1200ms steps(1, end) both;
+  }
+  @keyframes temoin-accroche {
+    0%   { background: var(--rule); }
+    88%  { background: var(--rule); }
+    100% { background: #1f9d55; }
+  }
+
+  /* Une mise au point est du mouvement autonome : coupee des que le systeme
+     demande moins de mouvement, la page arrive alors simplement nette. */
+  @media (prefers-reduced-motion: reduce) {
+    :global(main.af-recherche) > *,
+    :global(body:has(main.af-recherche)) .viseur,
+    :global(body:has(main.af-recherche)) .viseur-point {
+      animation: none !important;
     }
-    .destination-title {
-      font-size: 1rem;
-      left: 12px;
-      bottom: 10px;
+  }
+
+  /* Le viseur ne disparait plus sous 900px, il retrecit — sa variante mobile
+     est dans editorial.css. */
+  @media (max-width: 900px) {
+    :global(main.page.editorial) {
+      --edge: 40px;
+      /* Le contenu commence sous le cartouche du viseur, sinon la ligne de meta
+         passait dessous — le cartouche est a 70px et fait 21px de haut. */
+      padding-top: 104px;
+    }
+  }
+  @media (max-width: 700px) {
+    :global(main.page.editorial) {
+      /* 28 et non 20 : il faut de quoi loger l'equerre hors du texte. */
+      --edge: 28px;
+      padding-top: 96px;
+    }
+  }
+
+  /* Les vignettes en 4:3 plutot qu'en 4:5. Le portrait imposait 434px de haut
+     par vignette et 2183px de page ; en 4:3 elles tombent a 244px d'image et la
+     page a 1614. Surtout, un cadre portrait coupait en plein milieu les vues
+     larges — un paysage, une scene, une salle — qui sont l'essentiel de ces
+     galeries. Quatre colonnes conservees : avec 11 galeries, cinq colonnes
+     laissent une vignette orpheline sur la derniere rangee. */
+  .vignette-visuel {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* De l'air entre la derniere rangee et le filet du bloc contact. Mesure : il
+     n'y en avait AUCUN — 0px entre le libelle de la derniere vignette et le
+     trait, contre 78 sur /clouddevops et 80 sur l'accueil. Le filet collait aux
+     legendes. */
+  .vignettes {
+    padding-bottom: var(--pas-10);
+  }
+
+  .section-head.grande {
+    margin-top: var(--pas-10);
+  }
+
+  /* L'ancre doit degager le titre de chapitre de la barre fixe de 64px. */
+  #galeries {
+    scroll-margin-top: 88px;
+  }
+
+  /* Le bloc de contact clot la page, comme sur l'accueil et /clouddevops.
+     /photo etait la seule des trois a passer directement de son dernier bloc au
+     pied de page — d'ou un ecart de 56px la ou l'accueil en a 120, et surtout
+     une fin abrupte. Aucun doublon : le pied de page du gabarit ne porte que la
+     mention de copyright.
+
+     Son filet superieur s'arrete au cadre du viseur, comme tous les autres
+     filets des pages qui l'affichent. */
+  :global(main.page.editorial) .section-head::after,
+  :global(.colophon)::before {
+    /* Le filet attend que la vague des vignettes soit passee.
+       Mesure : le dernier bloc de contenu se revele a y=600 et le bloc contact
+       a y=925, soit 325px d'ecart contre 450 sur l'accueil — page plus courte,
+       tout arrive plus groupe. Or la cascade des vignettes ajoute jusqu'a 400ms
+       de decalage a une animation de 560, donc elle debordait sur le trace du
+       filet : deux mouvements concurrents a l'ecran. 700ms le fait passer
+       apres, sans jamais faire attendre puisqu'il n'est de toute facon visible
+       qu'une fois le bloc atteint. */
+    transition-delay: 700ms;
+  }
+  @media (max-width: 700px) {
+    .ouverture-pied {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .section-head.grande {
+      margin-top: var(--pas-8);
     }
   }
 </style>
+
+<script>
+  // La mise au point de la page. Posee en JavaScript, donc sans JavaScript la
+  // page arrive simplement nette — rien n'est jamais masque par defaut.
+  const zone = document.querySelector("main");
+  const reduit = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (zone && !reduit) {
+    zone.classList.add("af-recherche");
+    // Le filtre est RETIRE a la fin : un `filter: blur(0)` laisse en place
+    // maintient une couche de composition pour toute la duree de vie de la page
+    // et alourdit le defilement pour rien.
+    // L'animation porte maintenant sur les enfants, donc l'evenement REMONTE
+    // jusqu'a <main>. Filtrer sur `e.target === zone` bloquait le retrait de la
+    // classe, et le filtre restait en place.
+    zone.addEventListener(
+      "animationend",
+      () => zone.classList.remove("af-recherche"),
+      { once: true }
+    );
+  }
+</script>

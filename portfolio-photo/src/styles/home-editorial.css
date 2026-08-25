@@ -1,0 +1,402 @@
+/* ============================================================================
+   Home — ce qui n'existe que sur l'accueil.
+
+   Le systeme partage par toutes les pages vit dans editorial.css. Ici : le
+   titre geant, le bloc « qui je suis » et les quatre cartes.
+
+   Construite sur un echantillon mesure de 24 sites primes Awwwards, restreint
+   ensuite aux laureats a fond CLAIR (choix de l'utilisateur) : olhalazarieva.com,
+   normalisboring.es, snp.agency, formandfun.co, madebynull.com, adcker.com.
+
+   Ce que la mesure a montre sur les 24, et qui gouverne ce fichier :
+
+     - 4 % SEULEMENT utilisent la pile systeme pour le corps. Les autres chargent
+       une vraie fonte : Suisse Intl, Neue Haas Grotesk, Aeonik, Neue Montreal,
+       Favorit, Sofia Sans Condensed... Butterick dit la meme chose : eviter les
+       polices systeme et la plupart des fontes gratuites.
+     - Les tailles de titre sont BIMODALES : soit 12-24px, soit 130-245px.
+       Presque rien entre 40 et 80px — c'est exactement la ou vivent les pages
+       generiques, et c'est la que se situaient mes essais precedents.
+     - Mediane de 36 images dans le DOM. Une home a quatre vignettes n'existe
+       pas dans cet echantillon.
+
+   Pairage typographique, deux familles seulement :
+     - Sofia Sans Condensed 800 pour l'unique moment display. C'est la fonte
+       d'olhalazarieva.com, relevee sur le site, et elle est libre.
+     - JetBrains Mono pour toutes les etiquettes, legendes et le corps. Le
+       registre technique n'est pas un effet de style ici : c'est le metier de
+       la personne dont c'est le site.
+
+   Seuils typographiques respectes (Butterick) : corps a 15px, interlignage a
+   145 % maximum, longueur de ligne sous 90 caracteres, et 8 % d'interlettrage
+   ajoute sur les capitales (la regle donne 5 a 12 %).
+
+   Aucun degrade, aucun grain, aucune lueur, aucune ombre portee. Animations en
+   `animation-timeline: view()` dans un @supports, donc sans support le contenu
+   s'affiche en place. Aucun JavaScript.
+   ========================================================================= */
+
+.home {
+  padding: 0;
+}
+
+/* L'en-tete est fixe : sans cette marge, une ancre place le haut de la section
+   sous la barre et le titre disparait. */
+/* L'en-tete est fixe : sans cette marge, une ancre place le haut de la section
+   sous la barre. Ecrite sur une seule ligne a dessein — sur deux lignes, un
+   outil qui cherche le bloc ".about {" tombait sur celui-ci. */
+#explorer,
+.about { scroll-margin-top: 72px; }
+
+/* ------------------------------------------------------------- ouverture --- */
+.opening {
+  overflow: clip;
+  padding: 8px var(--edge) 0;
+}
+
+/* L'unique moment display. Bord a bord : la taille est pilotee par la largeur
+   du viewport, pas par une echelle de pas. Reduit de 18.7vw a 13vw (~-30%) :
+   le titre prenait 221px de haut a 1440px, contre 114px de meta-row au-dessus
+   et une simple phrase en dessous — trop de poids pour l'ouverture. */
+.mega {
+  overflow: clip;
+  /* 64px et non 26 : avec un interlignage de 0,82 les lettres DEBORDENT de leur
+     boite. Mesure de texte a texte — la seule qui dise ce que l'oeil voit —
+     l'ecart au bandeau de metadonnees etait de -10px, donc le titre le
+     chevauchait. */
+  margin: 64px 0 0;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(44px, 13vw, 300px);
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Sous le titre : une seule ligne, la phrase d'intention a gauche et le lien
+   vers la suite a droite. L'ouverture ne porte plus ni portrait ni liste de
+   sections — le portrait appartient a "qui je suis", et la liste repetait la
+   navigation du haut ET les quatre cartes plus bas. */
+.opening-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 32px;
+  /* Meme raison : l'ecart texte au titre etait de -11px. */
+  margin-top: 64px;
+  padding-bottom: 4px;
+}
+
+.opening-foot p {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-55);
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ------------------------------------------------------------ a propos --- */
+
+/* Remise a sa place d'origine : juste apres l'ouverture, avant Explorer. */
+.about {
+  /* Bord droit rentre pour rapprocher le portrait du centre : la section ne
+     porte que le texte a gauche et l'image a droite, rien d'autre ne bouge. */
+  margin: var(--pas-10) 0 0;
+  padding: var(--pas-6) clamp(40px, 8vw, 150px) 0 var(--edge);
+  border-top: 1px solid var(--ink);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 52px;
+  align-items: center;
+}
+
+.about-media {
+  box-sizing: border-box;
+  margin: 0;
+  background: var(--block);
+  padding: 20px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.about-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  /* Le sujet est a 45 % de la largeur dans la photo d'origine, et le recadrage
+     4:3 rogne 11 % de la largeur — a position centree il tombait a 44 %. En
+     decalant la fenetre a 8 %, le visage revient a 49,6 % du cadre. */
+  object-position: 8% 50%;
+}
+
+.about-title {
+  /* balance repartit les deux lignes du titre a longueur egale. */
+  margin: 0 0 18px;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(22px, 2.6vw, 34px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  color: var(--ink);
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+.about-text {
+  /* Les trois premieres lignes remplissaient 98 a 99 % de la mesure (656, 664
+     et 662px sur 668) : un drapeau aussi serre se lit comme une justification
+     ratee. Mesure resserree a 60 signes, et text-wrap: pretty pour eviter les
+     lignes finales orphelines. */
+  margin: 0;
+  /* 15px, interlignage 145 %, ligne sous 90 signes : les seuils de Butterick. */
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 60ch;
+  text-align: left;
+  text-indent: 0;
+  hyphens: manual;
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+  text-wrap: pretty;
+}
+
+/* L'organisation de la page d'origine : quatre cartes sur une rangee, image en
+   haut, puis titre, description et lien. Seul le style change — pas d'ombre
+   portee, pas de fond de carte, pas de coins arrondis, pas de zoom au survol.
+   Un filet sous l'image tient la structure, comme le reste de la page. */
+.activites {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: var(--pas-3) var(--edge) var(--pas-10);
+}
+
+.activite {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.activite-visuel {
+  display: block;
+  overflow: hidden;
+  background: var(--block);
+  aspect-ratio: 3 / 2;
+  max-height: 340px;
+}
+
+.activite-visuel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* La couleur revient au survol : l'image reste en place, seul son rendu change.
+   Plus discret qu'un agrandissement, et ca signale la carte active sans bouger
+   la mise en page. */
+.activite:focus-visible .activite-visuel img {
+  filter: grayscale(0) contrast(1);
+}
+
+.activite-titre {
+  margin: 14px 0 0;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(19px, 1.7vw, 24px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.activite-note {
+  margin: 7px 0 12px;
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-55);
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.activite-lien {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+
+.activite-lien i {
+  font-style: normal;
+  font-weight: 500;
+  transition: transform var(--duree) var(--sortie);
+}
+
+.activite:hover .activite-lien i,
+.activite:focus-visible .activite-lien i {
+  transform: translateX(6px);
+}
+
+.activite:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+/* ------------------------------------------- animations liees au scroll --- */
+
+
+
+/* ------------------------------------------------------------ responsive --- */
+@media (max-width: 1100px) {
+.activites {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+.about {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+.about-media {
+    justify-self: center;
+    margin-right: 0;
+  }
+.mega {
+    /* Sur un ecran etroit, un nom bord a bord devient illisible : on autorise
+       le retour a la ligne et on reduit la casse de l'echelle. Meme reduction
+       proportionnelle que la regle de base (~-30%). */
+    white-space: normal;
+    font-size: clamp(44px, 12vw, 64px);
+    line-height: 0.88;
+  }
+.opening-foot {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+.about,
+  .colophon {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+.about {
+    margin-top: 56px;
+  }
+.activites {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+/* Quatre portraits 4:5 pleine largeur donnaient une page de 3879px : beaucoup
+     de defilement pour quatre entrees. Le 3:2 raccourcit sans rien couper. */
+.activite-visuel {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+.activite-lien {
+  text-decoration: none;
+}
+
+/* --------------------------------------------------- mouvement reduit --- */
+@media (prefers-reduced-motion: reduce) {
+.mega span {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================================================
+   Gestes creatifs — un seul motif decline : la ligne et le masque.
+   ========================================================================= */
+
+/* --- le titre entre lettre par lettre, chacune sous son propre masque --- */
+.mega {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.mega-lettre {
+  display: inline-block;
+  /* le masque, c'est le h1 lui-meme qui a overflow: clip ; chaque lettre monte
+     depuis sa ligne de base avec 40ms d'ecart sur la precedente */
+  animation: monteLettre 720ms var(--sortie) both;
+  animation-delay: calc(var(--i) * 40ms);
+  will-change: transform;
+}
+
+@keyframes monteLettre {
+  from {
+    transform: translateY(102%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.about {
+  border-top-color: transparent;
+}
+
+.about::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 680ms var(--sortie);
+}
+
+.about {
+  position: relative;
+}
+
+.about::before {
+  top: -1px;
+}
+
+.about:has([data-reveal].vu)::before {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+.mega-lettre {
+    animation: none !important;
+    transform: none !important;
+  }
+.about::before,
+  .section-head::after,
+  .colophon::before {
+    transition: none !important;
+    transform: scaleX(1) !important;
+  }
+}
+
+/* Sur une carte, le trait ne souligne pas un mot : il signale que le bloc entier
+   est actif. Il court donc sur toute la largeur, contrairement aux liens de
+   navigation ou il suit le texte. */
+.activite-lien {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size var(--duree-longue) var(--sortie);
+}
+
+.activite:hover .activite-lien,
+.activite:focus-visible .activite-lien {
+  background-size: 100% 1px;
+}
+

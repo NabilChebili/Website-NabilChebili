@@ -1,0 +1,885 @@
+/* ============================================================================
+   Le systeme editorial, partage par les 16 pages.
+
+   header.astro importe cette feuille, donc toute page qui utilise le gabarit
+   en herite : jetons, fond, typographie, chrome (en-tete, nav, pieds),
+   rythme des sections, en-tetes de section, bloc de contact, revelations au
+   defilement et soulignements au survol.
+
+   Ce qui reste dans home-editorial.css : uniquement ce qui n'existe que sur
+   l'accueil — le titre geant, le bloc « qui je suis » et les quatre cartes.
+
+   Les choix (echantillon de 24 sites primes, seuils de Butterick, systeme de
+   motion) sont documentes en tete de home-editorial.css.
+   ========================================================================= */
+
+/* ============================================================================
+   Home — composition editoriale sur fond clair.
+
+   Construite sur un echantillon mesure de 24 sites primes Awwwards, restreint
+   ensuite aux laureats a fond CLAIR (choix de l'utilisateur) : olhalazarieva.com,
+   normalisboring.es, snp.agency, formandfun.co, madebynull.com, adcker.com.
+
+   Ce que la mesure a montre sur les 24, et qui gouverne ce fichier :
+
+     - 4 % SEULEMENT utilisent la pile systeme pour le corps. Les autres chargent
+       une vraie fonte : Suisse Intl, Neue Haas Grotesk, Aeonik, Neue Montreal,
+       Favorit, Sofia Sans Condensed... Butterick dit la meme chose : eviter les
+       polices systeme et la plupart des fontes gratuites.
+     - Les tailles de titre sont BIMODALES : soit 12-24px, soit 130-245px.
+       Presque rien entre 40 et 80px — c'est exactement la ou vivent les pages
+       generiques, et c'est la que se situaient mes essais precedents.
+     - Mediane de 36 images dans le DOM. Une home a quatre vignettes n'existe
+       pas dans cet echantillon.
+
+   Pairage typographique, deux familles seulement :
+     - Sofia Sans Condensed 800 pour l'unique moment display. C'est la fonte
+       d'olhalazarieva.com, relevee sur le site, et elle est libre.
+     - JetBrains Mono pour toutes les etiquettes, legendes et le corps. Le
+       registre technique n'est pas un effet de style ici : c'est le metier de
+       la personne dont c'est le site.
+
+   Seuils typographiques respectes (Butterick) : corps a 15px, interlignage a
+   145 % maximum, longueur de ligne sous 90 caracteres, et 8 % d'interlettrage
+   ajoute sur les capitales (la regle donne 5 a 12 %).
+
+   Aucun degrade, aucun grain, aucune lueur, aucune ombre portee. Animations en
+   `animation-timeline: view()` dans un @supports, donc sans support le contenu
+   s'affiche en place. Aucun JavaScript.
+   ========================================================================= */
+:root {
+  --paper: #f4f4f2;
+  --ink: #0a0a0a;
+  --ink-55: #5c5c58;
+  --rule: #c9c9c4;
+  --block: #e6e6e2;
+  --edge: 40px;
+  /* Systeme de motion. Une transition d'interface tient entre 200 et 300ms :
+     au-dela de 500 elle est molle, en dessous de 100 elle est seche. La courbe
+     de deceleration correspond a la physique reelle — depart franc, arrivee
+     posee. */
+  --duree: 240ms;
+  --duree-longue: 560ms;
+  --sortie: cubic-bezier(0.2, 0, 0, 1);
+  --pas-3: 24px;
+  --pas-6: 48px;
+  --pas-8: 64px;
+  --pas-10: 80px;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo,
+    monospace;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- chrome --- */
+
+/* Nav entre crochets, en mono minuscule : le motif releve sur
+   olhalazarieva.com ([ ABOUT ME ] [ WORKS ]). */
+.site-header {
+  background: var(--paper);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
+  height: 56px;
+}
+
+.header-inner {
+  height: 56px;
+  padding: 0 var(--edge);
+}
+
+.brand a {
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.nav-home,
+.site-nav a {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.footer-nav,
+.site-footer {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.footer-nav {
+  padding: 0 0 40px;
+}
+
+.footer-nav nav a {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.site-footer {
+  color: var(--ink-55);
+  padding: 0 0 36px;
+}
+
+main > section,
+main > section:nth-child(even) {
+  background: var(--paper);
+}
+
+/* Bandeau de metadonnees : chiffres releves a gauche, fonction a droite. */
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+  padding-bottom: 0;
+}
+
+.meta-row b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.jump {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- univers --- */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 20px;
+  margin: var(--pas-6) 0 0;
+  padding: 0 var(--edge) 9px;
+  border-bottom: 1px solid var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.section-head span:last-child {
+  color: var(--ink-55);
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------- colophon --- */
+.colophon {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: var(--pas-8);
+  padding: var(--pas-8) var(--edge);
+  border-top: 1px solid var(--ink);
+}
+
+.colophon h2 {
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+
+.colophon p {
+  margin: 0 0 12px;
+  /* 15px, interlignage 145 %, ligne sous 90 caracteres : les trois seuils de
+     Butterick pour un texte courant. */
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 74ch;
+  text-align: left;
+  text-indent: 0;
+  hyphens: manual;
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.colophon .fine {
+  font-size: 12px;
+  color: var(--ink-55);
+}
+
+.colophon .fine-after {
+  margin-top: 16px;
+}
+
+.colophon-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.colophon-links a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.colophon-links a:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+.colophon-links i {
+  font-style: normal;
+  font-weight: 500;
+  transition: transform var(--duree) var(--sortie);
+}
+
+.colophon-links a:hover i {
+  transform: translateX(6px);
+}
+
+@media (max-width: 700px) {
+:root {
+    --edge: 20px;
+  }
+.section-head {
+    margin-top: 56px;
+  }
+}
+
+/* ============================================================================
+   Motion — mecanique unique, calquee sur le standard du domaine.
+
+   AOS et Motion font tous deux la meme chose : opacite 0 vers 1 combinee a une
+   translation, declenchee par IntersectionObserver, et surtout `once: true` —
+   la revelation n'a lieu qu'une fois et n'est jamais annulee.
+
+   C'est ce dernier point qui rend l'opacite sur du texte acceptable ici, alors
+   qu'elle etait dangereuse avec une timeline de defilement : une timeline
+   ramene l'element a son etat initial des qu'il sort de la plage, donc le texte
+   redevenait invisible. Un observateur qui retire sa surveillance apres le
+   premier passage ne peut pas re-masquer quoi que ce soit.
+
+   Valeurs reprises d'AOS : 400ms de duree, declenchement quand l'element est a
+   120px dans l'ecran. Cascade de 80ms, dans la fourchette 40-120 du domaine.
+
+   Repli : les etats masques ne s'appliquent que sous `.reveal-ok`, classe posee
+   par un script en tete de page. Sans JavaScript, rien n'est jamais masque.
+   ========================================================================= */
+html {
+  scroll-behavior: smooth;
+}
+
+.reveal-ok [data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+[data-reveal] {
+  transition: opacity 400ms var(--sortie), transform 400ms var(--sortie);
+}
+
+[data-reveal].vu {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- soulignement qui se trace, en degrade de fond --- */
+
+/* Le degrade souligne LA BOITE, pas le texte. Or ces elements ne sont pas de
+   simples morceaux de texte : la nav porte ses crochets en pseudo-elements
+   (boite de 120px pour 90px de texte, le trait passait sous les crochets) et
+   « Voir » vit dans un conteneur flex large de toute la carte (322px pour 49px
+   de texte, le trait barrait la carte entiere). Le soulignement cible donc un
+   span interieur qui ne contient que les mots.
+
+   Volontairement pas en ::after : la nav utilise deja ::before et ::after. */
+.nav-home,
+.brand a,
+.footer-nav nav a,
+.jump,
+.colophon-links a > span {
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size var(--duree) var(--sortie);
+}
+
+.nav-home:hover,
+.brand a:hover,
+.footer-nav nav a:hover,
+.jump:hover,
+.colophon-links a:hover > span {
+  background-size: 100% 1px;
+}
+
+.site-nav a,
+.colophon-links a {
+  text-decoration: none;
+}
+
+/* --------------------------------------------------- mouvement reduit --- */
+@media (prefers-reduced-motion: reduce) {
+html {
+    scroll-behavior: auto;
+  }
+.reveal-ok [data-reveal],
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+.site-nav a span,
+  .nav-home,
+  .brand a,
+  .footer-nav nav a,
+  .jump,
+  .activite-lien > span,
+  .colophon-links a > span,
+  .colophon-links i,
+  .activite-lien i {
+    transition: none;
+  }
+}
+
+.colophon {
+  border-top-color: transparent;
+}
+
+.section-head {
+  border-bottom-color: transparent;
+}
+
+/* Le filet s'arrete la ou le texte commence. Il etait a 0/0, donc il debordait
+   du contenu de --edge de chaque cote : sur une galerie, le trait courait de 0
+   a 1440 pendant que « Photographies » et son compteur tenaient entre 40 et
+   1400. Un filet de section souligne un titre, il ne traverse pas la page.
+
+   Corrige ici et non page par page : la meme rustine avait deja ete posee en
+   dur a 64px sur l'accueil puis sur /photo, chaque fois pour la meme raison, et
+   les onze galeries plus /clouddevops gardaient le defaut. En var(--edge) il
+   suit automatiquement les paliers (64 sur les pages a viseur, 40, puis 20 en
+   dessous de 700px) sans qu'aucune page ait a le redire. */
+.section-head::after,
+.colophon::before {
+  content: "";
+  position: absolute;
+  left: var(--edge);
+  right: var(--edge);
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 680ms var(--sortie);
+}
+
+.section-head,
+.colophon {
+  position: relative;
+}
+
+.colophon::before {
+  top: -1px;
+}
+
+.section-head::after {
+  bottom: -1px;
+}
+
+.section-head.vu::after,
+.colophon:has([data-reveal].vu)::before {
+  transform: scaleX(1);
+}
+
+/* --- l'image s'ouvre comme un obturateur, depuis son centre --- */
+.reveal-ok [data-reveal] img {
+  clip-path: inset(46% 0 46% 0);
+  transition: clip-path 760ms var(--sortie);
+  transition-delay: 120ms;
+}
+
+[data-reveal].img-prete img {
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+.reveal-ok [data-reveal] .activite-visuel img,
+  .reveal-ok [data-reveal].about-media img {
+    clip-path: none !important;
+    transition: none !important;
+  }
+}
+
+
+/* ================================================== pages interieures ===
+   Le vocabulaire commun aux pages autres que l'accueil : un titre en display
+   cale sur le bord, du texte courant aligne a gauche, et une grille de
+   vignettes sans chrome. Les pages y entrent en passant `mainClass="page
+   editorial"` — le drapeau evite de retirer le rembourrage des pages pas
+   encore converties. */
+
+/* layout.css donne `main { padding-top: 64px }` pour compenser l'en-tete fixe.
+   Des que `.page` est porte par le <main> lui-meme — c'est le cas depuis que les
+   pages n'emettent plus leur propre <main> — sa specificite l'emporte et remet le
+   rembourrage a zero. On redonne donc la valeur ici, avec la meme rupture. */
+.page.editorial {
+  padding: 64px 0 0;
+}
+@media (max-width: 768px) {
+  .page.editorial {
+    padding-top: 56px;
+  }
+}
+
+.tete-page {
+  padding: var(--pas-6) var(--edge) 0;
+}
+
+/* Quand le bloc de contact suit directement l'en-tete de page — cas de /gaming,
+   qui n'a pas de section intermediaire — son filet venait se coller sous la
+   derniere ligne du paragraphe et se lisait comme un soulignement. Ailleurs
+   c'est la section suivante qui fournit cet air. */
+.tete-page + .colophon {
+  margin-top: var(--pas-8);
+}
+.titre-page {
+  margin: 0;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(52px, 9.5vw, 150px);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------ titre geant d'ouverture ---
+   Le titre des pages de SECTION — celles qui ouvrent un domaine plutot que de
+   presenter un contenu. Il etait recopie a l'identique dans /clouddevops puis
+   dans /photo ; /musique en aurait fait une troisieme copie, donc il monte ici.
+
+   La taille se calcule sur la largeur DISPONIBLE (viewport moins les deux
+   retraits de bord) divisee par --titre-div, et non en vw : un vw ignore
+   --edge, qui vaut 40 sur les pages ordinaires et 64 sur celles qui portent le
+   viseur. Le diviseur reste page par page parce qu'il depend du mot : « CLOUD
+   DEVOPS » fait 5,356 fois son corps en largeur, contre 4,927 pour « NABIL
+   CHEBILI » — des O, U et D contre des I et des L. A diviseur egal, un mot
+   large deborde et un mot etroit paraitrait petit.
+
+   `overflow: clip` et `white-space: nowrap` : le titre ne se coupe jamais en
+   deux lignes, il retrecit. */
+.titre-geant {
+  --titre-div: 7.8;
+  overflow: clip;
+  /* 64px et non la valeur du pas : avec un interlignage de 0,82 les lettres
+     DEBORDENT de leur boite. Mesure de texte a texte — la seule qui dise ce
+     que l'oeil voit — les ecarts aux voisins etaient negatifs, donc le titre
+     les chevauchait. */
+  margin: 64px 0 0;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(44px, calc((100vw - 2 * var(--edge)) / var(--titre-div)), 300px);
+  font-weight: 800;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- reperes ---
+   Trois a quatre faits courts poses sous le chapo d'ouverture : une etiquette
+   et une valeur en gros. Meme raison de monter ici que le titre geant — le
+   dispositif etait ne sur /clouddevops et /musique le reprend tel quel. */
+.reperes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 20px;
+  width: 100%;
+}
+.repere {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--block);
+  padding: 18px 20px;
+}
+.repere-k {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+.repere-v {
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* Aligne a gauche et sous 90 caracteres. La justification sans cesure maitrisee
+   produit des rivieres de blanc en francais sur colonne etroite, et c'est ce que
+   faisaient les pages heritees. */
+/* Le texte de LECTURE est en Sofia Sans, le mono reste aux ETIQUETTES.
+   La regle etait posee en local sur /clouddevops puis sur /photo, chaque fois
+   pour la meme raison — le mono ne fait pas serieux sur du texte suivi — mais
+   les onze galeries, /musique, /gaming et les recits gardaient le mono. Elle
+   monte donc dans le systeme : un seul endroit, toutes les pages.
+
+   Ce qui reste en JetBrains Mono : meta-row, libelles, numeros de chapitre,
+   periodes, etiquettes, compteurs. Le partage est fonctionnel — on lit les
+   phrases, on repere les etiquettes. */
+.prose {
+  max-width: 68ch;
+  margin: var(--pas-3) 0 0;
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  text-align: left;
+  text-indent: 0;
+  color: var(--ink-55);
+}
+.prose p {
+  margin: 0;
+  text-align: left;
+  text-indent: 0;
+}
+.prose p + p {
+  margin-top: 1em;
+}
+
+/* Vignettes : l'image, puis le libelle dessous. Aucun coin arrondi, aucune
+   ombre portee, aucun texte pose sur la photo. Le cadre 4:5 est celui deja
+   retenu pour les galeries. */
+.vignettes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--pas-6) 20px;
+  padding: var(--pas-6) var(--edge) 0;
+}
+.vignette {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+.vignette-visuel {
+  display: block;
+  overflow: hidden;
+  background: var(--block);
+  aspect-ratio: 4 / 5;
+}
+.vignette-visuel img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.vignette-titre {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.vignette-titre,
+.retour {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size var(--duree) var(--sortie);
+}
+.vignette:hover .vignette-titre,
+.vignette:focus-visible .vignette-titre,
+.retour:hover {
+  background-size: 100% 1px;
+}
+
+/* Retour vers la page mere, en tete des galeries. */
+.retour {
+  display: inline-block;
+  margin: 0 0 var(--pas-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+  text-decoration: none;
+}
+
+@media (max-width: 1100px) {
+  .vignettes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .vignettes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pas-3) 12px;
+    padding-top: var(--pas-3);
+  }
+  .tete-page {
+    padding-top: var(--pas-3);
+  }
+}
+
+/* Lien dans du texte courant. Souligne en permanence — un lien qui n'apparait
+   qu'au survol ne se trouve pas quand il est noye dans une phrase. Le survol
+   epaissit le trait plutot que de le faire apparaitre. */
+.prose a,
+.lien {
+  color: var(--ink);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  transition: background-size var(--duree) var(--sortie);
+}
+.prose a:hover,
+.prose a:focus-visible,
+.lien:hover,
+.lien:focus-visible {
+  background-size: 100% 2px;
+}
+
+/* Duo : du texte et un visuel cote a cote. Meme rapport que le bloc « qui je
+   suis » de l'accueil, la colonne du visuel etant fixe pour que la mesure de
+   lecture ne depende pas de la largeur de l'ecran. */
+.duo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--pas-6);
+  align-items: start;
+  padding: var(--pas-6) var(--edge) 0;
+}
+.duo > .prose {
+  margin-top: 0;
+}
+.duo-media {
+  margin: 0;
+}
+.duo-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--block);
+}
+
+/* Bouton du systeme : filet a l'encre, aucun rayon, inversion au survol. */
+.bouton {
+  display: inline-block;
+  padding: 11px 16px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--duree) var(--sortie), color var(--duree) var(--sortie);
+}
+.bouton:hover,
+.bouton:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+@media (max-width: 900px) {
+  .duo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--pas-3);
+  }
+  .duo-media {
+    order: -1;
+  }
+}
+
+/* En-tete de section, variante haute. A 11px un en-tete se lit comme une
+   etiquette, pas comme un titre de chapitre : sur une page longue et
+   structuree — un CV — le squelette devient invisible. Cette variante donne
+   le niveau typographique intermediaire qui manquait entre le titre de page
+   et le corps de texte. */
+.section-head.grande {
+  align-items: baseline;
+  padding-bottom: 12px;
+}
+.section-head.grande > span:first-child {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.section-num {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  color: var(--ink-55);
+}
+
+/* --------------------------------------------------------------- viseur ---
+   Quatre equerres epaisses aux angles de la fenetre, fixes, le contenu defilant
+   derriere. Primitive partagee : aucune page ne l'affiche sans poser le
+   balisage `<div class="viseur"><i></i>x4</div>`, donc la porter ici ne coute
+   rien aux quatorze autres.
+
+   GEOMETRIE. Les equerres occupent les carres d'angle de 16 a 60px (retrait 16
+   + bras 44). Une page qui les affiche doit donc porter `--edge: 64px` au
+   minimum, sinon elles mordent sur le texte — c'est mesure, pas estime.
+
+   Chaque page fournit ses propres cartouches d'affichage en enfants
+   supplementaires : elles se superposent au contenu comme l'afficheur d'une
+   camera, et c'est voulu. */
+.viseur {
+  position: fixed;
+  inset: 72px 16px 16px;
+  pointer-events: none;
+  z-index: 3;
+}
+.viseur i {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+}
+.viseur i:nth-child(1) { top: 0; left: 0; border-top: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+.viseur i:nth-child(2) { top: 0; right: 0; border-top: 3px solid var(--ink); border-right: 3px solid var(--ink); }
+.viseur i:nth-child(3) { right: 0; bottom: 0; border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); }
+.viseur i:nth-child(4) { bottom: 0; left: 0; border-bottom: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+
+/* Sur petit ecran le viseur ne disparait pas, il retrecit. Il etait masque sous
+   900px faute de place pour des equerres de 44px a 16px du bord — mais c'est le
+   dispositif qui donne son identite a l'accueil et a /photo, et le supprimer la
+   ou la majorite des visites arrive revenait a ne pas l'avoir.
+
+   Tout est reduit dans les memes proportions : bras de 30px au lieu de 44,
+   trait de 2px au lieu de 3, cartouches d'un cran plus petits. Le cadre se
+   rapproche du bord (10px puis 8) pour laisser au texte le retrait qui lui
+   revient. */
+/* La regle qui dimensionne tout : le bras horizontal d'une equerre ne doit
+   jamais entrer dans la colonne de texte, donc `retrait du cadre + longueur du
+   bras` reste inferieur a --edge. Le cadre etant fixe, le contenu defile
+   indefiniment sous les equerres du bas — un bras trop long finirait par
+   traverser un paragraphe. C'est deja le calcul du bureau : 16 + 44 = 60, pour
+   un --edge de 64. */
+@media (max-width: 900px) {
+  .viseur {
+    inset: 70px 10px 10px;
+  }
+  /* 10 + 26 = 36, pour un --edge de 40. */
+  .viseur i {
+    width: 26px;
+    height: 26px;
+  }
+  .viseur i:nth-child(1),
+  .viseur i:nth-child(2),
+  .viseur i:nth-child(3),
+  .viseur i:nth-child(4) {
+    border-width: 2px;
+  }
+  .viseur-info {
+    gap: 5px;
+    padding: 4px 7px;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+  }
+  .viseur-point {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* L'entete fixe tombe de 64 a 56px sous 768px : le cadre suit. */
+@media (max-width: 768px) {
+  .viseur {
+    inset: 62px 8px 8px;
+  }
+}
+
+/* Sur telephone, --edge passe a 28px sur ces deux pages : 6 + 20 = 26, le bras
+   reste dehors. C'est la plus petite equerre qui se lit encore comme un coin de
+   cadre — en deca, ce ne sont plus que deux traits. */
+@media (max-width: 700px) {
+  .viseur {
+    /* La barre de geste des telephones recents mange le bas de l'ecran : sans
+       cette reserve, l'equerre inferieure et le compteur passent dessous. */
+    inset: 62px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .viseur i {
+    width: 20px;
+    height: 20px;
+  }
+  /* Le cartouche etait pose a 58px du coin, une distance calee sur le bras de
+     44px du bureau. Avec un bras de 20px il flottait loin du cadre au lieu d'y
+     etre accroche. */
+  .viseur-rec,
+  .viseur-af {
+    left: 30px;
+  }
+}
+
+/* Le cartouche d'affichage : fond a l'encre pour rester lisible par-dessus
+   n'importe quel contenu qui defile derriere. */
+.viseur-info {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 5px 9px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.viseur-point {
+  width: 7px;
+  height: 7px;
+}

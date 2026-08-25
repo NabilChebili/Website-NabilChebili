@@ -1,144 +1,365 @@
 ---
 import "../styles/global.css";
-import "../styles/layout.css";
-import "../styles/index.css";
+// layout.css et editorial.css viennent de header.astro. index.css est l'ancienne
+// feuille de la home : elle ne definit plus aucune classe utilisee ici, et son
+// `main > section { background: var(--ui-bg) }` ecrasait le fond papier depuis
+// que le systeme partage se charge avant les feuilles de page.
+import "../styles/home-editorial.css";
 import Layout from "../layouts/header.astro";
+import { Image } from "astro:assets";
+
+// Visuels importes depuis src/assets : Astro les redimensionne et les convertit
+// en WebP a la construction. En public/ ils partaient bruts — 2,4 / 2,0 / 2,7 Mo
+// pour des vignettes affichees en 322px de large.
+import visuelCloud from "../assets/nabil-ishane.jpg";
+import visuelPhoto from "../assets/A7401833.jpg";
+import visuelMusique from "../assets/image.png";
+import visuelGaming from "../assets/twitch.png";
+
+// Les quatre activites de la page d'origine : memes titres, memes descriptions,
+// memes images, memes destinations.
+const univers = [
+  {
+    titre: "Cloud & DevOps",
+    note: "Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.",
+    href: "/clouddevops",
+    img: visuelCloud,
+    alt: "Nabil Chebili chez I-Shane",
+  },
+  {
+    titre: "Photographie",
+    note: "Galeries & séries photographiques : voyages, portraits et instantanés.",
+    href: "/photo",
+    img: visuelPhoto,
+    alt: "Photographie",
+  },
+  {
+    titre: "Musique",
+    note: "Petites avancées dans le monde la guitare (autodidacte)",
+    href: "/musique",
+    img: visuelMusique,
+    alt: "Musique",
+  },
+  {
+    titre: "Gaming",
+    note: "Twitch, streaming et jeux vidéo.",
+    href: "/gaming",
+    img: visuelGaming,
+    alt: "Gaming",
+  },
+];
 ---
 
 <Layout
   title="Nabil Chebili"
   description="Site personnel de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries."
+  webfont={true}
+  mainClass="page home editorial"
 >
-  <main class="page">
-    <section class="hero fade-in">
-      <div class="container hero-inner">
-        <div class="hero-text">
-				<p class="eyebrow fade-in">Ingénieur Cloud &amp; DevOps</p>
-				<h1 class="page-title fade-in">Nabil Chebili</h1>
-          <p class="lead fade-in">
-				Cloud & DevOps, photographie et musique — projets, galeries et inspirations.
-          </p>
-        </div>
-      </div>
-      <div class="hero-ctas">
-        <a class="btn btn-outline" href="/clouddevops">Cloud DevOps</a>
-        <a class="btn btn-outline" href="/photo">Photographie</a>
-        <a class="btn btn-outline" href="/musique">Musique</a>
-        <a class="btn btn-outline" href="/gaming">Gaming</a>
-      </div>
-    </section>
+  {/* Le viseur. Le cadre est FIXE et le contenu defile derriere : c'est ce qui
+      le rend honnete plutot que decoratif — il cadre reellement une image qui
+      bouge, au lieu d'etre un autocollant pose autour d'une page immobile. Le
+      compteur en bas est la tete de lecture : il traduit la position de
+      defilement en code temporel, donc faire defiler la page, c'est lire le
+      film. Purement decoratif pour un lecteur d'ecran, d'ou aria-hidden, et
+      pointer-events: none pour ne capter aucun clic. */}
+  <div class="viseur" aria-hidden="true">
+    <i></i><i></i><i></i><i></i>
+    <span class="viseur-info viseur-rec"><b class="viseur-point"></b>REC</span>
+    <span class="viseur-info viseur-tc">00:00:00</span>
+  </div>
 
-    <section class="section two-col reverse fade-in">
-      <div class="container two-col-inner">
-        <div class="media">
-          <img src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg" alt="Portrait de Nabil Chebili" />
-        </div>
-        <div class="content">
-          <h2>Vous vous demandez sûrement qui je suis ?</h2>
-          <p>
-            Je suis quelqu’un de curieux, attiré par les choses que l’on construit et que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des systèmes ou des images. 
-            Ce qui m’intéresse autant que le résultat, c’est le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à ce que tout fasse sens.
-          </p>
-        </div>
-      </div>
-    </section>
+  <section class="opening">
+    <div class="meta-row" data-reveal data-groupe="manchette">
+      <span><b>958</b> photographies &middot; <b>11</b> galeries</span>
+      <span>Ingénieur Cloud &amp; DevOps &middot; <b>+4</b> ans</span>
+    </div>
 
-    <section class="section cards-overview fade-in">
-      <div class="container">
-        <h2 style="margin-bottom:18px;">Explorer</h2>
-        <div class="cards-grid">
-          <article class="card fade-in">
-            <img src="/nabil-ishane.jpg" alt="Nabil Chebili chez I-Shane" />
-            <div class="card-body">
-              <h3>Cloud & DevOps</h3>
-              <p>Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.</p>
-              <a class="btn btn-outline" href="/clouddevops">Voir</a>
-            </div>
-          </article>
+    <h1 class="mega">
+      {
+        "Nabil Chebili".split("").map((c, i) => (
+          <span class="mega-lettre" style={`--i:${i}`}>
+            {c === " " ? " " : c}
+          </span>
+        ))
+      }
+    </h1>
 
-          <article class="card fade-in">
-            <img src="/A7401833.jpg" alt="Photographie" />
-            <div class="card-body">
-              <h3>Photographie</h3>
-              <p>Galeries & séries photographiques : voyages, portraits et instantanés.</p>
-              <a class="btn btn-outline" href="/photo">Voir</a>
-            </div>
-          </article>
+    <div class="opening-foot" data-reveal data-groupe="manchette">
+      <p>
+        Cloud &amp; DevOps, photographie et musique — projets, galeries et
+        inspirations.
+      </p>
+      <a class="jump" href="#explorer">Explorer &#8595;</a>
+    </div>
+  </section>
 
-          <article class="card fade-in">
-            <img src="/image.png" alt="Musique" />
-            <div class="card-body">
-              <h3>Musique</h3>
-              <p>Petites avancées dans le monde la guitare (autodidacte)</p>
-              <a class="btn btn-outline" href="/musique">Voir</a>
-            </div>
-          </article>
+  <section class="about">
+    <div>
+      <h2 class="about-title" data-reveal data-groupe="apropos">Vous vous demandez sûrement qui je suis ?</h2>
+      <p class="about-text" data-reveal data-groupe="apropos">
+      Je suis quelqu’un de curieux, attiré par les choses que l’on construit et
+      que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et
+      reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
+      systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est
+      le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à
+        ce que tout fasse sens.
+      </p>
+    </div>
 
-          <article class="card fade-in">
-            <img src="/twitch.png" alt="Gaming" />
-            <div class="card-body">
-              <h3>Gaming</h3>
-              <p>Twitch, streaming et jeux vidéo.</p>
-              <a class="btn btn-outline" href="/gaming">Voir</a>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
+    <figure class="about-media" data-reveal data-groupe="apropos">
+      <img
+        src="https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/post/A7404480.jpg"
+        alt="Portrait de Nabil Chebili"
+        width="2200"
+        height="1467"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
+  </section>
 
-    <section class="section contact fade-in">
-      <div class="container">
-        <div class="contact-card">
-          
-            <div class="contact-card-main">
-              <h2>Contact</h2>
-              <p class="contact-lead">Pour toute question, collaboration ou prise de contact rapide — écrivez-moi.</p>
-              <p class="contact-note">Je réponds généralement sous quelques heures.</p>
-            </div>
+  <section id="explorer">
+    <div class="section-head" data-reveal data-groupe="explorer">
+      <span>Explorer</span>
+      <span>({univers.length})</span>
+    </div>
+    <div class="activites">
+      {
+        univers.map((u) => (
+          <a class="activite" href={u.href} data-reveal data-groupe="cartes">
+            <span class="activite-visuel">
+              <Image
+                src={u.img}
+                alt={u.alt}
+                widths={[400, 800]}
+                sizes="(max-width: 700px) 100vw, 25vw"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="activite-titre">{u.titre}</span>
+            <span class="activite-note">{u.note}</span>
+            <span class="activite-lien">
+              <span>Voir</span>
+              <i aria-hidden="true">&#8594;</i>
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
 
-            <div class="contact-card-side">
-              <div class="contact-ctas">
-                <a class="btn" href="mailto:nabilchebili1999@gmail.com">Envoyer un email</a>
-                <a class="btn btn-outline" href="https://www.linkedin.com/in/chebili-nabil/" target="_blank" rel="noopener">LinkedIn</a>
-              </div>
-            </div>
-          
-        </div>
-      </div>
-    </section>
+  <section class="colophon">
+    <div data-reveal data-groupe="contact">
+      <h2>Contact</h2>
+      <p class="fine">
+        Pour toute question, collaboration ou prise de contact rapide —
+        écrivez-moi.
+      </p>
+      <p class="fine fine-after">
+        Je réponds généralement sous quelques heures.
+      </p>
+    </div>
 
-    <script>
-      // Reveal: find all `.fade-in` in document, sort by vertical position and reveal them sequentially
-      (function () {
-        const nodes = Array.from(document.querySelectorAll('main .fade-in'));
-        if (!nodes.length) return;
-
-        // compute absolute top positions and sort
-        const list = nodes
-          .map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
-          .sort((a, b) => a.top - b.top)
-          .map((o) => o.el);
-
-        const baseDelay = 80;
-        const step = 120;
-        list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
-
-        // Contact form: build a mailto with form contents as fallback
-        const form = document.getElementById('contactForm');
-        if (form && form instanceof HTMLFormElement) {
-          form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const data = new FormData(form);
-            const name = data.get('name') || '';
-            const email = data.get('email') || '';
-            const message = data.get('message') || '';
-            const subject = encodeURIComponent('Contact depuis le site — ' + (name || ''));
-            const body = encodeURIComponent(`Nom: ${name}\nEmail: ${email}\n\n${message}`);
-            // open mail client
-            window.location.href = `mailto:nabilchebili1999@gmail.com?subject=${subject}&body=${body}`;
-          });
-        }
-      })();
-    </script>
-  </main>
+    <div class="colophon-links" data-reveal data-groupe="contact">
+      <a href="mailto:nabilchebili1999@gmail.com">
+        <span>Envoyer un email</span>
+        <i aria-hidden="true">&#8594;</i>
+      </a>
+      <a
+        href="https://www.linkedin.com/in/chebili-nabil/"
+        target="_blank"
+        rel="noopener"
+      >
+        <span>LinkedIn</span>
+        <i aria-hidden="true">&#8599;</i>
+      </a>
+    </div>
+  </section>
 </Layout>
+
+<style>
+  /* --------------------------------------------------------------- viseur ---
+     Quatre equerres epaisses aux angles, fixes au cadre de la fenetre.
+
+     GEOMETRIE, calculee pour qu'aucune equerre ne touche jamais le texte : les
+     equerres occupent les carres d'angle de 16 a 60px (retrait 16 + bras 44).
+     Le contenu commence donc a --edge: 64px sur cette page au lieu de 40 — 24px
+     de retrait en plus de chaque cote, et il n'y a AUCUN recouvrement horizontal
+     possible, quelle que soit la position de defilement. C'est bien moins cher
+     que de resserrer la page en colonne centree, qui aurait coute 200px et
+     renonce au bord a bord dont tout le systeme depend.
+
+     Le rembourrage haut de <main> passe a 112px : sans cela la pastille REC,
+     posee juste sous l'equerre superieure gauche, tombait sur la meta-row.
+     Il faut `main.page.home` et non `main.home` : `.page.editorial` pese
+     0-2-0 contre 0-1-1, donc il gagnait et la regle etait sans effet — mesure
+     a l'appui, le rembourrage restait a 64px.
+
+     Les deux pastilles sont a fond --ink comme les cartouches noirs d'un vrai
+     viseur : elles restent lisibles par-dessus n'importe quel contenu qui
+     defile derriere. C'est assume — un afficheur de camera passe par-dessus
+     l'image, il ne se range pas a cote. */
+  /* ------------------------------------------------- mise au point ---
+     PAS DE FONDU AUX BORDS. Trois approches ont ete construites et mesurees,
+     les trois echouent. A ne pas reproposer sans lever la contrainte de fond.
+
+     1. FLOU en `backdrop-filter`. Trop cher : defilement continu de bout en
+        bout, 61 images/s sans bande, 37 a une couche par bord, 20 a deux, 14 a
+        trois. A 14 c'est saccade.
+
+     2. FONDU PAR ELEMENT en `animation-timeline: view()`. La plage depend de la
+        HAUTEUR du bloc, or ils vont de 40 a 400px : un bloc haut sort bien
+        avant d'atteindre le cadre, un bloc court bien apres. Regle pour
+        disparaitre a temps, il efface le texte au centre de l'ecran —
+        retrait 200/160 : 7 blocs touchent encore le cadre, opacite mini 0,84 ;
+        300/220 : 3 blocs, 0,48 ; 420/300 : 0 bloc, 0,00 (illisible).
+
+     3. VOILE FIXE en degrade. Le seul a satisfaire la mesure au pixel (0 d'ecart
+        au papier dans la bande des equerres) mais il casse le rendu de deux
+        facons visibles uniquement a l'oeil, pas dans mes chiffres :
+        - la meta-row (« 958 photographies · 11 galeries ») tombe a y=112, en
+          pleine zone opaque du voile : elle est effacee DES LE CHARGEMENT, sans
+          avoir defile. Du contenu permanent perdu.
+        - le titre geant fait 187px de haut ; un voile qui l'efface sur ses 64
+          premiers pixels le COUPE au milieu des lettres. Ca ne se lit pas comme
+          un fondu, ca se lit comme un rendu casse.
+
+     LA CONTRAINTE DE FOND : le cadre est a 72px, le chrome a 64px, le contenu
+     commence a 112px. Il reste 40px entre le contenu et le cadre — aucune zone
+     de fondu ne tient dans 40px sans mordre sur ce qu'il faut lire.
+
+     Le voile a ete repris une derniere fois, degrade continu sans palier et
+     contenu demarrant sous la bande : les deux defauts ci-dessus etaient bien
+     corriges — meta-row intacte au chargement, titre estompe et non coupe, 61
+     img/s. Verdict quand meme negatif a l'usage. SUJET CLOS : ne pas reproposer
+     de fondu, de flou ni de voile aux bords de cette page.
+
+     Et accessoirement, un vrai viseur ne floute pas son image aux bords :
+     l'affichage se superpose a une image nette partout. Le hors-champ etait une
+     invention, pas une convention du sujet — ce qui explique peut-etre pourquoi
+     aucune des quatre versions n'a convaincu. */
+
+  /* Le cadre lui-meme et le gabarit des cartouches vivent dans editorial.css :
+     /photo les reutilise avec un autre affichage. Ne restent ici que les
+     cartouches propres a l'accueil. */
+  .viseur-rec { top: 0; left: 58px; }
+  /* Le compteur d'images est la seule piece du viseur qui AFFICHE quelque
+     chose : il merite d'etre lu, pas devine. Il partageait les 10px des
+     etiquettes, ce qui le rendait aussi discret qu'un libelle. */
+  .viseur-tc {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 7px 13px;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+  }
+  @media (max-width: 900px) {
+    .viseur-tc {
+      padding: 5px 10px;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+    }
+  }
+  /* Le seul point de couleur du site. Un temoin d'enregistrement est rouge ou
+     n'est pas — c'est ce qui fait lire « REC » comme un etat et non comme un
+     mot. Jeton local et unique, il n'entre pas dans la palette. */
+  .viseur-point {
+    background: #e0301e;
+    animation: viseur-clignote 1.7s steps(1, end) infinite;
+  }
+  @keyframes viseur-clignote {
+    0%, 55% { opacity: 1; }
+    56%, 100% { opacity: 0.18; }
+  }
+  /* Un temoin qui clignote est du mouvement autonome : coupe des que le
+     systeme demande moins de mouvement. Le point reste, fixe. */
+  @media (prefers-reduced-motion: reduce) {
+    .viseur-point { animation: none; }
+  }
+
+  :global(main.page.home) {
+    --edge: 64px;
+    padding-top: 112px;
+  }
+
+  /* Les filets s'arretent AU cadre au lieu de le traverser.
+     C'etait ce qui empechait le viseur de se lire comme un viseur : les filets
+     pleine largeur du systeme courent de 0 a 100% et passaient donc a travers
+     les equerres, de part en part. Un cadre traverse par des traits n'est plus
+     un cadre.
+
+     Le flou avait ete essaye pour la meme intention — marquer un hors-champ —
+     et il ne peut pas fonctionner ici : les bandes de marge sont VIDES. Le
+     contenu s'arrete a 64px, il n'y a rien a flouter entre 0 et 64. Pour que le
+     flou dise quelque chose il faudrait que du texte passe dans le hors-champ,
+     donc qu'une partie du texte soit illisible — un cout qu'un CV ne peut pas
+     payer.
+
+     Seuls les FILETS sont rentres, pas les blocs : rentrer aussi leurs marges
+     decalait les quatre cartes de 64px supplementaires. */
+  /* Le filet de `.about` — celui qui separe le titre du bloc « qui je suis » —
+     etait le seul de la page a traverser de bord a bord. Il rejoint les autres.
+
+     Un `border-image` avait ete pose ici pour le meme but : il ne servait a
+     RIEN. Verifie au pixel — le filet mesurait toujours 1440px de long. Avec un
+     slice de 1, le degrade est decoupe puis ETIRE sur le bord, donc les arrets
+     exprimes en pixels (64px) ne correspondent plus a rien. Et le filet visible
+     ne venait meme pas de la bordure : `border-top` est transparent, c'est
+     `.about::before` qui dessine le trait. Regle sur le bon element. */
+  /* --edge vaut 64 sur cette page, et le systeme cale desormais ses filets
+     dessus : seul .about::before, propre a l'accueil, reste a aligner. */
+  :global(main.page.home) .about::before {
+    left: var(--edge);
+    right: var(--edge);
+  }
+
+  /* Le viseur ne disparait plus sous 900px, il retrecit — sa variante mobile
+     est dans editorial.css. Seuls les retraits de la page changent ici. */
+  @media (max-width: 900px) {
+    :global(main.page.home) {
+      --edge: 40px;
+      /* Le contenu commence sous le cartouche du viseur, sinon la ligne de meta
+         passait dessous — le cartouche est a 70px et fait 21px de haut. */
+      padding-top: 104px;
+    }
+  }
+  @media (max-width: 700px) {
+    :global(main.page.home) {
+      /* 28 et non 20 : il faut de quoi loger l'equerre hors du texte. */
+      --edge: 28px;
+      padding-top: 96px;
+    }
+  }
+</style>
+
+<script>
+  // Le code temporel EST la position de defilement : un pixel = une image, lues
+  // a 24 images par seconde. Faire defiler la page revient donc a deplacer la
+  // tete de lecture, ce qui est le seul rapport honnete entre un compteur et
+  // une page — un compteur qui tournerait tout seul mesurerait le temps passe,
+  // pas le film.
+  const tc = document.querySelector(".viseur-tc");
+  if (tc) {
+    const deux = (n) => String(n).padStart(2, "0");
+    let enAttente = false;
+    const majuscule = () => {
+      enAttente = false;
+      const images = Math.max(0, Math.round(window.scrollY));
+      const secondes = Math.floor(images / 24);
+      tc.textContent =
+        deux(Math.floor(secondes / 60)) + ":" + deux(secondes % 60) + ":" + deux(images % 24);
+    };
+    // Passif et amorti par requestAnimationFrame : le defilement ne doit jamais
+    // attendre le compteur.
+    addEventListener(
+      "scroll",
+      () => { if (!enAttente) { enAttente = true; requestAnimationFrame(majuscule); } },
+      { passive: true }
+    );
+    majuscule();
+  }
+
+</script>

@@ -1,153 +1,789 @@
 ---
 import "../styles/global.css";
-import "../styles/layout.css";
-import "../styles/index.css";
-import "../styles/musique.css";
 import Layout from "../layouts/header.astro";
-	const videos = [
-	  // première vidéo fournie (embed)
-	  "https://www.youtube.com/watch?v=WYXsf-MV1GM",
-	  "https://www.youtube.com/watch?v=6gsqAnGUTvw"
-	  // autre vidéo (embed)
-	];
+import Colophon from "../components/Colophon.astro";
+import { Image } from "astro:assets";
 
+// Le chemin etait relatif : depuis /musique/ il pointait vers /musique/image.png,
+// qui renvoyait un 404. L'import garantit une URL correcte — et passe par
+// astro:assets, qui sort du WebP redimensionne au lieu du PNG de 1,9 Mo.
+import guitare from "../assets/image.png";
+
+const videos = [
+	"https://www.youtube.com/watch?v=WYXsf-MV1GM",
+	"https://www.youtube.com/watch?v=6gsqAnGUTvw",
+];
+
+// ---------------------------------------------------------------- le manche
+// Un manche de guitare dessine au filet de 1px — le seul vocabulaire du
+// systeme. Meme logique que le viseur de l'accueil et l'autofocus de /photo :
+// la page se comporte comme son instrument.
+//
+// Les frettes ne sont pas reparties regulierement, une guitare non plus : la
+// n-ieme frette tombe a S x (1 - 2^(-n/12)), la « regle des 17,817 ». Une
+// repartition reguliere se serait vue tout de suite.
+const NB_FRETTES = 14;
+// Le sillet laisse juste la place du nom de corde a sa gauche, et le manche
+// court jusqu'au bord du contenu : le dessin est cale sur --edge comme tout le
+// reste de la page. Avec un libelle ancre a DROITE en x = NUT - 16, il restait
+// 18 unites de vide mort avant la premiere lettre, donc le manche demarrait
+// 17px a droite du titre.
+const NUT = 30;
+const FIN = 1360;
+const ECHELLE = (FIN - NUT) / (1 - Math.pow(2, -NB_FRETTES / 12));
+const frettes = Array.from({ length: NB_FRETTES }, (_, i) =>
+	+(NUT + ECHELLE * (1 - Math.pow(2, -(i + 1) / 12))).toFixed(2)
+);
+const milieuCase = (n) => ((n === 1 ? NUT : frettes[n - 2]) + frettes[n - 1]) / 2;
+
+// Ordre de la tablature : l'aigu en haut. Le calibre croit vers le grave, et
+// la frequence est celle de l'accordage standard.
+// `midi` est la note a vide : la frette n survolee ajoute n demi-tons.
+const cordes = [
+	{ nom: "E", midi: 64, calibre: 0.9 },
+	{ nom: "B", midi: 59, calibre: 1.15 },
+	{ nom: "G", midi: 55, calibre: 1.45 },
+	{ nom: "D", midi: 50, calibre: 1.85 },
+	{ nom: "A", midi: 45, calibre: 2.35 },
+	{ nom: "E", midi: 40, calibre: 3.0 },
+].map((c, i) => ({ ...c, y: 26 + i * 31 }));
+const HAUTEUR = 26 + 5 * 31 + 26;
+
+const idVideo = (url) =>
+	url.includes("v=") ? url.split("v=")[1].split("&")[0] : url.split("/").pop();
 ---
 
 <Layout
 	title="Musique"
 	description="Guitare, vidéos et progression autodidacte — une page dédiée à la musique."
+	mainClass="page editorial"
 >
-	<main class="page">
-		<h1 class="page-title fade-in">Musique</h1>
+	<section class="ouverture">
+		<div class="meta-row" data-reveal data-groupe="tete">
+			<span><b>{videos.length}</b> vidéos &middot; <b>1</b> recueil de tablatures</span>
+			<span>Guitare &middot; Autodidacte</span>
+		</div>
 
-		<p class="paragraph-center fade-in">
-			Cette page est dédiée à ma passion pour la musique, en particulier la guitare.
-		</p>
+		<h1 class="titre-geant" data-reveal data-groupe="tete">Musique</h1>
 
-		<section class="section two-col">
-			<div class="container two-col-inner fade-in">
-				<div class="content">
-					<p class="paragraph-center narrow">
-						J’ai commencé la guitare presque par hasard, en apprenant le riff de <em>Come As You Are</em> lors d’un voyage. 
-						Ce moment simple a été un déclic. 
-						De retour chez moi, j’ai découvert quelques accords sur Internet et je me suis mis à m’entraîner régulièrement pour reproduire des chansons que j’aimais.
-					<br><br>
-					</p>
-					<p class="paragraph-center narrow">
-						Peu à peu, la guitare a pris une place dans mon quotidien. 
-						Elle m’a appris à écouter autrement, à reproduire ce que j’entendais, puis à laisser venir mes propres idées. 
-						Avec le temps, j’y ai trouvé une vraie satisfaction : progresser par étapes, avec patience.
-					</p>
+		<div class="ouverture-pied" data-reveal data-groupe="tete">
+			<p>
+				Cette page est dédiée à ma passion pour la musique, en particulier la
+				guitare.
+			</p>
+			<a class="jump" href="#videos">Voir les vidéos &#8595;</a>
+		</div>
+
+		<figure class="manche" data-reveal data-groupe="tete">
+			<svg
+				data-frettes={frettes.join(",")}
+				data-nut={NUT}
+				data-fin={FIN}
+				viewBox={`0 0 1360 ${HAUTEUR}`}
+				width="100%"
+				role="img"
+				aria-label="Manche de guitare jouable : survolez une corde, la case determine la note."
+			>
+				{frettes.map((x, i) => (
+					<line class="frette" x1={x} y1="10" x2={x} y2={HAUTEUR - 10} stroke-width={i === NB_FRETTES - 1 ? 1.4 : 1} />
+				))}
+				<line class="sillet" x1={NUT} y1="6" x2={NUT} y2={HAUTEUR - 6} />
+
+				{[3, 5, 7, 9].map((n) => (
+					<circle class="inlay" cx={milieuCase(n)} cy={HAUTEUR / 2} r="7" />
+				))}
+				<circle class="inlay" cx={milieuCase(12)} cy={cordes[1].y} r="7" />
+				<circle class="inlay" cx={milieuCase(12)} cy={cordes[4].y} r="7" />
+
+				<text class="note-lue" x={FIN} y={HAUTEUR - 2} />
+
+				{cordes.map((c, i) => (
+					<g class="corde" data-i={i} data-midi={c.midi} data-y={c.y}>
+						<text class="corde-nom" x="0" y={c.y + 4}>{c.nom}</text>
+						<path class="corde-fil" d={`M ${NUT} ${c.y} L ${FIN} ${c.y}`} stroke-width={c.calibre} />
+						<line class="corde-cible" x1={NUT} y1={c.y} x2={FIN} y2={c.y} />
+					</g>
+				))}
+			</svg>
+		</figure>
+	</section>
+
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="recit">
+			<span><i class="section-num">01</i> Le récit</span>
+		</div>
+	<div class="duo">
+		<div class="prose" data-reveal data-groupe="recit">
+			<p>
+				J’ai commencé la guitare presque par hasard, en apprenant le riff de
+				<em>Come As You Are</em> lors d’un voyage. Ce moment simple a été un
+				déclic. De retour chez moi, j’ai découvert quelques accords sur Internet
+				et je me suis mis à m’entraîner régulièrement pour reproduire des
+				chansons que j’aimais.
+			</p>
+			<p>
+				Peu à peu, la guitare a pris une place dans mon quotidien. Elle m’a
+				appris à écouter autrement, à reproduire ce que j’entendais, puis à
+				laisser venir mes propres idées. Avec le temps, j’y ai trouvé une vraie
+				satisfaction : progresser par étapes, avec patience.
+			</p>
+		</div>
+
+		<figure class="duo-media" data-reveal data-groupe="recit">
+			<Image
+				src={guitare}
+				alt="Guitare"
+				widths={[400, 720]}
+				sizes="(max-width: 900px) 100vw, 360px"
+				loading="lazy"
+				decoding="async"
+			/>
+		</figure>
+	</div>
+	</section>
+
+	<section id="videos">
+		<div class="section-head grande" data-reveal data-groupe="videos">
+			<span><i class="section-num">02</i> Vidéos</span>
+			<span>({videos.length})</span>
+		</div>
+
+		<div class="zone-carrousel">
+			<div class="video-carousel" aria-label="Carrousel vidéo">
+				<div class="carousel-track" role="list">
+					{
+						videos.map((src) => (
+							<div class="carousel-item" role="listitem">
+								<iframe
+									src={`https://www.youtube-nocookie.com/embed/${idVideo(src)}`}
+									title="Lecteur vidéo YouTube"
+									loading="lazy"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+									referrerpolicy="strict-origin-when-cross-origin"
+									allowfullscreen
+								/>
+							</div>
+						))
+					}
 				</div>
-				<div class="media">
-					<img src="image.png" alt="Guitare" />
+				<div class="commandes">
+					<button class="car-btn prev" type="button" aria-label="Vidéo précédente">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 L7 12 L15 20" /></svg>
+					</button>
+					<button class="car-btn next" type="button" aria-label="Vidéo suivante">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 L17 12 L9 20" /></svg>
+					</button>
 				</div>
 			</div>
-		</section>
+			<p class="aide">
+				Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile,
+				balayez la zone.
+			</p>
+		</div>
+	</section>
 
-		<section class="section fade-in">
-			<div class="container">
-				<h2 style="margin-bottom:12px;">Carrousel de vidéos</h2>
+	<section>
+		<div class="section-head grande" data-reveal data-groupe="tablatures">
+			<span><i class="section-num">03</i> Tablatures</span>
+			<span>(1)</span>
+		</div>
+		<div class="bloc-tab" data-reveal data-groupe="tablatures">
+			<p>
+				Envie de jouer ces morceaux ? J’ai rassemblé des tablatures simplifiées
+				pour commencer rapidement.
+			</p>
+			<a
+				class="bouton"
+				href="https://docs.google.com/document/d/1lzav6pmo0A10RGYKqbtwUIGk8aWnmJpQV9uYpebnV2Q/edit?usp=sharing"
+				target="_blank"
+				rel="noopener noreferrer">Accéder aux tablatures</a
+			>
+		</div>
+	</section>
 
-				<div class="video-carousel" aria-label="Carrousel vidéo">
-					<button class="car-btn prev" aria-label="Précédent">‹</button>
-					<div class="carousel-track" role="list">
-						{videos.map((src) => {
-							const id = src.includes('v=') ? src.split('v=')[1].split('&')[0] : src.split('/').pop();
-							return (
-								<div class="carousel-item" role="listitem">
-									<iframe
-										width="200"
-										height="315"
-										src={`https://www.youtube-nocookie.com/embed/${id}`}
-										title="YouTube video player"
-										frameborder="0"
-										allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-										referrerpolicy="strict-origin-when-cross-origin" 
-										allowfullscreen
-									></iframe>
-								</div>
-							);
-						})}
-					</div>
-					<button class="car-btn next" aria-label="Suivant">›</button>
-				</div>
+	<Colophon />
 
-				<p class="paragraph-center">Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile, balayez la zone.</p>
-			</div>
-		</section>
+	<script>
+		// ------------------------------------------------------------- le manche
+		// Chaque corde repond au survol : elle vibre, et elle sonne.
+		//
+		// Le son est SYNTHETISE, aucun fichier n'est charge. Karplus-Strong :
+		// on remplit un anneau de N = frequence d'echantillonnage / hauteur avec
+		// du bruit, puis on le relit en moyennant chaque echantillon avec le
+		// suivant. La moyenne est un passe-bas, donc les aigus meurent avant les
+		// graves — exactement ce que fait une corde pincee. Vingt lignes pour un
+		// timbre credible, et zero octet sur le reseau.
+		(function () {
+			const svg = document.querySelector(".manche svg");
+			if (!svg) return;
+			const NUT = +svg.dataset.nut;
+			const FIN = +svg.dataset.fin;
+			const FRETTES = svg.dataset.frettes.split(",").map(Number);
+			const lecture = svg.querySelector(".note-lue");
+			const NOMS = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
 
-		<section class="section two-col">
-			<div class="tab-card fade-in">
-				<div class="tab-card-media" aria-hidden="true">🎸</div>
-				<div class="tab-card-body">
-					<h3>Tablatures</h3>
-					<p class="muted">Envie de jouer ces morceaux ? J'ai rassemblé des tablatures simplifiées pour commencer rapidement.</p>
-					<a class="tab-btn" href="https://docs.google.com/document/d/1lzav6pmo0A10RGYKqbtwUIGk8aWnmJpQV9uYpebnV2Q/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Accéder aux tablatures</a>
-				</div>
-			</div>
-		</section>
+			// Case survolee. Le doigt se pose DERRIERE une frette et la corde est
+			// arretee par celle-ci : l'espace compris entre la frette n-1 (ou le
+			// sillet) et la frette n est donc la case n.
+			//
+			// La version precedente comptait les frettes situees avant le pointeur,
+			// ce qui decalait tout d'un cran — le point de la 3e case annoncait
+			// « case 2 ». Et ma verification ne l'a pas vu parce qu'elle placait le
+			// pointeur avec la meme convention fausse : les deux erreurs
+			// s'annulaient. On teste desormais contre la position des reperes, qui
+			// sont, eux, poses par une autre fonction.
+			function caseSous(x) {
+				for (let i = 0; i < FRETTES.length; i++) if (x < FRETTES[i]) return i + 1;
+				return FRETTES.length;
+			}
+			// La frette qui arrete la corde : tout ce qui est derriere elle est mort.
+			const depart = (n) => FRETTES[n - 1];
 
-		<script>
-			(function () {
-				// reveal animations (existing behavior)
-				const nodes = Array.from(document.querySelectorAll('main .fade-in'));
-				if (nodes.length) {
-					const list = nodes
-						.map((el) => ({ el, top: el.getBoundingClientRect().top + window.scrollY }))
-						.sort((a, b) => a.top - b.top)
-						.map((o) => o.el);
-					const baseDelay = 80;
-					const step = 120;
-					list.forEach((el, i) => setTimeout(() => el.classList.add('is-visible'), baseDelay + i * step));
+			// Les navigateurs refusent de jouer un son tant que la page n'a recu
+			// aucun geste, et un survol n'en est pas un. Le contexte est donc cree
+			// a la demande puis reveille au premier clic ou a la premiere touche :
+			// avant ca, les cordes vibrent en silence.
+			let audio = null;
+			function reveille() {
+				try {
+					const Ctx = window.AudioContext || window.webkitAudioContext;
+					if (!Ctx) return null;
+					if (!audio) audio = new Ctx();
+					if (audio.state === "suspended") audio.resume();
+					return audio;
+				} catch (e) {
+					return null;
+				}
+			}
+			addEventListener("pointerdown", reveille, { once: true });
+			addEventListener("keydown", reveille, { once: true });
+
+			// Karplus-Strong : on remplit un anneau de N = frequence
+			// d'echantillonnage / hauteur avec du bruit, puis on le relit en
+			// moyennant chaque echantillon avec le suivant. La moyenne est un
+			// passe-bas, donc les aigus meurent avant les graves — exactement ce que
+			// fait une corde pincee. Vingt lignes pour un timbre credible, et zero
+			// octet sur le reseau.
+			function sonne(hz) {
+				const c = reveille();
+				if (!c || c.state !== "running") return;
+				const sr = c.sampleRate;
+				const N = Math.max(2, Math.round(sr / hz));
+				const buffer = c.createBuffer(1, Math.ceil(sr * 2.2), sr);
+				const sortie = buffer.getChannelData(0);
+
+				const anneau = new Float32Array(N);
+				for (let i = 0; i < N; i++) anneau[i] = Math.random() * 2 - 1;
+				// Le bruit blanc pur donne un « tic » de plectre trop dur : trois
+				// lissages en font une attaque au doigt.
+				for (let p = 0; p < 3; p++)
+					for (let i = 0; i < N; i++)
+						anneau[i] = (anneau[i] + anneau[(i + 1) % N]) * 0.5;
+
+				let k = 0;
+				for (let i = 0; i < sortie.length; i++) {
+					sortie[i] = anneau[k];
+					anneau[k] = (anneau[k] + anneau[(k + 1) % N]) * 0.5 * 0.9965;
+					k = (k + 1) % N;
 				}
 
-				// Carousel logic (use native horizontal scroll + CSS scroll-snap)
-				const carousel = document.querySelector('.video-carousel');
-				if (!carousel) return;
-				const track = carousel.querySelector('.carousel-track');
-				let items = Array.from(track.querySelectorAll('.carousel-item'));
-				const prev = carousel.querySelector('.car-btn.prev');
-				const next = carousel.querySelector('.car-btn.next');
-				let index = 0;
+				const source = c.createBufferSource();
+				source.buffer = buffer;
+				const filtre = c.createBiquadFilter();
+				filtre.type = "lowpass";
+				filtre.frequency.value = 3200;
+				const volume = c.createGain();
+				// Bas volontairement : un son au survol se declenche sans etre
+				// demande, il ne doit jamais faire sursauter.
+				volume.gain.setValueAtTime(0.0001, c.currentTime);
+				volume.gain.exponentialRampToValueAtTime(0.14, c.currentTime + 0.006);
+				volume.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 2.1);
+				source.connect(filtre).connect(volume).connect(c.destination);
+				source.start();
+				source.stop(c.currentTime + 2.2);
+			}
 
-				function clamp(i) { return Math.max(0, Math.min(i, items.length - 1)); }
+			const sobre = matchMedia("(prefers-reduced-motion: reduce)").matches;
+			const jetons = new WeakMap();
 
-				function scrollToIndex(i) {
-					const w = carousel.getBoundingClientRect().width;
-					track.scrollTo({ left: i * w, behavior: 'smooth' });
-					index = clamp(i);
+			function vibre(groupe, y, vitesse, x0) {
+				const fil = groupe.querySelector(".corde-fil");
+				// Seule la portion entre la frette et le bout vibre : au dela du
+				// doigt, la corde est morte. C'est ce detail qui fait que le manche
+				// se lit comme une guitare et pas comme six traits.
+				const repos = `M ${NUT} ${y} L ${FIN} ${y}`;
+				// Mouvement reduit : la corde ne bouge pas, mais son nom doit quand
+				// meme se rallumer puis s'eteindre — sinon la classe `sonne` posee
+				// par l'appelant ne serait jamais retiree et le nom resterait a
+				// l'encre pour toujours.
+				if (sobre) {
+					setTimeout(() => groupe.classList.remove("sonne"), 900);
+					return;
+				}
+				const jeton = {};
+				jetons.set(groupe, jeton);
+				const t0 = performance.now();
+				const portee = FIN - x0;
+				(function pas(t) {
+					if (jetons.get(groupe) !== jeton) return;
+					const dt = t - t0;
+					const a = 8 * Math.exp(-dt / 780);
+					if (a < 0.3) {
+						fil.setAttribute("d", repos);
+						groupe.classList.remove("sonne");
+						return;
+					}
+					// Le ventre est au milieu de la portion libre et ses deux bouts
+					// sont fixes : c'est le mode fondamental, donc un demi-sinus.
+					const phase = (dt / 1000) * vitesse * 2 * Math.PI;
+					let d = `M ${NUT} ${y} L ${x0} ${y}`;
+					for (let x = x0 + 14; x <= FIN; x += 14) {
+						const ventre = Math.sin((Math.PI * (x - x0)) / portee);
+						d += ` L ${x} ${(y + a * ventre * Math.sin(phase)).toFixed(2)}`;
+					}
+					fil.setAttribute("d", d);
+					requestAnimationFrame(pas);
+				})(t0);
+			}
+
+			let lisible = null;
+			svg.querySelectorAll(".corde").forEach((groupe, i) => {
+				const y = parseFloat(groupe.dataset.y);
+				const vide = parseFloat(groupe.dataset.midi);
+				// Les vraies frequences sont bien trop rapides pour l'ecran : la
+				// vibration VUE est une convention, plus vive sur les aigus.
+				const vitesse = 6 + (5 - i) * 1.3;
+				const cible = groupe.querySelector(".corde-cible");
+				let derniere = null;
+
+				// Position du pointeur exprimee dans le repere du dessin : le SVG
+				// est mis a l'echelle par la largeur de la page.
+				function abscisse(ev) {
+					const b = svg.getBoundingClientRect();
+					return ((ev.clientX - b.left) / b.width) * 1360;
 				}
 
-				prev.addEventListener('click', () => { scrollToIndex(index - 1); });
-				next.addEventListener('click', () => { scrollToIndex(index + 1); });
-
-				// keyboard navigation
-				document.addEventListener('keydown', (e) => {
-					if (e.key === 'ArrowLeft') scrollToIndex(index - 1);
-					if (e.key === 'ArrowRight') scrollToIndex(index + 1);
-				});
-
-				// update index on native scroll end (debounced)
-				let scrollTimer = null;
-				track.addEventListener('scroll', () => {
-					if (scrollTimer) clearTimeout(scrollTimer);
-					scrollTimer = setTimeout(() => {
-						const w = carousel.getBoundingClientRect().width;
-						index = Math.round(track.scrollLeft / w);
-					}, 120);
-				});
-
-				// make carousel responsive: set items width to carousel width (use inline-block sizing)
-				function resize() {
-					const w = carousel.getBoundingClientRect().width;
-					items = Array.from(track.querySelectorAll('.carousel-item'));
-					items.forEach((it) => { it.style.width = w + 'px'; });
-					scrollToIndex(index);
+				function pince(n) {
+					const midi = vide + n;
+					groupe.classList.add("sonne");
+					vibre(groupe, y, vitesse, depart(n));
+					sonne(440 * Math.pow(2, (midi - 69) / 12));
+					if (lecture) {
+						lecture.textContent =
+							NOMS[midi % 12] + (Math.floor(midi / 12) - 1) + "  case " + n;
+						clearTimeout(lisible);
+						lisible = setTimeout(() => (lecture.textContent = ""), 2200);
+					}
 				}
-				window.addEventListener('resize', resize);
-				resize();
-			})();
-		</script>
-	</main>
+
+				function survol(ev) {
+					const n = caseSous(abscisse(ev));
+					// On ne rejoue qu'en CHANGEANT de case : sans ca, le moindre
+					// tremblement de souris declencherait une rafale de notes.
+					if (n === derniere) return;
+					derniere = n;
+					pince(n);
+				}
+
+				// Le survol ne vaut que pour une souris ; au doigt, c'est le tap.
+				if (matchMedia("(hover: hover) and (pointer: fine)").matches) {
+					cible.addEventListener("pointerenter", survol);
+					cible.addEventListener("pointermove", survol);
+					cible.addEventListener("pointerleave", () => (derniere = null));
+				}
+				cible.addEventListener("click", (ev) => pince(caseSous(abscisse(ev))));
+			});
+		})();
+
+		(function () {
+			const zone = document.querySelector(".zone-carrousel");
+			const carousel = document.querySelector(".video-carousel");
+			if (!zone || !carousel) return;
+			const track = carousel.querySelector(".carousel-track");
+			const prev = zone.querySelector(".car-btn.prev");
+			const next = zone.querySelector(".car-btn.next");
+			let items = Array.from(track.querySelectorAll(".carousel-item"));
+			let index = 0;
+
+			const clamp = (i) => Math.max(0, Math.min(i, items.length - 1));
+
+			// `aria-disabled` et non `disabled` : le bouton reste atteignable au
+			// clavier, donc on peut encore lire son etat au lecteur d'ecran.
+			function majEtat() {
+				prev.setAttribute("aria-disabled", String(index <= 0));
+				next.setAttribute("aria-disabled", String(index >= items.length - 1));
+			}
+
+			// La mesure est prise au moment du clic, sur la piste elle-meme : elle
+			// est donc toujours a jour, quoi qu'il soit arrive a la mise en page.
+			function scrollToIndex(i) {
+				index = clamp(i);
+				track.scrollTo({ left: index * track.clientWidth, behavior: "smooth" });
+				majEtat();
+			}
+
+			prev.addEventListener("click", () => scrollToIndex(index - 1));
+			next.addEventListener("click", () => scrollToIndex(index + 1));
+
+			// Les fleches ne pilotent le carrousel que s'il est a l'ecran : sinon
+			// elles volaient le clavier a toute la page.
+			document.addEventListener("keydown", (e) => {
+				if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+				const r = carousel.getBoundingClientRect();
+				if (r.bottom < 0 || r.top > window.innerHeight) return;
+				scrollToIndex(e.key === "ArrowLeft" ? index - 1 : index + 1);
+			});
+
+			let minuteur = null;
+			track.addEventListener("scroll", () => {
+				if (minuteur) clearTimeout(minuteur);
+				minuteur = setTimeout(() => {
+					index = clamp(Math.round(track.scrollLeft / track.clientWidth));
+					majEtat();
+				}, 120);
+			});
+
+			// Un changement de largeur ne casse plus rien (le CSS s'en charge), mais
+			// la position de defilement, elle, est en pixels : on la recale.
+			addEventListener("resize", () => {
+				track.scrollTo({ left: index * track.clientWidth });
+			});
+			majEtat();
+		})();
+	</script>
 </Layout>
+
+<style>
+	/* ------------------------------------------------------------ ouverture ---
+	   Le patron de /clouddevops : ligne de meta, titre geant, chapo, repères,
+	   lien de saut. La page n'avait qu'une `.tete-page` de 211px la ou les
+	   trois autres pages de section ouvrent sur un bloc complet.
+
+	   Pas de photo ici, contrairement a /clouddevops : la guitare reste dans
+	   le recit, ou elle illustre le texte qu'elle accompagne. L'ouverture est
+	   donc en une seule colonne, et ce sont les repères qui occupent la
+	   largeur. */
+	.ouverture {
+		overflow: clip;
+		padding: 8px var(--edge) 0;
+	}
+	/* 7,8 comme /clouddevops : « MUSIQUE » est plus court que « CLOUD DEVOPS »,
+	   donc aucun risque de rognage, et le titre rend a la meme taille que sur
+	   les pages voisines. */
+	.titre-geant {
+		--titre-div: 7.8;
+	}
+	/* La rangee de `.opening-foot` de l'accueil : le chapo a gauche, le lien
+	   pousse a droite, sur une seule ligne. La page empilait les deux, ce qui
+	   creusait un vide a droite du chapo. */
+	.ouverture-pied {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 20px var(--pas-6);
+		margin-top: 64px;
+		padding-bottom: 4px;
+	}
+	/* Sofia Sans et 15px, comme le chapo de /clouddevops : `body` est en
+	   JetBrains Mono, donc un paragraphe sans famille declaree herite du mono. */
+	.ouverture-pied p {
+		margin: 0;
+		max-width: 52ch;
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+		font-size: 15px;
+		line-height: 1.5;
+		color: var(--ink-55);
+	}
+
+	/* ---------------------------------------------------------------- manche ---
+	   Aucun aplat de fond : le manche est un dessin au trait, comme l'orbite
+	   des logos de /clouddevops. Les frettes sont plus foncees que --rule —
+	   #c9c9c4 ne donne que 1,51:1 sur le papier et disparaissait. */
+	.manche {
+		margin: var(--pas-8) 0 0;
+	}
+	.manche svg {
+		display: block;
+		width: 100%;
+		height: auto;
+		overflow: visible;
+	}
+
+	/* Sur telephone, un manche entier mis a la largeur de l'ecran tombe a 53px
+	   de haut : six cordes a 8,8px d'ecart, impossibles a viser au doigt. Un
+	   manche de guitare est plus long qu'un telephone — on ne l'ecrase pas, on
+	   le fait defiler. Hauteur fixe, ecart de corde a 25px, et le reste du
+	   manche s'atteint au glissement. */
+	@media (max-width: 760px) {
+		.manche {
+			overflow-x: auto;
+			overscroll-behavior-x: contain;
+			scrollbar-width: none;
+		}
+		.manche::-webkit-scrollbar {
+			display: none;
+		}
+		.manche svg {
+			width: auto;
+			height: 168px;
+		}
+	}
+	.frette {
+		stroke: #b4b4ae;
+	}
+	.sillet {
+		stroke: var(--ink);
+		stroke-width: 4;
+	}
+	.inlay {
+		fill: #d2d2cc;
+	}
+	.corde-fil {
+		fill: none;
+		stroke: var(--ink);
+	}
+	.corde-nom {
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 12px;
+		font-weight: 700;
+		text-anchor: start;
+		fill: var(--ink-55);
+	}
+	/* Une corde fait 1 a 3px de haut : impossible a survoler. Un double
+	   invisible de 26px porte le survol sans rien ajouter a l'image. */
+	.corde-cible {
+		stroke: transparent;
+		stroke-width: 26;
+		pointer-events: stroke;
+		cursor: pointer;
+	}
+	.corde:hover .corde-nom,
+	.corde.sonne .corde-nom {
+		fill: var(--ink);
+	}
+	/* La note jouee, en bout de manche : meme registre que le compteur d'images
+	   de l'accueil — une lecture d'appareil, en mono, discrete. */
+	.note-lue {
+		font-family: "JetBrains Mono", ui-monospace, monospace;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 0.09em;
+		text-anchor: end;
+		fill: var(--ink);
+	}
+
+	/* Passe-partout a l'encre sur la guitare, comme le portrait de
+	   /clouddevops : la photo etait nue sur le papier. */
+	.duo-media {
+		box-sizing: border-box;
+		background: var(--ink);
+		padding: 20px;
+	}
+
+	/* Plus d'air entre les chapitres, comme sur /clouddevops. */
+	.section-head.grande {
+		margin-top: var(--pas-10);
+	}
+
+	/* La barre du haut est fixe sur 64px : sans cette marge, l'ancre depose le
+	   titre du chapitre derriere elle. */
+	#videos {
+		scroll-margin-top: 88px;
+	}
+
+	.zone-carrousel,
+	.bloc-tab {
+		padding: var(--pas-3) var(--edge) 0;
+	}
+
+	/* Le lecteur prend toute la colonne de contenu, moins la reserve des deux
+	   fleches. Il plafonnait a 960px pour empecher une video 16:9 d'atteindre
+	   690px de haut — la hauteur est assumee, elle vient avec la largeur.
+	   68px de reserve = 48 de bouton + 20 d'air : la fleche vient alors se caler
+	   exactement sur --edge, comme le titre, le chapo et le manche. */
+	.zone-carrousel {
+		box-sizing: border-box;
+		padding-inline: calc(var(--edge) + 68px);
+	}
+	/* Pleine largeur, une video 16:9 grandit sans fin : a 1800px de fenetre elle
+	   atteignait 891px de haut et ne tenait plus a l'ecran. On la borne donc par
+	   la HAUTEUR disponible plutot que par une largeur arbitraire — le ratio est
+	   conserve, et sur un ecran normal la contrainte ne mord pas.
+	   Les fleches suivent : elles sont posees par rapport a ce bloc. */
+	.video-carousel {
+		max-width: min(100%, calc((100vh - 280px) * 16 / 9));
+		margin-inline: auto;
+	}
+
+	.bloc-tab {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--pas-3);
+		max-width: 68ch;
+	}
+	/* Reste en JetBrains Mono : ce bloc ne s'appelle pas `.prose`, le correctif
+	   de police du systeme ne l'atteignait donc pas. */
+	.bloc-tab p {
+		margin: 0;
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+		font-size: 15px;
+		line-height: 1.45;
+		color: var(--ink-55);
+	}
+
+	.video-carousel {
+		position: relative;
+	}
+
+	/* Les fleches etaient en blanc sur fond blanc, donc invisibles. Carre a
+	   l'encre, comme les autres commandes du systeme.
+
+	   Elles etaient posees SOUS le lecteur, cote a cote a gauche : on ne les
+	   associait pas a la video qu'elles pilotent, et elles ajoutaient une
+	   rangee de 40px sous un bloc deja haut. Elles passent de part et d'autre
+	   du lecteur, a l'aplomb de son centre — la ou la main les cherche.
+	   `.commandes` est desormais dans `.video-carousel`, qui porte deja
+	   `position: relative`. */
+	.commandes {
+		position: absolute;
+		/* Dans la reserve, donc jamais sur l'image. */
+		top: 50%;
+		left: -68px;
+		right: -68px;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		/* Le conteneur ne doit rien intercepter : sans ca, il couvrirait tout le
+		   lecteur et le clic sur la video ne partirait jamais. Seuls les boutons
+		   reprennent les evenements. */
+		pointer-events: none;
+	}
+	.commandes .car-btn {
+		pointer-events: auto;
+	}
+	/* Sur telephone la reserve couterait 136px sur 280 a 372 de large : il ne
+	   resterait presque plus de video. Les fleches passent donc SOUS le lecteur,
+	   centrees — jamais posees sur l'image. */
+	@media (max-width: 760px) {
+		.zone-carrousel {
+			padding-inline: var(--edge);
+		}
+		.commandes {
+			position: static;
+			transform: none;
+			justify-content: center;
+			gap: 12px;
+			margin-top: 14px;
+		}
+	}
+
+	/* 48px et non 40 : la cible tactile recommandee est de 44px minimum
+	   (WCAG 2.5.5), et le bouton reste a l'interieur du lecteur sur telephone.
+	   Le chevron est DESSINE au trait plutot qu'ecrit avec les glyphes « ‹ › » :
+	   ces deux caracteres n'ont ni la meme chasse ni le meme centrage optique
+	   selon la police de repli, donc les deux fleches n'etaient pas symetriques.
+	   Un trace de 2px, c'est aussi le vocabulaire du reste de la page. */
+	.car-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		border: 1px solid var(--ink);
+		border-radius: 0;
+		background: var(--paper);
+		color: var(--ink);
+		cursor: pointer;
+		transition: background var(--duree) var(--sortie),
+			color var(--duree) var(--sortie), border-color var(--duree) var(--sortie),
+			opacity var(--duree) var(--sortie);
+	}
+	.car-btn svg {
+		width: 22px;
+		height: 22px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: square;
+		stroke-linejoin: miter;
+	}
+	.car-btn:hover {
+		background: var(--ink);
+		color: var(--paper);
+	}
+	/* Le contour de focus se pose a l'exterieur : a l'interieur il se confondait
+	   avec la bordure du bouton. */
+	.car-btn:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 3px;
+	}
+	/* Il n'y a que deux videos : arrive au bout, la fleche ne faisait plus rien
+	   tout en gardant l'air active. Elle se retire au lieu de mentir. */
+	.car-btn[aria-disabled="true"] {
+		border-color: var(--rule);
+		color: var(--rule);
+		cursor: default;
+	}
+	.car-btn[aria-disabled="true"]:hover {
+		background: var(--paper);
+		color: var(--rule);
+	}
+	.carousel-track {
+		display: flex;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+	.carousel-track::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* La largeur vient d'ici, plus du JavaScript. Elle y etait posee en pixels
+	   par un `redimensionne()` appele au chargement et sur `resize` — donc elle
+	   se desynchronisait des que la mise en page changeait SANS evenement resize
+	   (rechargement a chaud, arrivee d'une police, zoom, apparition d'une barre
+	   de defilement) : les elements gardaient leur ancienne largeur et deux
+	   videos s'affichaient cote a cote. `100%` du conteneur ne peut pas mentir. */
+	.carousel-item {
+		flex: 0 0 100%;
+		min-width: 0;
+		scroll-snap-align: start;
+		box-sizing: border-box;
+	}
+	.carousel-item iframe {
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		height: auto;
+		border: 0;
+		background: var(--block);
+	}
+
+	/* C'est une phrase d'instruction, pas une etiquette : elle etait en mono
+	   11px tout en capitales, sur 88 caracteres par ligne. En capitales et sur
+	   cette longueur, elle se lisait moins bien que le texte qu'elle sert.
+	   (Deux blocs `.aide` se suivaient ici, le second ne redefinissant que la
+	   marge — fusionnes.) */
+	.aide {
+		margin: 12px auto 0;
+		max-width: 62ch;
+		text-align: center;
+		font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+		font-size: 13px;
+		line-height: 1.5;
+		color: var(--ink-55);
+	}
+
+	/* Le bouton des tablatures touchait le filet du colophon — ecart mesure a
+	   0px, la ou /photo et /clouddevops en laissent 64. C'est le dernier bloc
+	   de la page, l'air lui revient. */
+	.bloc-tab {
+		padding-bottom: var(--pas-8);
+	}
+</style>

@@ -95,3 +95,58 @@ tokens).
 - Un hook `rtk` (Rust Token Killer) réécrit certaines commandes Bash de façon transparente — si une
   commande échoue de façon inattendue avec un message `[RTK:PASSTHROUGH]`, ce n'est pas une vraie
   erreur, la commande sous-jacente s'exécute quand même en fallback.
+
+## Refonte éditoriale — état au 23/08/2026
+
+Les 16 pages partagent désormais un seul système visuel. **La référence est
+[`portfolio-photo/DESIGN.md`](portfolio-photo/DESIGN.md)** : jetons, primitives, mécanisme de
+révélation, recette pour ajouter une page, et la liste des pièges déjà payés. À lire avant tout
+ajustement de mise en forme — plusieurs de ces pièges ont coûté des tours entiers.
+
+### Ce qui a changé
+
+- Le système vit dans `src/styles/editorial.css`, importée par `header.astro` donc par toutes les
+  pages. `home-editorial.css` ne garde que ce qui est propre à l'accueil.
+- Les quatre feuilles héritées (`index.css`, `photo.css`, `clouddevops.css`, `musique.css`) ont été
+  supprimées : plus personne ne les importait, et elles reprenaient le dessus sur le système.
+- `header.astro` porte l'unique `<main>` (il y en avait deux imbriqués par page) et reçoit sa classe
+  par `mainClass`. Il porte aussi le mécanisme de révélation, désormais disponible partout.
+- Nouveau composant `Colophon.astro` pour le bloc de contact des pages intérieures.
+
+### Étapes de design rejetées (ne pas les reproposer sans raison)
+
+- **Noir et blanc sur les photos** : le filtre restait appliqué en permanence sur mobile, où le
+  survol n'existe pas.
+- **Filet blanc sous les photos des cartes** : en `var(--paper)`, soit la couleur exacte du fond de
+  page, il se confondait avec le fond au repos et donnait l'impression d'une photo rognée de 2px.
+- **Pastilles en verre dépoli sur `/clouddevops`** : incompatibles avec un système qui interdit
+  dégradés, lueurs et ombres portées.
+- **L'orbite des logos, elle, a été redemandée et remise** (23/08 au soir), redessinée en filets SVG
+  de 1px : l'utilisateur la trouvait plus belle que la rangée à plat, et voulait « une animation qui
+  correspond au cloud, comme les planètes du système solaire ». Un motif animé n'est donc pas
+  interdit sur ce site — ce sont les effets (dégradé, lueur, ombre) qui le sont.
+- **Animation permanente sur le titre de l'accueil** : cinq variantes fabriquées et essayées
+  (respiration de la graisse, vague au curseur, balayage lumineux, soulèvement des lettres, et la
+  combinaison des deux dernières). Verdict de l'utilisateur : « ça fait pas très pro ». Abandonné.
+  Note technique si le sujet revient : l'axe de graisse de Sofia Sans Condensed s'arrête à 900 et le
+  titre est déjà à 800 — il ne reste que 100 unités de marge, donc l'amplitude doit venir de la
+  verticale, pas de la graisse.
+- **Soulignement de crochet à crochet dans la nav** : le trait passe sous les espaces de `[ ` et
+  ` ]`, il encadre les crochets au lieu de souligner le mot et prend l'allure d'un champ de
+  formulaire. Retenu à la place : les crochets marquent une destination, l'entrée de la page courante
+  n'en porte pas, et le survol souligne le texte seul.
+
+### En attente
+
+- **Ajustements de mise en forme** — reprise prévue le 24/08/2026.
+- **Push / PR** : la branche `feat/home-cinematic` a **37 commits** d'avance sur `origin/main` et
+  n'a pas de branche amont — rien n'a jamais été poussé. Chaque push déclenche un déploiement réel,
+  donc attendre la demande explicite.
+- **TLS de l'apex `nabilchebili.fr`** : diagnostic clos, correctif écrit et parqué. `https://nabilchebili.fr`
+  n'a aucun certificat (alerte TLS 80, confirmée en IPv4 et IPv6) ; le certificat de `www` ne porte
+  que le SAN `www.nabilchebili.fr`. Correctif retenu : rattacher l'apex à la SWA via un `A` vers
+  `stableInboundIP` + un `TXT` de validation chez IONOS, puis aligner `terraform/main.tf` par
+  `terraform import`.
+- **Sept galeries jamais revues visuellement une par une** (`event-databricks`, `illumination`,
+  `londres`, `mariage`, `gr1-1`, `gr1-2`, `gr1-3`). Elles passent par `GalleryPage`, le même
+  composant que `croatie` et `supersonic` qui ont été revues, et elles passent le script de contrôle.
