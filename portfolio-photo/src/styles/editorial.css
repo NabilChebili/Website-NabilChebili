@@ -423,23 +423,6 @@ html {
   transform: scaleX(1);
 }
 
-/* Le bas de page ne se revele plus au defilement : il est simplement la.
-   Le bloc de contact clot chaque page, on l'atteint toujours en fin de course
-   et il n'y a rien a decouvrir — l'animation ne faisait que retarder une
-   information qu'on vient justement chercher. Son filet est trace d'emblee et
-   ses colonnes ne montent plus en fondu.
-
-   Le reste du mecanisme est intact : les sections du corps se revelent
-   toujours. */
-.reveal-ok .colophon [data-reveal] {
-  opacity: 1;
-  transform: none;
-}
-.colophon::before {
-  transform: scaleX(1);
-  transition: none;
-}
-
 /* --- l'image s'ouvre comme un obturateur, depuis son centre --- */
 .reveal-ok [data-reveal] img {
   clip-path: inset(46% 0 46% 0);

@@ -202,8 +202,21 @@ const schemaWebsite = {
 		});
 		});
 		},
-		// 120px d'avance avant de declencher, la valeur par defaut d'AOS
-		{ rootMargin: "0px 0px -120px 0px", threshold: 0 }
+		// Zone de detection = la fenetre entiere, sans retrait.
+		//
+		// Il y avait ici -120px en bas, l'offset par defaut d'AOS. Une marge
+		// NEGATIVE retrecit la zone : un element devait etre remonte de 120px
+		// au-dessus du bord inferieur pour compter comme visible. Consequence,
+		// tout ce qui tombait dans cette bande au chargement restait a
+		// l'opacite 0 alors qu'on le voyait a l'ecran — un titre de section
+		// pouvait donc laisser une bande blanche tant qu'on n'avait pas
+		// defile. Sur l'accueil en 1080px de haut, « Explorer » atterrissait a
+		// 83px du bas et disparaissait ainsi.
+		//
+		// A 0, un element se revele des qu'il touche la fenetre : rien de
+		// visible ne reste jamais masque, et la revelation au defilement joue
+		// toujours pour ce qui arrive d'en dessous.
+		{ rootMargin: "0px", threshold: 0 }
 		);
 
 		cibles.forEach((el) => io.observe(el));
