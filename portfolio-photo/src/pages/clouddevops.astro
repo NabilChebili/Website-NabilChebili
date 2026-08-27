@@ -54,20 +54,40 @@ const certifications = [
   { name: "AZ-900", detail: "Azure Fundamentals (2021)" },
 ];
 
+// Volontairement sans identifiants d'infrastructure : ni abonnements, ni noms
+// de ressources, ni principals de service. Une page publique decrit ce qui est
+// fait et comment, pas la cartographie interne d'un client.
 const missions = [
   {
-    period: "2025 · 1 mois (mission active)",
+    period: "2025–2026 · en cours (mission active)",
+    client: "Hello Paris",
+    role: "Architecte Cloud & DevOps — Azure & Terraform",
+    summary:
+      "Conception et exploitation d’une plateforme d’onboarding Azure : un projet qui démarre reçoit ses abonnements, son réseau, ses coffres et ses identités par un seul pipeline, et la gouvernance qui va avec.",
+    bullets: [
+      "Plateforme d’onboarding en Terraform : groupes de ressources, réseau hub & spoke, Key Vault, identités managées, sauvegarde et supervision provisionnés d’un bloc pour chaque nouveau projet",
+      "Bibliothèque de modules Terraform versionnés en SemVer, mutualisée entre les projets — un correctif se propage par un tag, pas par un copier-coller",
+      "Templates de pipelines Azure DevOps partagés (init, plan, apply) : un seul endroit pour faire évoluer la CI/CD de tous les projets à la fois",
+      "Gouvernance Azure Policy écrite en Terraform au niveau management group — définitions, initiatives et affectations versionnées et relues comme du code",
+      "Initiative d’enregistrement DNS automatique des private endpoints vers les zones privées du hub, en DeployIfNotExists, couvrant neuf types de ressources",
+      "Chantier ISO 27001 : recréation en policies internes d’un sous-ensemble de l’initiative Microsoft, pour en maîtriser le contenu et le versionner",
+    ],
+    stack: ["Azure", "Terraform", "Azure DevOps", "Azure Policy", "Hub & Spoke", "Private Endpoints", "ISO 27001", "SemVer"],
+  },
+  {
+    period: "2025 · 1 mois",
     client: "RTE",
     clientLogo: "/company_logo/RTE.png",
     role: "Cloud Engineer DevOps — Azure DevOps & Azure",
     summary:
-      "Conception, sécurisation et industrialisation d’environnements Azure: landing zones via AVM/Terraform, gouvernance Azure Policy et structuration AZDO.",
+      "Conception, sécurisation et industrialisation d’environnements Azure : landing zones via AVM/Terraform, gouvernance Azure Policy et structuration Azure DevOps.",
     bullets: [
       "Participation à la mise en place de landing zones (Terraform + Azure Verified Modules)",
-      "Structuration de projets Azure DevOps: bonnes pratiques CI/CD, permissions, templates",
-      "Déploiement/ajustement d’Azure Policies pour sécurité et conformité",
+      "Structuration de projets Azure DevOps : bonnes pratiques CI/CD, permissions, templates",
+      "Déploiement et ajustement d’Azure Policies pour la sécurité et la conformité",
+      "Remaniement et optimisation de l’infrastructure existante, pour sa maintenabilité et sa performance",
     ],
-    stack: ["Azure", "Terraform", "AVM", "Azure DevOps", "Azure Policy", "DevSecOps"],
+    stack: ["Azure", "Terraform", "AVM", "Azure DevOps", "Azure Policy", "DevSecOps", "Agile"],
   },
   {
     period: "2025 · 5 mois",
