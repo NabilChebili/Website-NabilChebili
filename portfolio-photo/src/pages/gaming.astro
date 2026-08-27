@@ -391,12 +391,16 @@ const jalons = [
 		}
 	}
 
-	/* Au survol la bande s'arrete : un mur de 76 titres qu'on ne peut pas lire
-	   est un ornement, pas une information. */
-	.defile:hover .defile-rang,
-	.defile:focus-within .defile-rang {
-		animation-play-state: paused;
-	}
+	/* La bande ne s'arrete plus au survol : elle passait en pause des que la
+	   souris la traversait, y compris en allant simplement d'une section a
+	   l'autre — un arret non demande, plus genant que le mouvement lui-meme.
+
+	   Le mecanisme d'arret reste assure par `prefers-reduced-motion` plus bas,
+	   qui coupe l'animation ET rend la bande defilable a la main.
+
+	   `:focus-within` partait de toute facon a la poubelle : les items sont des
+	   <li> sans lien ni bouton, donc rien n'y prend le focus et la regle ne
+	   s'est jamais declenchee. */
 
 	.defile-piste li:hover span {
 		color: var(--ink);

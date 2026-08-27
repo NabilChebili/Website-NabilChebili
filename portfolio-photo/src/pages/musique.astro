@@ -9,9 +9,13 @@ import { Image } from "astro:assets";
 // astro:assets, qui sort du WebP redimensionne au lieu du PNG de 1,9 Mo.
 import guitare from "../assets/image.png";
 
+// Les trois videos publiques de la chaine @Nabs_land, dans son ordre
+// d'affichage. « Wait and C - Impro » (WYXsf-MV1GM) est retiree : elle n'est
+// pas repertoriee sur la chaine.
 const videos = [
-	"https://www.youtube.com/watch?v=WYXsf-MV1GM",
-	"https://www.youtube.com/watch?v=6gsqAnGUTvw",
+	{ id: "N-OAoaQRJSg", titre: "Random Sunday" },
+	{ id: "8hG1J2Y_sVA", titre: "Purple Caged" },
+	{ id: "6gsqAnGUTvw", titre: "Sparkle — Your Name" },
 ];
 
 // ---------------------------------------------------------------- le manche
@@ -49,8 +53,7 @@ const cordes = [
 ].map((c, i) => ({ ...c, y: 26 + i * 31 }));
 const HAUTEUR = 26 + 5 * 31 + 26;
 
-const idVideo = (url) =>
-	url.includes("v=") ? url.split("v=")[1].split("&")[0] : url.split("/").pop();
+
 ---
 
 <Layout
@@ -152,11 +155,11 @@ const idVideo = (url) =>
 			<div class="video-carousel" aria-label="Carrousel vidéo">
 				<div class="carousel-track" role="list">
 					{
-						videos.map((src) => (
+						videos.map((v) => (
 							<div class="carousel-item" role="listitem">
 								<iframe
-									src={`https://www.youtube-nocookie.com/embed/${idVideo(src)}`}
-									title="Lecteur vidéo YouTube"
+									src={`https://www.youtube-nocookie.com/embed/${v.id}`}
+									title={v.titre}
 									loading="lazy"
 									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 									referrerpolicy="strict-origin-when-cross-origin"
