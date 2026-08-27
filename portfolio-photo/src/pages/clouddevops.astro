@@ -54,9 +54,10 @@ const certifications = [
   { name: "AZ-900", detail: "Azure Fundamentals (2021)" },
 ];
 
-// Volontairement sans identifiants d'infrastructure : ni abonnements, ni noms
-// de ressources, ni principals de service. Une page publique decrit ce qui est
-// fait et comment, pas la cartographie interne d'un client.
+// Retenue volontaire sur le detail interne : ni identifiants d'infrastructure
+// (abonnements, noms de ressources, principals de service), ni description des
+// chantiers en cours chez le client. C'est un CV : il dit le metier exerce et
+// le niveau de responsabilite, pas le contenu du backlog.
 const missions = [
   {
     period: "2025–2026 · en cours (mission active)",
@@ -67,13 +68,24 @@ const missions = [
       "Conception et exploitation d’une plateforme d’onboarding Azure : un projet qui démarre reçoit ses abonnements, son réseau, ses coffres et ses identités par un seul pipeline, et la gouvernance qui va avec.",
     bullets: [
       "Plateforme d’onboarding en Terraform : groupes de ressources, réseau hub & spoke, Key Vault, identités managées, sauvegarde et supervision provisionnés d’un bloc pour chaque nouveau projet",
-      "Bibliothèque de modules Terraform versionnés en SemVer, mutualisée entre les projets — un correctif se propage par un tag, pas par un copier-coller",
-      "Templates de pipelines Azure DevOps partagés (init, plan, apply) : un seul endroit pour faire évoluer la CI/CD de tous les projets à la fois",
+      "Bibliothèque de modules Terraform versionnés en SemVer, mutualisée entre les projets — un correctif se propage par un tag",
+      "Templates de pipelines Azure DevOps partagés : un seul endroit pour faire évoluer la CI/CD de tous les projets à la fois",
       "Gouvernance Azure Policy écrite en Terraform au niveau management group — définitions, initiatives et affectations versionnées et relues comme du code",
-      "Initiative d’enregistrement DNS automatique des private endpoints vers les zones privées du hub, en DeployIfNotExists, couvrant neuf types de ressources",
-      "Chantier ISO 27001 : recréation en policies internes d’un sous-ensemble de l’initiative Microsoft, pour en maîtriser le contenu et le versionner",
     ],
-    stack: ["Azure", "Terraform", "Azure DevOps", "Azure Policy", "Hub & Spoke", "Private Endpoints", "ISO 27001", "SemVer"],
+    // « Well-Architected » et « Cloud Adoption » sont ecrits en toutes lettres
+    // plutot qu'en CAF/WAF : a cote du mot « Azure », l'acronyme WAF se lit
+    // d'abord comme Web Application Firewall, qui est un tout autre sujet.
+    stack: [
+      "Azure",
+      "Terraform",
+      "Azure DevOps",
+      "Azure Policy",
+      "Hub & Spoke",
+      "Cloud Adoption Framework",
+      "Well-Architected Framework",
+      "ISO 27001",
+      "SemVer",
+    ],
   },
   {
     period: "2025 · 1 mois",
@@ -209,7 +221,7 @@ const other = {
   // page qui affiche deja « 7 missions ».
   reperes: [
     { k: "Rôles", v: "Ingénieur · Team Lead · Product Owner" },
-    { k: "Secteurs", v: "Énergie · Banque · Fintech · Télécom · Environnement" },
+    { k: "Secteurs", v: "Énergie · Transport · Banque · Fintech · Télécom · Environnement" },
   ],
   notes: [
     "J’aime les environnements complexes et la qualité d’exécution (clarté, standards, sécurité).",
