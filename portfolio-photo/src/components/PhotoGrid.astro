@@ -69,13 +69,31 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
       }
 
       function unlockScroll() {
-        if (scrollLock !== null) {
-          document.body.style.position = "";
-          const y = scrollLock;
-          document.body.style.top = "";
-          window.scrollTo(0, y);
-          scrollLock = null;
-        }
+        if (scrollLock === null) return;
+        const y = scrollLock;
+        scrollLock = null;
+        document.body.style.position = "";
+        document.body.style.top = "";
+
+        // Le retour a la position doit etre INSTANTANE. `html` porte
+        // `scroll-behavior: smooth` dans le systeme editorial, et cette regle
+        // s'applique aussi aux defilements programmes : le `scrollTo` de
+        // restauration devenait donc une animation, et on voyait la page
+        // remonter depuis le haut jusqu'a la photo qu'on venait de fermer.
+        //
+        // Le verrou met `body` en `position: fixed`, ce qui ramene le document
+        // a 0 — d'ou une animation d'autant plus longue qu'on avait defile
+        // loin dans une galerie.
+        //
+        // On neutralise la regle le temps du saut plutot que d'utiliser
+        // `behavior: "instant"` : la valeur n'est comprise que par les
+        // navigateurs recents, alors que forcer `auto` sur l'element marche
+        // partout.
+        const racine = document.documentElement;
+        const avant = racine.style.scrollBehavior;
+        racine.style.scrollBehavior = "auto";
+        window.scrollTo(0, y);
+        racine.style.scrollBehavior = avant;
       }
 
       function openLightbox(src) {
