@@ -230,6 +230,17 @@ Trois règles à respecter :
 - **Normaliser l'emplacement des logos.** À hauteur égale, des rapports très différents donnent des
   présences optiques inégales : un logotype large atteignait 165px et écrasait le nom du client
   au-dessus. `width` fixe + `object-fit: contain`.
+- **Préfixer toute classe d'état posée par du JavaScript.** `editorial.css` définit des classes à
+  noms courts et génériques (`.retour`, `.vignette`, `.galerie`) visibles depuis n'importe quel
+  composant. La visionneuse posait une classe `retour` pendant son animation de fermeture : elle
+  récupérait au passage le `margin-bottom: 24px` du lien « ← Toutes les galeries », et sur une boîte
+  `position: fixed; inset: 0` cette marge **retire 24px de hauteur** (900 → 876). La photo
+  atterrissait à 7px de sa vignette, un biais constant que j'ai d'abord attribué à trois causes
+  fausses de suite. Les classes d'état de la visionneuse sont donc toutes en `lb-`.
+- **Une marge sur une boîte `fixed` à `inset: 0` change sa taille.** Avec `top` et `bottom` tous deux
+  à `0` et `height: auto`, l'équation est sur-contrainte et la hauteur vaut
+  `conteneur − marges`. C'est le mécanisme du piège précédent, et il vaut pour tout élément
+  positionné sur ses quatre côtés.
 
 ### Sur la méthode de vérification
 

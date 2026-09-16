@@ -16,15 +16,25 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
     ))}
   </div>
 
-  <div class="lightbox" aria-hidden="true">
-    <div class="lb-inner">
-      <img alt="" />
-      <div class="lb-controls">
-        <button class="lb-download" type="button">Télécharger</button>
-        <button class="lb-share" type="button">Partager</button>
-        <button class="lb-close" type="button" aria-label="Fermer">✕</button>
-      </div>
+  <!-- Trois vues et non une seule : la precedente, la courante, la suivante.
+       Le glissement lateral deplace la piste entiere, si bien que la photo
+       voisine entre par le bord au rythme du doigt, au lieu d'apparaitre une
+       fois le geste termine. -->
+  <div class="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Visionneuse">
+    <div class="lb-fond"></div>
+    <div class="lb-piste">
+      <div class="lb-vue"><img alt="" hidden /></div>
+      <div class="lb-vue"><img alt="" hidden /></div>
+      <div class="lb-vue"><img alt="" hidden /></div>
     </div>
+    <button class="lb-fleche lb-prec" type="button" aria-label="Photo précédente">&lsaquo;</button>
+    <button class="lb-fleche lb-suiv" type="button" aria-label="Photo suivante">&rsaquo;</button>
+    <div class="lb-controls">
+      <button class="lb-download" type="button">Télécharger</button>
+      <button class="lb-share" type="button">Partager</button>
+      <button class="lb-close" type="button" aria-label="Fermer">✕</button>
+    </div>
+    <p class="lb-compteur"><span class="lb-rang">1</span> / <span class="lb-total">1</span></p>
   </div>
 </div>
 
@@ -50,19 +60,176 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
       );
       cards.forEach((card) => observer.observe(card));
 
-      // Lightbox (same behavior as the classic galleries)
+      // ===================================================================
+      //  Visionneuse
+      // ===================================================================
       const images = cards.map((card) => card.querySelector("img")).filter(Boolean);
       const lightbox = grid.querySelector(".lightbox");
-      const lbImg = lightbox.querySelector("img");
+      const track = lightbox.querySelector(".lb-piste");
+      let views = Array.from(lightbox.querySelectorAll(".lb-vue"));
       const lbDownload = lightbox.querySelector(".lb-download");
       const lbShare = lightbox.querySelector(".lb-share");
       const lbClose = lightbox.querySelector(".lb-close");
+      const lbPrev = lightbox.querySelector(".lb-prec");
+      const lbNext = lightbox.querySelector(".lb-suiv");
+      const lbRank = lightbox.querySelector(".lb-rang");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-      let lastOpenedImg = null;
+      lightbox.querySelector(".lb-total").textContent = String(images.length);
+
+      const SLIDE = 260; // duree d'un pas lateral
+      const RETURN = 340; // duree du vol vers la vignette
+
+      let index = 0;
       let scrollLock = null;
+      let frozenWidth = "";
 
+      const currentImg = () => views[1].querySelector("img");
+      const viewWidth = () => track.getBoundingClientRect().width || window.innerWidth;
+
+      // -------------------------------------------------------------------
+      //  Etat des transformations
+      //
+      //  `scale` / `panX` / `panY` appartiennent au zoom, `fallY` au geste de
+      //  fermeture. On conserve la transformation composee dans curK/curX/curY
+      //  parce que le vol de retour doit repartir de la boite de MISE EN PAGE :
+      //  getBoundingClientRect rend la boite deja transformee, et la nouvelle
+      //  transformation, elle, s'applique a la boite non transformee. Sans
+      //  cette soustraction, lacher le doigt fait sauter la photo.
+      // -------------------------------------------------------------------
+      let scale = 1;
+      let panX = 0;
+      let panY = 0;
+      let fallY = 0;
+      let curK = 1;
+      let curX = 0;
+      let curY = 0;
+
+      // Glisser une fois zoome (souris ou doigt) : c'est du deplacement dans
+      // l'image, pas de la navigation.
+      let panning = false;
+      let startX = 0;
+      let startY = 0;
+      let pinchDistance = 0;
+
+      function paint() {
+        const img = currentImg();
+        if (!img) return;
+        curK = scale * (fallY > 0 ? Math.max(0.5, 1 - fallY / 900) : 1);
+        curX = panX;
+        curY = panY + fallY;
+        img.style.transform = `translate3d(${curX}px, ${curY}px, 0) scale(${curK})`;
+        img.style.cursor = scale > 1 ? "grab" : "zoom-in";
+      }
+
+      function resetZoom() {
+        scale = 1;
+        panX = 0;
+        panY = 0;
+        fallY = 0;
+        paint();
+      }
+
+      // Opacite du fond ET du chrome — pas de la boite entiere. Pendant la
+      // descente le decor s'efface, la photo non : c'est elle qu'on suit
+      // jusqu'a sa case dans la grille.
+      function veil(v) {
+        lightbox.style.setProperty("--fond", String(v));
+      }
+
+      function placeTrack(dx, animated) {
+        track.classList.toggle("lb-glisse", !!animated);
+        track.style.setProperty("--dx", `${dx}px`);
+      }
+
+      function fill(slot, j) {
+        const img = views[slot].querySelector("img");
+        if (j < 0 || j >= images.length) {
+          img.removeAttribute("src");
+          img.alt = "";
+          img.hidden = true;
+          return;
+        }
+        const src = images[j].currentSrc || images[j].src;
+        if (img.src !== src) img.src = src;
+        img.alt = images[j].alt || "";
+        img.hidden = false;
+      }
+
+      function layout() {
+        fill(0, index - 1);
+        fill(1, index);
+        fill(2, index + 1);
+        lbRank.textContent = String(index + 1);
+        lbPrev.disabled = index === 0;
+        lbNext.disabled = index === images.length - 1;
+      }
+
+      // -------------------------------------------------------------------
+      //  Navigation
+      // -------------------------------------------------------------------
+      let moving = false;
+
+      function go(d) {
+        if (moving) return;
+        const j = index + d;
+        if (j < 0 || j >= images.length) {
+          placeTrack(0, true);
+          return;
+        }
+        resetZoom();
+        if (reducedMotion.matches) {
+          index = j;
+          placeTrack(0, false);
+          layout();
+          paint();
+          return;
+        }
+
+        moving = true;
+        placeTrack(-d * viewWidth(), true);
+
+        let done = false;
+        let timer = 0;
+        const settle = (e) => {
+          if (done || (e && e.target !== track)) return;
+          done = true;
+          track.removeEventListener("transitionend", settle);
+          clearTimeout(timer);
+          index = j;
+
+          // On fait tourner les VUES plutot que de reecrire les `src` : la vue
+          // qui vient d'arriver au centre garde l'image deja decodee, donc pas
+          // de clignotement au recentrage. Seule la vue qui repart a l'autre
+          // bout, hors ecran, recoit une nouvelle source.
+          if (d > 0) {
+            track.appendChild(views[0]);
+            views.push(views.shift());
+          } else {
+            track.insertBefore(views[2], views[0]);
+            views.unshift(views.pop());
+          }
+          placeTrack(0, false);
+          layout();
+          paint();
+          moving = false;
+        };
+        track.addEventListener("transitionend", settle);
+        timer = setTimeout(settle, SLIDE + 90);
+      }
+
+      // -------------------------------------------------------------------
+      //  Verrou de defilement
+      //
+      //  La largeur est figee AVANT de passer `body` en `position: fixed` :
+      //  sans elle la boite prend la largeur de son contenu, la page se remet
+      //  en page derriere le voile, et toutes les positions de vignettes
+      //  mesurees ensuite pour le vol de retour sont fausses.
+      // -------------------------------------------------------------------
       function lockScroll() {
         const y = window.scrollY || document.documentElement.scrollTop;
+        frozenWidth = document.body.style.width;
+        document.body.style.width = getComputedStyle(document.body).width;
         document.body.style.position = "fixed";
         document.body.style.top = `-${y}px`;
         scrollLock = y;
@@ -74,16 +241,13 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
         scrollLock = null;
         document.body.style.position = "";
         document.body.style.top = "";
+        document.body.style.width = frozenWidth;
 
         // Le retour a la position doit etre INSTANTANE. `html` porte
         // `scroll-behavior: smooth` dans le systeme editorial, et cette regle
         // s'applique aussi aux defilements programmes : le `scrollTo` de
         // restauration devenait donc une animation, et on voyait la page
         // remonter depuis le haut jusqu'a la photo qu'on venait de fermer.
-        //
-        // Le verrou met `body` en `position: fixed`, ce qui ramene le document
-        // a 0 — d'ou une animation d'autant plus longue qu'on avait defile
-        // loin dans une galerie.
         //
         // On neutralise la regle le temps du saut plutot que d'utiliser
         // `behavior: "instant"` : la valeur n'est comprise que par les
@@ -96,162 +260,375 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
         racine.style.scrollBehavior = avant;
       }
 
-      function openLightbox(src) {
-        lbImg.src = src;
+      // -------------------------------------------------------------------
+      //  Ouverture / fermeture
+      // -------------------------------------------------------------------
+      function clearFrames() {
+        views.forEach((v) => {
+          const im = v.querySelector("img");
+          im.style.transition = "";
+          im.style.transform = "";
+          im.style.clipPath = "";
+        });
+      }
+
+      function openLightbox(i) {
+        index = i;
+        // Le vol de retour laisse la visionneuse traversable pendant 340 ms :
+        // on peut donc rouvrir une photo avant qu'il ne soit fini. On efface
+        // l'etat du vol precedent, et son minuteur d'atterrissage se desamorce
+        // tout seul en ne retrouvant plus la classe.
+        lightbox.classList.remove("lb-retour", "lb-remet");
+        moving = false;
+        clearFrames();
+        scale = 1;
+        panX = 0;
+        panY = 0;
+        fallY = 0;
+        placeTrack(0, false);
+        layout();
+        paint();
+        veil(1);
+        lockScroll();
         lightbox.classList.add("active");
         lightbox.setAttribute("aria-hidden", "false");
-        lockScroll();
         lbClose.focus();
       }
 
-      let scale = 1;
-      let translateX = 0;
-      let translateY = 0;
-      let isDragging = false;
-      let startX = 0;
-      let startY = 0;
-      let lastTouchDistance = 0;
-
-      function resetZoom() {
-        scale = 1;
-        translateX = 0;
-        translateY = 0;
-        updateTransform();
-      }
-
-      function updateTransform() {
-        lbImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-        lbImg.style.cursor = scale > 1 ? "grab" : "zoom-in";
-      }
-
-      function closeLightbox() {
+      function closeNow() {
         lightbox.classList.remove("active");
         lightbox.setAttribute("aria-hidden", "true");
-        lbImg.src = "";
-        resetZoom();
+
+        // Le style calcule est fige ici : sans ce passage, retirer `.retour`
+        // juste apres lui rendrait sa transition, et l'opacite qu'on vient de
+        // mettre a 0 repartirait en fondu de 180 ms par-dessus la page deja
+        // restauree — soit exactement le fantome qu'on veut eviter.
+        void lightbox.offsetWidth;
+        lightbox.classList.remove("lb-retour", "lb-remet");
+
         unlockScroll();
+        views.forEach((v) => {
+          const im = v.querySelector("img");
+          im.style.transition = "";
+          im.style.transform = "";
+          im.style.clipPath = "";
+          im.removeAttribute("src");
+          im.hidden = true;
+        });
+        scale = 1;
+        panX = 0;
+        panY = 0;
+        fallY = 0;
+        curK = 1;
+        curX = 0;
+        curY = 0;
+        panning = false;
+        moving = false;
+        veil(1);
+        placeTrack(0, false);
         try {
-          if (lastOpenedImg && typeof lastOpenedImg.focus === "function") lastOpenedImg.focus({ preventScroll: true });
+          const thumb = images[index];
+          if (thumb && typeof thumb.focus === "function") thumb.focus({ preventScroll: true });
         } catch (e) {
           /* ignore */
         }
       }
 
-      images.forEach((img) => {
+      // La photo ne disparait pas : elle retourne dans sa case.
+      function closeToThumb() {
+        const thumb = images[index];
+        const img = currentImg();
+        if (reducedMotion.matches || !thumb || !img || !img.getAttribute("src")) {
+          closeNow();
+          return;
+        }
+
+        // 1. On rend d'abord sa position a la page, pendant que le fond est
+        //    encore opaque : le saut de defilement se fait sous le voile, donc
+        //    invisible, et la vignette visee est deja a sa place definitive au
+        //    moment ou on la mesure. Si on a glisse jusqu'a une photo situee
+        //    hors ecran, on la ramene au centre.
+        const vue = thumb.getBoundingClientRect();
+        const marge = 40;
+        if (vue.top < marge || vue.bottom > window.innerHeight - marge) {
+          scrollLock = Math.max(0, scrollLock + vue.top + vue.height / 2 - window.innerHeight / 2);
+        }
+        unlockScroll();
+
+        // 2. Boite de depart, debarrassee de la transformation courante.
+        const r = img.getBoundingClientRect();
+        const cx = r.left + r.width / 2 - curX;
+        const cy = r.top + r.height / 2 - curY;
+        const w = r.width / curK;
+        const h = r.height / curK;
+        const t = thumb.getBoundingClientRect();
+        if (!w || !h || !t.width) {
+          closeNow();
+          return;
+        }
+
+        // 3. On agrandit jusqu'a COUVRIR la case, puis on rogne au cadre exact.
+        //    La vignette est en `object-fit: cover` dans un 4:5 ; viser sa
+        //    seule largeur ferait atterrir un paysage en bandeau au milieu
+        //    d'une case portrait.
+        const s = Math.max(t.width / w, t.height / h);
+        const dx = t.left + t.width / 2 - cx;
+        const dy = t.top + t.height / 2 - cy;
+        // Arrondi au centieme : sans lui le zero en virgule flottante s'ecrit
+        // `2.84217e-14px` dans le style, une notation exponentielle valide en
+        // CSS mais que tout ce qui relit la valeur ensuite lira mal.
+        const ix = Math.max(0, (w - t.width / s) / 2).toFixed(2);
+        const iy = Math.max(0, (h - t.height / s) / 2).toFixed(2);
+
+        lightbox.classList.add("lb-retour");
+        img.style.transition = `transform ${RETURN}ms var(--sortie), clip-path ${RETURN}ms var(--sortie)`;
+
+        // Le style calcule est fige avant le changement, pour que la transition
+        // parte bien de la position du doigt. Pas de requestAnimationFrame ici :
+        // un onglet passe en arriere-plan pendant le geste n'en recoit plus, et
+        // la visionneuse resterait ouverte pour toujours.
+        void img.offsetWidth;
+        img.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${s})`;
+        img.style.clipPath = `inset(${iy}px ${ix}px)`;
+        veil(0);
+
+        let landed = false;
+        const land = () => {
+          if (landed || !lightbox.classList.contains("lb-retour")) return;
+          landed = true;
+          closeNow();
+        };
+        img.addEventListener("transitionend", land, { once: true });
+        setTimeout(land, RETURN + 120);
+      }
+
+      function snapBack() {
+        const img = currentImg();
+        lightbox.classList.add("lb-remet");
+        if (img) img.style.transition = `transform ${SLIDE}ms var(--sortie)`;
+        fallY = 0;
+        paint();
+        veil(1);
+        setTimeout(() => {
+          lightbox.classList.remove("lb-remet");
+          if (img) img.style.transition = "";
+        }, SLIDE + 40);
+      }
+
+      images.forEach((img, i) => {
         img.addEventListener("click", (e) => {
           e.stopPropagation();
-          lastOpenedImg = img;
-          openLightbox(img.currentSrc || img.src);
+          openLightbox(i);
         });
         img.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            lastOpenedImg = img;
-            openLightbox(img.currentSrc || img.src);
+            openLightbox(i);
           }
         });
       });
 
-      lightbox.addEventListener("click", (e) => {
-        if (scale === 1 && (e.target === lightbox || e.target === lbClose)) closeLightbox();
-      });
-      lbClose.addEventListener("click", closeLightbox);
+      lbClose.addEventListener("click", closeToThumb);
+      lbPrev.addEventListener("click", () => go(-1));
+      lbNext.addEventListener("click", () => go(1));
 
-      lbImg.addEventListener(
-        "wheel",
+      // -------------------------------------------------------------------
+      //  Geste : lateral pour changer de photo, vers le bas pour refermer
+      //
+      //  Il est pris sur toute la surface, pas sur la seule image : un
+      //  portrait ne remplit qu'un tiers de l'ecran, obliger a viser sa bande
+      //  serait une contrainte gratuite.
+      // -------------------------------------------------------------------
+      let gx = 0;
+      let gy = 0;
+      let gt = 0;
+      let axis = null;
+      let gesture = false;
+      let moved = false;
+
+      function gestureStart(x, y, target) {
+        if (scale > 1 || moving) return;
+        if (target && target.closest && target.closest("button")) return;
+        gx = x;
+        gy = y;
+        gt = performance.now();
+        axis = null;
+        gesture = true;
+        moved = false;
+      }
+
+      function gestureMove(x, y) {
+        if (!gesture) return false;
+        const dx = x - gx;
+        const dy = y - gy;
+        if (!axis) {
+          if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return false;
+          axis = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
+        }
+        moved = true;
+        if (axis === "h") {
+          const atEdge = (dx > 0 && index === 0) || (dx < 0 && index === images.length - 1);
+          placeTrack(atEdge ? dx / 3.2 : dx, false);
+        } else {
+          // Vers le haut on ne fait rien : la consigne est « un mouvement vers
+          // le bas », et une descente qui repondrait aussi a la montee devient
+          // un tremblement des qu'on tient mal son telephone.
+          fallY = Math.max(0, dy);
+          paint();
+          veil(Math.max(0, 1 - fallY / 420));
+        }
+        return true;
+      }
+
+      function gestureEnd(x, y) {
+        if (!gesture) return;
+        gesture = false;
+        const dx = x - gx;
+        const dy = y - gy;
+        const dt = Math.max(1, performance.now() - gt);
+        if (axis === "h") {
+          const seuil = Math.min(90, viewWidth() * 0.18);
+          const atEdge = (dx > 0 && index === 0) || (dx < 0 && index === images.length - 1);
+          if (!atEdge && (Math.abs(dx) > seuil || Math.abs(dx) / dt > 0.5)) go(dx < 0 ? 1 : -1);
+          else placeTrack(0, true);
+        } else if (axis === "v") {
+          if (fallY > 110 || dy / dt > 0.6) closeToThumb();
+          else snapBack();
+        }
+        axis = null;
+      }
+
+      lightbox.addEventListener("mousedown", (e) => {
+        if (e.button !== 0) return;
+        if (scale > 1) {
+          if (e.target.tagName === "IMG") {
+            panning = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+            e.target.style.cursor = "grabbing";
+          }
+          return;
+        }
+        gestureStart(e.clientX, e.clientY, e.target);
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (panning && scale > 1) {
+          panX = e.clientX - startX;
+          panY = e.clientY - startY;
+          paint();
+        } else if (gesture) {
+          gestureMove(e.clientX, e.clientY);
+        }
+      });
+
+      document.addEventListener("mouseup", (e) => {
+        if (panning) {
+          panning = false;
+          paint();
+        }
+        if (gesture) gestureEnd(e.clientX, e.clientY);
+      });
+
+      lightbox.addEventListener("click", (e) => {
+        // Un glissement se termine par un `click` : sans ce garde-fou, relacher
+        // le doigt apres un balayage refermerait la visionneuse.
+        if (moved) {
+          moved = false;
+          return;
+        }
+        if (scale === 1 && !e.target.closest("button") && e.target.tagName !== "IMG") closeToThumb();
+      });
+
+      lightbox.addEventListener(
+        "touchstart",
         (e) => {
-          e.preventDefault();
-          const delta = e.deltaY > 0 ? -0.15 : 0.15;
-          const newScale = Math.max(1, Math.min(5, scale + delta));
-          if (newScale === 1) resetZoom();
-          else {
-            scale = newScale;
-            updateTransform();
+          if (e.touches.length === 2) {
+            gesture = false;
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            pinchDistance = Math.sqrt(dx * dx + dy * dy);
+          } else if (e.touches.length === 1) {
+            if (scale > 1) {
+              gesture = false;
+              panning = true;
+              startX = e.touches[0].clientX - panX;
+              startY = e.touches[0].clientY - panY;
+            } else {
+              gestureStart(e.touches[0].clientX, e.touches[0].clientY, e.target);
+            }
+          }
+        },
+        { passive: true }
+      );
+
+      lightbox.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length === 2 && pinchDistance > 0) {
+            e.preventDefault();
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const next = Math.max(1, Math.min(5, scale * (distance / pinchDistance)));
+            if (next === 1) resetZoom();
+            else {
+              scale = next;
+              paint();
+            }
+            pinchDistance = distance;
+          } else if (e.touches.length === 1 && panning && scale > 1) {
+            e.preventDefault();
+            panX = e.touches[0].clientX - startX;
+            panY = e.touches[0].clientY - startY;
+            paint();
+          } else if (e.touches.length === 1 && gesture) {
+            if (gestureMove(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
           }
         },
         { passive: false }
       );
 
-      lbImg.addEventListener("dblclick", () => {
+      lightbox.addEventListener("touchend", (e) => {
+        if (e.touches.length > 0) return;
+        pinchDistance = 0;
+        panning = false;
+        if (gesture) {
+          const t = e.changedTouches[0];
+          gestureEnd(t ? t.clientX : gx, t ? t.clientY : gy);
+        }
+      });
+
+      // -------------------------------------------------------------------
+      //  Zoom a la molette et au double-clic
+      // -------------------------------------------------------------------
+      lightbox.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const delta = e.deltaY > 0 ? -0.15 : 0.15;
+          const next = Math.max(1, Math.min(5, scale + delta));
+          if (next === 1) resetZoom();
+          else {
+            scale = next;
+            paint();
+          }
+        },
+        { passive: false }
+      );
+
+      lightbox.addEventListener("dblclick", (e) => {
+        if (e.target.tagName !== "IMG") return;
         if (scale === 1) {
           scale = 2.5;
-          updateTransform();
+          paint();
         } else {
           resetZoom();
         }
       });
 
-      lbImg.addEventListener("mousedown", (e) => {
-        if (scale > 1) {
-          isDragging = true;
-          startX = e.clientX - translateX;
-          startY = e.clientY - translateY;
-          lbImg.style.cursor = "grabbing";
-        }
-      });
-
-      document.addEventListener("mousemove", (e) => {
-        if (isDragging && scale > 1) {
-          translateX = e.clientX - startX;
-          translateY = e.clientY - startY;
-          updateTransform();
-        }
-      });
-
-      document.addEventListener("mouseup", () => {
-        if (isDragging) {
-          isDragging = false;
-          lbImg.style.cursor = scale > 1 ? "grab" : "zoom-in";
-        }
-      });
-
-      lbImg.addEventListener("touchstart", (e) => {
-        if (e.touches.length === 2) {
-          const dx = e.touches[0].clientX - e.touches[1].clientX;
-          const dy = e.touches[0].clientY - e.touches[1].clientY;
-          lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
-        } else if (e.touches.length === 1 && scale > 1) {
-          isDragging = true;
-          startX = e.touches[0].clientX - translateX;
-          startY = e.touches[0].clientY - translateY;
-        }
-      });
-
-      lbImg.addEventListener(
-        "touchmove",
-        (e) => {
-          if (e.touches.length === 2 && lastTouchDistance > 0) {
-            e.preventDefault();
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const scaleDiff = distance / lastTouchDistance;
-            const newScale = Math.max(1, Math.min(5, scale * scaleDiff));
-            if (newScale === 1) resetZoom();
-            else {
-              scale = newScale;
-              updateTransform();
-            }
-            lastTouchDistance = distance;
-          } else if (e.touches.length === 1 && isDragging && scale > 1) {
-            e.preventDefault();
-            translateX = e.touches[0].clientX - startX;
-            translateY = e.touches[0].clientY - startY;
-            updateTransform();
-          }
-        },
-        { passive: false }
-      );
-
-      lbImg.addEventListener("touchend", (e) => {
-        if (e.touches.length === 0) {
-          isDragging = false;
-          lastTouchDistance = 0;
-        }
-      });
-
       lbShare.addEventListener("click", async () => {
-        const url = lbImg.src;
+        const url = currentImg().src;
         if (navigator.share) {
           try {
             await navigator.share({ title: "Photo", url });
@@ -272,7 +649,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
 
       lbDownload.addEventListener("click", async (e) => {
         e.preventDefault();
-        const url = lbImg.src;
+        const url = currentImg().src;
         if (!url) return;
         lbDownload.disabled = true;
         const originalText = lbDownload.textContent;
@@ -300,7 +677,10 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
       });
 
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && lightbox.classList.contains("active")) closeLightbox();
+        if (!lightbox.classList.contains("active")) return;
+        if (e.key === "Escape") closeToThumb();
+        else if (e.key === "ArrowRight") go(1);
+        else if (e.key === "ArrowLeft") go(-1);
       });
 
       // Download all: zip every image in this grid using JSZip (loaded from CDN on demand)
@@ -480,43 +860,87 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
     }
   }
 
-  /* La visionneuse est un autre mode : le fond sombre y est deliberement
+  /* ===================================================================
+     Visionneuse
+
+     La visionneuse est un autre mode : le fond sombre y est deliberement
      conserve, c'est ce qui fait exister la photo. Seuls le rayon et l'ombre
-     partent. */
+     partent.
+     =================================================================== */
   .photo-grid .lightbox {
     position: fixed;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(10, 10, 10, 0.94);
+    overflow: hidden;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transition: opacity 180ms var(--sortie);
+    /* `visibility` differee jusqu'a la fin du fondu : sans elle, les trois vues
+       restent composees en permanence sur les onze galeries, et une page comme
+       Vietnam en compte une par etape. */
+    transition: opacity 180ms var(--sortie), visibility 0s linear 180ms;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
     z-index: 2000;
   }
   .photo-grid .lightbox.active {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
+    transition: opacity 180ms var(--sortie), visibility 0s;
   }
-  .photo-grid .lightbox .lb-inner {
-    transform: scale(0.98);
-    opacity: 0;
-    transition: transform var(--duree) var(--sortie), opacity 180ms var(--sortie);
+
+  /* Le fond est une boite a lui, et non l'opacite de la visionneuse entiere :
+     pendant la descente il s'efface tout seul, pendant que la photo, elle,
+     reste pleinement visible jusqu'a son atterrissage sur la vignette.
+
+     Une vraie boite et non un `::before` : le pseudo-element ne se peint pas
+     des que sa couleur est semi-transparente dans le navigateur integre, alors
+     qu'il se peint en aplat opaque et qu'un element reel de la meme couleur se
+     peint, lui, sans probleme. Comportement non explique, donc non utilise. */
+  .photo-grid .lb-fond {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.94);
+    opacity: var(--fond, 1);
   }
-  .photo-grid .lightbox.active .lb-inner {
-    transform: scale(1);
-    opacity: 1;
+
+  .photo-grid .lb-piste {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    transform: translate3d(calc(-100% + var(--dx, 0px)), 0, 0);
   }
-  .photo-grid .lightbox img {
-    max-width: 94vw;
-    max-height: 94vh;
-    cursor: zoom-in;
-    transition: transform 80ms ease-out;
+  .photo-grid .lb-piste.lb-glisse {
+    transition: transform 260ms var(--sortie);
+  }
+
+  .photo-grid .lb-vue {
+    flex: 0 0 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Le retrait lateral degage les fleches, le retrait haut les commandes et
+       le bas le compteur : la photo ne passe jamais dessous. */
+    padding: 74px 78px 62px;
+  }
+
+  .photo-grid .lb-vue img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    clip-path: inset(0);
     transform-origin: center center;
+    cursor: zoom-in;
     user-select: none;
     -webkit-user-drag: none;
   }
+  .photo-grid .lb-vue img[hidden] {
+    display: none;
+  }
+
   .photo-grid .lb-controls {
     position: absolute;
     right: var(--edge);
@@ -524,6 +948,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
     display: flex;
     gap: 8px;
     align-items: center;
+    opacity: var(--fond, 1);
   }
   .photo-grid .lb-controls button {
     padding: 9px 12px;
@@ -546,5 +971,113 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
   .photo-grid .lb-close {
     font-size: 13px;
     padding: 8px 11px;
+  }
+
+  /* Les fleches ne sortent que la ou il y a un curseur. Au doigt le balayage
+     est le geste, et deux cibles posees sur la photo ne feraient que la
+     recouvrir. */
+  .photo-grid .lb-fleche {
+    position: absolute;
+    top: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    transform: translateY(-50%);
+    border: 1px solid rgba(244, 244, 242, 0.35);
+    border-radius: 0;
+    background: transparent;
+    color: var(--paper);
+    font: inherit;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: var(--fond, 1);
+    transition: background var(--duree) var(--sortie), color var(--duree) var(--sortie);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .photo-grid .lb-fleche {
+      display: flex;
+    }
+  }
+  .photo-grid .lb-prec {
+    left: 16px;
+  }
+  .photo-grid .lb-suiv {
+    right: 16px;
+  }
+  .photo-grid .lb-fleche:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .photo-grid .lb-fleche[disabled] {
+    opacity: calc(var(--fond, 1) * 0.22);
+    cursor: default;
+  }
+  .photo-grid .lb-fleche[disabled]:hover {
+    background: transparent;
+    color: var(--paper);
+  }
+
+  .photo-grid .lb-compteur {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 22px;
+    margin: 0;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    color: rgba(244, 244, 242, 0.62);
+    opacity: var(--fond, 1);
+    pointer-events: none;
+  }
+
+  /* Pendant le geste, le voile suit le doigt sans retard : aucune transition
+     d'opacite par defaut. Elle n'apparait que sur les deux fins de geste — le
+     retour vers la vignette, et le rappel quand on n'est pas descendu assez
+     bas. */
+  .photo-grid .lightbox.lb-retour,
+  .photo-grid .lightbox.lb-retour .lb-piste {
+    transition: none;
+  }
+  .photo-grid .lightbox.lb-retour {
+    pointer-events: none;
+  }
+  .photo-grid .lightbox.lb-retour .lb-fond,
+  .photo-grid .lightbox.lb-remet .lb-fond,
+  .photo-grid .lightbox.lb-retour .lb-controls,
+  .photo-grid .lightbox.lb-remet .lb-controls,
+  .photo-grid .lightbox.lb-retour .lb-fleche,
+  .photo-grid .lightbox.lb-remet .lb-fleche,
+  .photo-grid .lightbox.lb-retour .lb-compteur,
+  .photo-grid .lightbox.lb-remet .lb-compteur {
+    transition: opacity 300ms var(--sortie);
+  }
+
+  @media (max-width: 760px) {
+    .photo-grid .lb-vue {
+      padding: 62px 14px 52px;
+    }
+    .photo-grid .lb-controls {
+      right: 14px;
+      top: 12px;
+      gap: 6px;
+    }
+    .photo-grid .lb-controls button {
+      padding: 8px 9px;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+    }
+    .photo-grid .lb-close {
+      padding: 7px 9px;
+      font-size: 12px;
+    }
+    .photo-grid .lb-compteur {
+      bottom: 16px;
+    }
   }
 </style>
