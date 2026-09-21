@@ -55,6 +55,23 @@ const labels = {
   </section>
 
   <section>
+    <div class="section-head" data-reveal data-groupe="video">
+      <span>La vidéo</span>
+      <span>(1)</span>
+    </div>
+    <div class="zone-video" data-reveal data-groupe="video">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/4ds0mpAiWJw"
+        title="VIETNAM - 2026"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      />
+    </div>
+  </section>
+
+  <section>
     <div class="section-head" data-reveal data-groupe="etapes">
       <span>Les étapes du voyage</span>
       <span>({Object.keys(vietnam.galleries).length})</span>
@@ -76,5 +93,28 @@ const labels = {
   }
   .etapes {
     padding-top: var(--pas-3);
+  }
+
+  /* Le lecteur de /musique, sans le carrousel qui va avec : il n'y a qu'une
+     video ici, donc pas de fleches — et pas la reserve de 68px que /musique
+     menage de chaque cote pour les loger.
+
+     Pas non plus le plafond de hauteur de /musique. La-bas le lecteur est le
+     sujet de la page et flotte seul ; ici il s'intercale entre la grille de
+     photos et les etapes du voyage, deux blocs qui courent de --edge a --edge.
+     Plafonne, il rentrait de 129px en 1440 et de 209 en 1920 : plus etroit que
+     tout ce qui l'entoure, pour un ecart que l'oeil attrape. Sur un bloc 16:9
+     on ne peut pas a la fois aligner les bords et borner la hauteur — ici
+     l'alignement gagne, et la video occupe une bonne part de l'ecran. */
+  .zone-video {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+  .zone-video iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border: 0;
+    background: var(--block);
   }
 </style>
