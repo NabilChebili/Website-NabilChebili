@@ -1,7 +1,7 @@
 ---
 import PhotoGrid from "./PhotoGrid.astro";
 
-const { id = "section", title = "", photos = [] } = Astro.props;
+const { id = "section", title = "", photos = [], lang = "fr" } = Astro.props;
 const previewPhotos = photos.slice(0, 4);
 ---
 
@@ -17,7 +17,7 @@ const previewPhotos = photos.slice(0, 4);
     </span>
   </summary>
   <div class="etape-corps">
-    <PhotoGrid photos={photos} name={title} />
+    <PhotoGrid photos={photos} name={title} lang={lang} />
   </div>
 </details>
 

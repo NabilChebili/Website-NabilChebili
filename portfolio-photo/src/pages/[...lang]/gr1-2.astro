@@ -1,0 +1,33 @@
+---
+import GalleryPage from "../../components/GalleryPage.astro";
+import galleries from "../../data/galleries.json";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    titre: "GR1 (2)",
+    description: "Galerie photo : GR1, partie 2.",
+    intro: "Deuxième étape du GR1 : la suite de l'aventure sur les sentiers, un peu plus loin sur le chemin.",
+  },
+  en: {
+    titre: "GR1 (2)",
+    description: "Photo gallery: GR1, part two.",
+    intro: "Second leg of the GR1: the walk goes on, a little further down the trail.",
+  },
+};
+const c = T[langue];
+---
+
+<GalleryPage
+  title={c.titre}
+  description={c.description}
+  intro={c.intro}
+  galleryUrl={galleries.GR1_2}
+  lang={langue}
+/>

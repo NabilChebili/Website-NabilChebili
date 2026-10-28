@@ -1,13 +1,78 @@
 ---
-import "../styles/global.css";
-import Layout from "../layouts/header.astro";
-import Colophon from "../components/Colophon.astro";
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import Colophon from "../../components/Colophon.astro";
 import { Image } from "astro:assets";
 
 // Le chemin etait relatif : depuis /musique/ il pointait vers /musique/image.png,
 // qui renvoyait un 404. L'import garantit une URL correcte — et passe par
 // astro:assets, qui sort du WebP redimensionne au lieu du PNG de 1,9 Mo.
-import guitare from "../assets/image.png";
+import guitare from "../../assets/image.png";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+	return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+	fr: {
+		titre: "Musique",
+		description: "Guitare, vidéos et progression autodidacte — une page dédiée à la musique.",
+		videosMot: "vidéos",
+		recueil: "recueil de tablatures",
+		accroche: "Guitare &middot; Autodidacte",
+		chapo: "Cette page est dédiée à ma passion pour la musique, en particulier la guitare.",
+		voirVideos: "Voir les vidéos",
+		mancheAria: "Manche de guitare jouable : survolez une corde, la case détermine la note.",
+		chapitre1: "Le récit",
+		// Coupe autour du titre du morceau, qui reste en italique : c'est une
+		// convention typographique, pas une emphase.
+		recit1a: "J’ai commencé la guitare presque par hasard, en apprenant le riff de",
+		recit1b:
+			"lors d’un voyage. Ce moment simple a été un déclic. De retour chez moi, j’ai découvert quelques accords sur Internet et je me suis mis à m’entraîner régulièrement pour reproduire des chansons que j’aimais.",
+		recit2:
+			"Peu à peu, la guitare a pris une place dans mon quotidien. Elle m’a appris à écouter autrement, à reproduire ce que j’entendais, puis à laisser venir mes propres idées. Avec le temps, j’y ai trouvé une vraie satisfaction : progresser par étapes, avec patience.",
+		guitareAlt: "Guitare",
+		chapitre2: "Vidéos",
+		carrousel: "Carrousel vidéo",
+		precedente: "Vidéo précédente",
+		suivante: "Vidéo suivante",
+		aide: "Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile, balayez la zone.",
+		chapitre3: "Tablatures",
+		tabTexte:
+			"Envie de jouer ces morceaux ? J’ai rassemblé des tablatures simplifiées pour commencer rapidement.",
+		tabBouton: "Accéder aux tablatures",
+	},
+	en: {
+		titre: "Music",
+		description: "Guitar, videos and self-taught progress — a page given over to music.",
+		videosMot: "videos",
+		recueil: "set of tabs",
+		accroche: "Guitar &middot; Self-taught",
+		chapo: "This page is given over to my passion for music, and the guitar in particular.",
+		voirVideos: "See the videos",
+		mancheAria: "Playable guitar neck: hover a string, the fret decides the note.",
+		chapitre1: "The story",
+		recit1a: "I came to the guitar almost by accident, learning the riff of",
+		recit1b:
+			"while travelling. That small moment was the trigger. Back home I found a few chords on the internet and started practising regularly, playing back songs I liked.",
+		recit2:
+			"Little by little the guitar took a place in my days. It taught me to listen differently, to play back what I heard, and then to let my own ideas come. Over time I found real satisfaction in it: getting better in stages, patiently.",
+		guitareAlt: "Guitar",
+		chapitre2: "Videos",
+		carrousel: "Video carousel",
+		precedente: "Previous video",
+		suivante: "Next video",
+		aide: "Use the arrows or the keyboard (← →) to move between videos. On a phone, swipe the area.",
+		chapitre3: "Tabs",
+		tabTexte:
+			"Want to play these? I’ve put together simplified tabs so you can get started quickly.",
+		tabBouton: "Open the tabs",
+	},
+};
+const c = T[langue];
 
 // Les trois videos publiques de la chaine @Nabs_land, dans son ordre
 // d'affichage. « Wait and C - Impro » (WYXsf-MV1GM) est retiree : elle n'est
@@ -57,24 +122,22 @@ const HAUTEUR = 26 + 5 * 31 + 26;
 ---
 
 <Layout
-	title="Musique"
-	description="Guitare, vidéos et progression autodidacte — une page dédiée à la musique."
+	title={c.titre}
+	description={c.description}
 	mainClass="page editorial"
+	lang={langue}
 >
 	<section class="ouverture">
 		<div class="meta-row" data-reveal data-groupe="tete">
-			<span><b>{videos.length}</b> vidéos &middot; <b>1</b> recueil de tablatures</span>
-			<span>Guitare &middot; Autodidacte</span>
+			<span><b>{videos.length}</b> {c.videosMot} &middot; <b>1</b> {c.recueil}</span>
+			<span set:html={c.accroche} />
 		</div>
 
-		<h1 class="titre-geant" data-reveal data-groupe="tete">Musique</h1>
+		<h1 class="titre-geant" data-reveal data-groupe="tete" lang={langue}>{c.titre}</h1>
 
 		<div class="ouverture-pied" data-reveal data-groupe="tete">
-			<p>
-				Cette page est dédiée à ma passion pour la musique, en particulier la
-				guitare.
-			</p>
-			<a class="jump" href="#videos">Voir les vidéos &#8595;</a>
+			<p>{c.chapo}</p>
+			<a class="jump" href="#videos">{c.voirVideos} &#8595;</a>
 		</div>
 
 		<figure class="manche" data-reveal data-groupe="tete">
@@ -85,7 +148,7 @@ const HAUTEUR = 26 + 5 * 31 + 26;
 				viewBox={`0 0 1360 ${HAUTEUR}`}
 				width="100%"
 				role="img"
-				aria-label="Manche de guitare jouable : survolez une corde, la case determine la note."
+				aria-label={c.mancheAria}
 			>
 				{frettes.map((x, i) => (
 					<line class="frette" x1={x} y1="10" x2={x} y2={HAUTEUR - 10} stroke-width={i === NB_FRETTES - 1 ? 1.4 : 1} />
@@ -113,29 +176,18 @@ const HAUTEUR = 26 + 5 * 31 + 26;
 
 	<section>
 		<div class="section-head grande" data-reveal data-groupe="recit">
-			<span><i class="section-num">01</i> Le récit</span>
+			<span><i class="section-num">01</i> {c.chapitre1}</span>
 		</div>
 	<div class="duo">
 		<div class="prose" data-reveal data-groupe="recit">
-			<p>
-				J’ai commencé la guitare presque par hasard, en apprenant le riff de
-				<em>Come As You Are</em> lors d’un voyage. Ce moment simple a été un
-				déclic. De retour chez moi, j’ai découvert quelques accords sur Internet
-				et je me suis mis à m’entraîner régulièrement pour reproduire des
-				chansons que j’aimais.
-			</p>
-			<p>
-				Peu à peu, la guitare a pris une place dans mon quotidien. Elle m’a
-				appris à écouter autrement, à reproduire ce que j’entendais, puis à
-				laisser venir mes propres idées. Avec le temps, j’y ai trouvé une vraie
-				satisfaction : progresser par étapes, avec patience.
-			</p>
+			<p>{c.recit1a} <em>Come As You Are</em> {c.recit1b}</p>
+			<p>{c.recit2}</p>
 		</div>
 
 		<figure class="duo-media" data-reveal data-groupe="recit">
 			<Image
 				src={guitare}
-				alt="Guitare"
+				alt={c.guitareAlt}
 				widths={[400, 720]}
 				sizes="(max-width: 900px) 100vw, 360px"
 				loading="lazy"
@@ -147,12 +199,12 @@ const HAUTEUR = 26 + 5 * 31 + 26;
 
 	<section id="videos">
 		<div class="section-head grande" data-reveal data-groupe="videos">
-			<span><i class="section-num">02</i> Vidéos</span>
+			<span><i class="section-num">02</i> {c.chapitre2}</span>
 			<span>({videos.length})</span>
 		</div>
 
 		<div class="zone-carrousel">
-			<div class="video-carousel" aria-label="Carrousel vidéo">
+			<div class="video-carousel" aria-label={c.carrousel}>
 				<div class="carousel-track" role="list">
 					{
 						videos.map((v) => (
@@ -170,41 +222,35 @@ const HAUTEUR = 26 + 5 * 31 + 26;
 					}
 				</div>
 				<div class="commandes">
-					<button class="car-btn prev" type="button" aria-label="Vidéo précédente">
+					<button class="car-btn prev" type="button" aria-label={c.precedente}>
 						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 L7 12 L15 20" /></svg>
 					</button>
-					<button class="car-btn next" type="button" aria-label="Vidéo suivante">
+					<button class="car-btn next" type="button" aria-label={c.suivante}>
 						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 L17 12 L9 20" /></svg>
 					</button>
 				</div>
 			</div>
-			<p class="aide">
-				Utilisez les flèches ou le clavier (← →) pour naviguer. Sur mobile,
-				balayez la zone.
-			</p>
+			<p class="aide">{c.aide}</p>
 		</div>
 	</section>
 
 	<section>
 		<div class="section-head grande" data-reveal data-groupe="tablatures">
-			<span><i class="section-num">03</i> Tablatures</span>
+			<span><i class="section-num">03</i> {c.chapitre3}</span>
 			<span>(1)</span>
 		</div>
 		<div class="bloc-tab" data-reveal data-groupe="tablatures">
-			<p>
-				Envie de jouer ces morceaux ? J’ai rassemblé des tablatures simplifiées
-				pour commencer rapidement.
-			</p>
+			<p>{c.tabTexte}</p>
 			<a
 				class="bouton"
 				href="https://docs.google.com/document/d/1lzav6pmo0A10RGYKqbtwUIGk8aWnmJpQV9uYpebnV2Q/edit?usp=sharing"
 				target="_blank"
-				rel="noopener noreferrer">Accéder aux tablatures</a
+				rel="noopener noreferrer">{c.tabBouton}</a
 			>
 		</div>
 	</section>
 
-	<Colophon />
+	<Colophon lang={langue} />
 
 	<script>
 		// ------------------------------------------------------------- le manche
@@ -476,6 +522,12 @@ const HAUTEUR = 26 + 5 * 31 + 26;
 	.titre-geant {
 		--titre-div: 7.8;
 	}
+	/* Pas de diviseur propre a l'anglais. Le diviseur fixe le CORPS, pas la
+	   largeur occupee : a 7.8 le titre sort a 174px ici comme sur /clouddevops,
+	   et « Musique » n'occupe deja que 41 % de la largeur disponible — le
+	   remplissage n'a jamais ete le critere. Un diviseur reduit pour « MUSIC »
+	   l'aurait sorti a 244px, soit bien plus gros que sa version francaise.
+	   Mesure : 174,4px et 41,5 % en francais, contre 244,2px avec la surcharge. */
 	/* La rangee de `.opening-foot` de l'accueil : le chapo a gauche, le lien
 	   pousse a droite, sur une seule ligne. La page empilait les deux, ce qui
 	   creusait un vide a droite du chapo. */

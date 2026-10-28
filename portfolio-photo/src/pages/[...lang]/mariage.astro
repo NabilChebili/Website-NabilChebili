@@ -1,0 +1,33 @@
+---
+import GalleryPage from "../../components/GalleryPage.astro";
+import galleries from "../../data/galleries.json";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    titre: "Mariage",
+    description: "Galerie photo : Mariage.",
+    intro: "Le mariage de Pierre, entre émotions, rires et moments partagés en famille.",
+  },
+  en: {
+    titre: "Wedding",
+    description: "Photo gallery: a wedding.",
+    intro: "Pierre's wedding — emotion, laughter, and a day spent among family.",
+  },
+};
+const c = T[langue];
+---
+
+<GalleryPage
+  title={c.titre}
+  description={c.description}
+  intro={c.intro}
+  galleryUrl={galleries.mariage}
+  lang={langue}
+/>

@@ -1,0 +1,171 @@
+---
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import PhotoGrid from "../../components/PhotoGrid.astro";
+import AccordionSection from "../../components/AccordionSection.astro";
+import vietnam from "../../data/vietnam.json";
+import { listGalleries } from "../../lib/blobList.js";
+import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+const t = traduire(langue);
+
+const fallback = [
+  "/photos/A7401177.jpg",
+  "/photos/A7401113.jpg",
+  "/photos/A7401167.jpg",
+  "/photos/A7401181.jpg",
+];
+
+const photosByKey = await listGalleries(vietnam.galleries, fallback);
+
+// Chaque photo du recit porte ses deux legendes ; on ne garde que celle de la
+// langue courante avant de la passer a la grille.
+const recit = vietnam.post.map((p) => ({
+  url: p.url,
+  caption: langue === "en" ? (p.captionEn ?? p.caption) : p.caption,
+}));
+
+// Les noms de lieux ne se traduisent pas. Seul « Festival Saigon » bascule,
+// parce que l'ordre des mots change.
+const labels = {
+  fr: {
+    "ba-na": "Bà Nà",
+    "da-nang": "Đà Nẵng",
+    "festival-saigon": "Festival Saigon",
+    gaming: "Gaming",
+    "nha-trang": "Nha Trang",
+    "phu-yen": "Phú Yên",
+    "quy-nhon": "Quy Nhơn",
+    saigon: "Saigon",
+    tet: "Têt",
+  },
+  en: {
+    "ba-na": "Bà Nà",
+    "da-nang": "Đà Nẵng",
+    "festival-saigon": "Saigon Festival",
+    gaming: "Gaming",
+    "nha-trang": "Nha Trang",
+    "phu-yen": "Phú Yên",
+    "quy-nhon": "Quy Nhơn",
+    saigon: "Saigon",
+    tet: "Tết",
+  },
+};
+
+const T = {
+  fr: {
+    description:
+      "Récit photo d'un voyage au Vietnam : Saigon, Đà Nẵng, Nha Trang, Phú Yên et plus.",
+    intro:
+      "Un mois à travers le Vietnam, du sud au centre, entre grandes villes bouillonnantes, côtes sauvages et fêtes du Têt.",
+    recit: "Le récit",
+    video: "La vidéo",
+    etapes: "Les étapes du voyage",
+  },
+  en: {
+    description:
+      "A photo story from a month in Vietnam: Saigon, Đà Nẵng, Nha Trang, Phú Yên and beyond.",
+    intro:
+      "A month across Vietnam, from the south to the centre — restless cities, wild coastline, and the Tết new year.",
+    recit: "The story",
+    video: "The film",
+    etapes: "Stops along the way",
+  },
+};
+const c = T[langue];
+const nomsEtapes = labels[langue];
+---
+
+<Layout title="Vietnam" description={c.description} mainClass="page editorial" lang={langue}>
+  <section class="tete-page">
+    <a class="retour" href={cheminLocalise("/photo", langue)}>{t("retour.galeries")}</a>
+    <h1 class="titre-page" data-reveal data-groupe="tete">Vietnam</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p>{c.intro}</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head" data-reveal data-groupe="recit">
+      <span>{c.recit}</span>
+      <span>({recit.length})</span>
+    </div>
+    <div class="galerie">
+      <PhotoGrid photos={recit} name="Vietnam" lang={langue} />
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head" data-reveal data-groupe="video">
+      <span>{c.video}</span>
+      <span>(1)</span>
+    </div>
+    <div class="zone-video" data-reveal data-groupe="video">
+      <iframe
+        src="https://www.youtube-nocookie.com/embed/4ds0mpAiWJw"
+        title="VIETNAM - 2026"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      />
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head" data-reveal data-groupe="etapes">
+      <span>{c.etapes}</span>
+      <span>({Object.keys(vietnam.galleries).length})</span>
+    </div>
+    <div class="etapes">
+      {
+        Object.keys(vietnam.galleries).map((key) => (
+          <AccordionSection
+            id={key}
+            title={nomsEtapes[key] ?? key}
+            photos={photosByKey[key]}
+            lang={langue}
+          />
+        ))
+      }
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .galerie,
+  .etapes {
+    padding: 0 var(--edge);
+  }
+  .etapes {
+    padding-top: var(--pas-3);
+  }
+
+  /* Le lecteur de /musique, sans le carrousel qui va avec : il n'y a qu'une
+     video ici, donc pas de fleches — et pas la reserve de 68px que /musique
+     menage de chaque cote pour les loger.
+
+     Pas non plus le plafond de hauteur de /musique. La-bas le lecteur est le
+     sujet de la page et flotte seul ; ici il s'intercale entre la grille de
+     photos et les etapes du voyage, deux blocs qui courent de --edge a --edge.
+     Plafonne, il rentrait de 129px en 1440 et de 209 en 1920 : plus etroit que
+     tout ce qui l'entoure, pour un ecart que l'oeil attrape. Sur un bloc 16:9
+     on ne peut pas a la fois aligner les bords et borner la hauteur — ici
+     l'alignement gagne, et la video occupe une bonne part de l'ecran. */
+  .zone-video {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+  .zone-video iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border: 0;
+    background: var(--block);
+  }
+</style>

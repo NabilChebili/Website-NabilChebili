@@ -1,51 +1,99 @@
 ---
-import "../styles/global.css";
-import Layout from "../layouts/header.astro";
-import Colophon from "../components/Colophon.astro";
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import Colophon from "../../components/Colophon.astro";
 import { getImage, Image } from "astro:assets";
-import photoPro from "../assets/nabil-ishane.jpg";
-import logoAzure from "../assets/devops/azure.png";
-import logoTerraform from "../assets/devops/terraform.png";
-import logoKube from "../assets/devops/kube.png";
-import logoDocker from "../assets/devops/docker.png";
-import logoGit from "../assets/devops/git.png";
-import logoAdo from "../assets/devops/ado.png";
-import logoVscode from "../assets/devops/vscode.png";
+import photoPro from "../../assets/nabil-ishane.jpg";
+import logoAzure from "../../assets/devops/azure.png";
+import logoTerraform from "../../assets/devops/terraform.png";
+import logoKube from "../../assets/devops/kube.png";
+import logoDocker from "../../assets/devops/docker.png";
+import logoGit from "../../assets/devops/git.png";
+import logoAdo from "../../assets/devops/ado.png";
+import logoVscode from "../../assets/devops/vscode.png";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
 
-const profile = {
-  title: "Cloud DevOps",
-  subtitle:
-    "Ingénieur Cloud / DevOps spécialisé Azure, IaC et DevSecOps — j’aide les équipes à livrer plus vite, plus proprement, et avec une posture sécurité solide.",
-  stats: [
-    { k: "Expérience", v: "+4/5 ans" },
-    { k: "Spécialités", v: "Azure · CI/CD · IaC" },
-    { k: "Approche", v: "Agile (Scrum/SAFe)" },
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+// Les noms propres, les technologies et les intitules de certification
+// Microsoft ne se traduisent pas : ils s'ecrivent de la meme facon dans les
+// deux langues, et les traduire les rendrait introuvables.
+const profils = {
+  fr: {
+    title: "Cloud DevOps",
+    subtitle:
+      "Ingénieur Cloud / DevOps spécialisé Azure, IaC et DevSecOps — j’aide les équipes à livrer plus vite, plus proprement, et avec une posture sécurité solide.",
+    stats: [
+      { k: "Expérience", v: "+4/5 ans" },
+      { k: "Spécialités", v: "Azure · CI/CD · IaC" },
+      { k: "Approche", v: "Agile (Scrum/SAFe)" },
+    ],
+  },
+  en: {
+    title: "Cloud DevOps",
+    subtitle:
+      "Cloud / DevOps engineer specialising in Azure, IaC and DevSecOps — I help teams ship faster, cleaner, and with security built in.",
+    stats: [
+      { k: "Experience", v: "4–5 years" },
+      { k: "Focus", v: "Azure · CI/CD · IaC" },
+      { k: "Approach", v: "Agile (Scrum/SAFe)" },
+    ],
+  },
+};
+const profile = profils[langue];
+
+const expertises = {
+  fr: [
+    {
+      title: "Cloud Azure (IaaS/PaaS)",
+      desc: "Landing zones, réseau, services applicatifs, observabilité et standards de déploiement.",
+    },
+    {
+      title: "DevOps & IaC",
+      desc: "Industrialisation CI/CD, templates, gouvernance et infrastructure as code au service de la productivité.",
+    },
+    {
+      title: "DevSecOps",
+      desc: "Sécurisation de la supply chain: scan code/dépendances, secrets, contrôles d’accès et politiques.",
+    },
+    {
+      title: "Scripting & automatisation",
+      desc: "Automatisation pragmatique pour réduire le temps perdu sur les tâches répétitives et fiabiliser les opérations.",
+    },
+  ],
+  en: [
+    {
+      title: "Azure Cloud (IaaS/PaaS)",
+      desc: "Landing zones, networking, application services, observability and deployment standards.",
+    },
+    {
+      title: "DevOps & IaC",
+      desc: "Industrialised CI/CD, templates, governance and infrastructure as code, in service of how fast teams can ship.",
+    },
+    {
+      title: "DevSecOps",
+      desc: "Securing the supply chain: code and dependency scanning, secrets, access control and policy.",
+    },
+    {
+      title: "Scripting & automation",
+      desc: "Pragmatic automation, to take back the time lost on repetitive work and make operations dependable.",
+    },
   ],
 };
-
-const expertise = [
-  {
-    title: "Cloud Azure (IaaS/PaaS)",
-    desc: "Landing zones, réseau, services applicatifs, observabilité et standards de déploiement.",
-    tags: ["VNet", "Hub & Spoke", "Firewall", "APIM", "WebApp", "Log Analytics"],
-  },
-  {
-    title: "DevOps & IaC",
-    desc: "Industrialisation CI/CD, templates, gouvernance et infrastructure as code au service de la productivité.",
-    tags: ["Terraform", "Azure DevOps", "GitHub Actions", "GitLab", "YAML"],
-  },
-  {
-    title: "DevSecOps",
-    desc: "Sécurisation de la supply chain: scan code/dépendances, secrets, contrôles d’accès et politiques.",
-    tags: ["GHAS", "CodeQL", "Secret scanning", "Azure Policy", "Entra ID"],
-  },
-  {
-    title: "Scripting & automatisation",
-    desc: "Automatisation pragmatique pour réduire le temps perdu sur les tâches répétitives et fiabiliser les opérations.",
-    tags: ["PowerShell", "Bash", "ARM", "Python"],
-  },
+const etiquettesExpertise = [
+  ["VNet", "Hub & Spoke", "Firewall", "APIM", "WebApp", "Log Analytics"],
+  ["Terraform", "Azure DevOps", "GitHub Actions", "GitLab", "YAML"],
+  ["GHAS", "CodeQL", "Secret scanning", "Azure Policy", "Entra ID"],
+  ["PowerShell", "Bash", "ARM", "Python"],
 ];
+const expertise = expertises[langue].map((x, i) => ({ ...x, tags: etiquettesExpertise[i] }));
 
+// Les intitules officiels des certifications sont deja en anglais : ils ne
+// changent pas d'une version a l'autre.
 const certifications = [
   { name: "AZ-700", detail: "Designing and Implementing Microsoft Azure Networking Solutions (2025)" },
   { name: "GitHub Actions", detail: "GitHub Actions Certification (2025)" },
@@ -58,11 +106,130 @@ const certifications = [
 // (abonnements, noms de ressources, principals de service), ni description des
 // chantiers en cours chez le client. C'est un CV : il dit le metier exerce et
 // le niveau de responsabilite, pas le contenu du backlog.
-const missions = [
+// Ce qui NE change PAS d'une langue a l'autre — clients, logos, technologies —
+// est tenu une seule fois, en regard des parties redigees. Les deux listes sont
+// appariees par leur rang.
+const missionsBase = [
+  { client: "Hello Paris", clientLogo: "/company_logo/HelloParis.png", active: true,
+    stack: ["Azure", "Terraform", "Azure DevOps", "Azure Policy", "Hub & Spoke",
+      "Cloud Adoption Framework", "Well-Architected Framework", "ISO 27001", "SemVer"] },
+  { client: "RTE", clientLogo: "/company_logo/RTE.png",
+    stack: ["Azure", "Terraform", "AVM", "Azure DevOps", "Azure Policy", "DevSecOps", "Agile"] },
+  { client: "Ardian", clientLogo: "/company_logo/Ardian.png",
+    stack: ["GitHub", "GitHub Actions", "GHAS", "Azure", "Azure DevOps", "Agile"] },
+  { client: "Lemonway", clientLogo: "/company_logo/Lemonway.png",
+    stack: ["Azure", "AWS", "GitLab", "Terraform", "Databricks", "Réseau Cloud"] },
+  { client: "SUEZ (One Forge)", clientLogo: "/company_logo/Suez.png",
+    stack: ["Azure", "Azure DevOps", "Terraform", "PowerShell", "Kubernetes", "ServiceNow"] },
+  { client: "Société Générale (Skynet)", clientLogo: "/company_logo/SG.png",
+    stack: ["Azure", "PowerShell", "Terraform", "Jenkins", "JIRA", "CMMI"] },
+  { client: "Devoteam (Alfun)",
+    stack: ["Azure", "PowerShell", "Azure DevOps", "JIRA", "Git", "M365"] },
+  { client: "Bouygues Telecom", clientLogo: "/company_logo/Bouygues.png",
+    stack: ["TypeScript", "Angular", "Node.js", "Figma", "Adobe XD", "JIRA"] },
+];
+
+// Le seul intitule de pile qui soit du francais et non un nom de produit.
+const pileTraduite = { "Réseau Cloud": "Cloud networking" };
+
+const missionsEn = [
   {
-    period: "2025–2026 · en cours (mission active)",
-    client: "Hello Paris",
-    clientLogo: "/company_logo/HelloParis.png",
+    period: "2025–2026 · ongoing",
+    role: "Cloud & DevOps Architect — Azure & Terraform",
+    summary:
+      "Designing and running an Azure onboarding platform: a project that starts up receives its subscriptions, network, vaults and identities from a single pipeline, along with the governance that goes with them.",
+    bullets: [
+      "Onboarding platform in Terraform: resource groups, hub & spoke network, Key Vault, managed identities, backup and monitoring provisioned in one block for every new project",
+      "Library of Terraform modules versioned with SemVer and shared across projects — a fix propagates through a tag",
+      "Shared Azure DevOps pipeline templates: one place to evolve CI/CD for every project at once",
+      "Azure Policy governance written in Terraform at management group level — definitions, initiatives and assignments versioned and reviewed like code",
+    ],
+  },
+  {
+    period: "2025 · 1 month",
+    role: "Cloud DevOps Engineer — Azure DevOps & Azure",
+    summary:
+      "Designing, securing and industrialising Azure environments: landing zones via AVM/Terraform, Azure Policy governance, and Azure DevOps structure.",
+    bullets: [
+      "Took part in setting up landing zones (Terraform + Azure Verified Modules)",
+      "Structured Azure DevOps projects: CI/CD practices, permissions, templates",
+      "Deployed and tuned Azure Policies for security and compliance",
+      "Reworked and optimised the existing infrastructure, for maintainability and performance",
+    ],
+  },
+  {
+    period: "2025 · 5 months",
+    role: "Cloud DevOps Engineer — GitHub & Azure",
+    summary:
+      "DevOps modernisation around GitHub Advanced Security, and a gradual migration from Azure DevOps to GitHub Actions, with a DevSecOps focus.",
+    bullets: [
+      "Set up and ran GHAS (CodeQL, secret scanning, dependencies, alerting)",
+      "Migrated Azure DevOps pipelines to GitHub Actions, and supported the teams through it",
+      "Security standards and controls built into the CI/CD workflows",
+    ],
+  },
+  {
+    period: "2025 · 7 months",
+    role: "Cloud & DevOps Consultant — Azure",
+    summary:
+      "Deployed a data infrastructure (Databricks included) with Terraform, hardened CI/CD and compliance (PCI DSS), and reworked legacy components.",
+    bullets: [
+      "Deployed data infrastructure on Azure (Databricks) as code",
+      "Hub & spoke network architecture plus Azure firewall, as code",
+      "Secured GitLab: runners, permissions, branch strategies, complex pipelines",
+    ],
+  },
+  {
+    period: "2024–2025 · 9 months",
+    role: "Cloud & DevOps Consultant — Azure",
+    summary:
+      "Azure DevOps expertise to deliver ready-to-use ADO projects: standardisation, automation, support and continuous improvement.",
+    bullets: [
+      "Automated delivery of Azure DevOps projects tailored to each client",
+      "Support and training, team guidance, and continuous improvement of the product",
+      "Set up and optimised CI/CD pipelines under security constraints",
+    ],
+  },
+  {
+    period: "2022–2024 · 2 years",
+    role: "Cloud & DevOps Engineer — Team Lead & PO",
+    summary:
+      "Product and delivery lead on an Azure security baseline: governance, automation, compliance and operations.",
+    bullets: [
+      "Team management (PowerShell development), organisation and follow-up",
+      "Deployed Azure security rules (Policy, Entra ID, Automation Account, Log Analytics…)",
+      "Monitored and optimised the infrastructure, and ran the Agile process",
+    ],
+  },
+  {
+    period: "2021–2022 · 6 months",
+    role: "Cloud & DevOps Engineer — Azure",
+    summary:
+      "Automation of recurring work (time saved, fewer mistakes), security constraints built in, and a bridge between M365 and Azure.",
+    bullets: [
+      "Automation scripts and tools, cutting down manual work",
+      "Security by design, and compliance with internal policy",
+      "M365 integration (SharePoint, Teams, OneDrive) with Azure",
+    ],
+  },
+  {
+    period: "2020–2021 · 5 months",
+    role: "UX Designer & Full-Stack Developer",
+    summary:
+      "Built a tool to help a team steer its agile process and improve how mobile and box offers were managed, with a single view of progress.",
+    bullets: [
+      "Gathered and analysed user needs in an Agile context",
+      "Turned those needs into clear functional specifications",
+      "Ran ideation meetings and facilitated brainstorming sessions",
+      "Designed mockups and prototypes, iterating on user and team feedback",
+      "Built a dashboard (Angular front, Node back) and wired in the data sources",
+    ],
+  },
+];
+
+const missionsFr = [
+  {
+    period: "2025–2026 · en cours",
     role: "Architecte Cloud & DevOps — Azure & Terraform",
     summary:
       "Conception et exploitation d’une plateforme d’onboarding Azure : un projet qui démarre reçoit ses abonnements, son réseau, ses coffres et ses identités par un seul pipeline, et la gouvernance qui va avec.",
@@ -72,25 +239,9 @@ const missions = [
       "Templates de pipelines Azure DevOps partagés : un seul endroit pour faire évoluer la CI/CD de tous les projets à la fois",
       "Gouvernance Azure Policy écrite en Terraform au niveau management group — définitions, initiatives et affectations versionnées et relues comme du code",
     ],
-    // « Well-Architected » et « Cloud Adoption » sont ecrits en toutes lettres
-    // plutot qu'en CAF/WAF : a cote du mot « Azure », l'acronyme WAF se lit
-    // d'abord comme Web Application Firewall, qui est un tout autre sujet.
-    stack: [
-      "Azure",
-      "Terraform",
-      "Azure DevOps",
-      "Azure Policy",
-      "Hub & Spoke",
-      "Cloud Adoption Framework",
-      "Well-Architected Framework",
-      "ISO 27001",
-      "SemVer",
-    ],
   },
   {
     period: "2025 · 1 mois",
-    client: "RTE",
-    clientLogo: "/company_logo/RTE.png",
     role: "Cloud Engineer DevOps — Azure DevOps & Azure",
     summary:
       "Conception, sécurisation et industrialisation d’environnements Azure : landing zones via AVM/Terraform, gouvernance Azure Policy et structuration Azure DevOps.",
@@ -100,12 +251,9 @@ const missions = [
       "Déploiement et ajustement d’Azure Policies pour la sécurité et la conformité",
       "Remaniement et optimisation de l’infrastructure existante, pour sa maintenabilité et sa performance",
     ],
-    stack: ["Azure", "Terraform", "AVM", "Azure DevOps", "Azure Policy", "DevSecOps", "Agile"],
   },
   {
     period: "2025 · 5 mois",
-    client: "Ardian",
-    clientLogo: "/company_logo/Ardian.png",
     role: "Cloud Engineer DevOps — GitHub & Azure",
     summary:
       "Modernisation DevOps autour de GitHub Advanced Security et migration progressive d’Azure DevOps vers GitHub Actions, avec un focus DevSecOps.",
@@ -114,12 +262,9 @@ const missions = [
       "Migration de pipelines Azure DevOps vers GitHub Actions + accompagnement des équipes",
       "Standards et mécanismes de sécurité intégrés aux workflows CI/CD",
     ],
-    stack: ["GitHub", "GitHub Actions", "GHAS", "Azure", "Azure DevOps", "Agile"],
   },
   {
     period: "2025 · 7 mois",
-    client: "Lemonway",
-    clientLogo: "/company_logo/Lemonway.png",
     role: "Consultant Cloud Engineer & DevOps — Azure",
     summary:
       "Déploiement d’une infra data (incl. Databricks) via Terraform, durcissement CI/CD et conformité (PCI DSS), refonte de composants legacy.",
@@ -128,12 +273,9 @@ const missions = [
       "Architecture réseau Hub & Spoke + firewall Azure (IaC)",
       "Sécurisation GitLab: runners, permissions, stratégies de branches, pipelines complexes",
     ],
-    stack: ["Azure", "AWS", "GitLab", "Terraform", "Databricks", "Réseau Cloud"],
   },
   {
     period: "2024–2025 · 9 mois",
-    client: "SUEZ (One Forge)",
-    clientLogo: "/company_logo/Suez.png",
     role: "Consultant Cloud Engineer & DevOps — Azure",
     summary:
       "Expertise Azure DevOps pour livrer des projets ADO prêts à l’emploi: standardisation, automatisation, support et amélioration continue.",
@@ -142,12 +284,9 @@ const missions = [
       "Support/formation, accompagnement des équipes et amélioration continue du produit",
       "Mise en place/optimisation de pipelines CI/CD avec contraintes sécurité",
     ],
-    stack: ["Azure", "Azure DevOps", "Terraform", "PowerShell", "Kubernetes", "ServiceNow"],
   },
   {
     period: "2022–2024 · 2 ans",
-    client: "Société Générale (Skynet)",
-    clientLogo: "/company_logo/SG.png",
     role: "Cloud & DevOps Engineer — Team Lead & PO",
     summary:
       "Pilotage produit et delivery d’un socle de sécurité Azure: gouvernance, automatisation, conformité et exploitation.",
@@ -156,11 +295,9 @@ const missions = [
       "Déploiement des règles de sécurité Azure (Policy, Entra ID, Automation Account, Log Analytics…)",
       "Supervision/optimisation de l’infrastructure et gestion Agile",
     ],
-    stack: ["Azure", "PowerShell", "Terraform", "Jenkins", "JIRA", "CMMI"],
   },
   {
     period: "2021–2022 · 6 mois",
-    client: "Devoteam (Alfun)",
     role: "Cloud & DevOps Engineer — Azure",
     summary:
       "Automatisation de tâches récurrentes (gain de temps, fiabilité), intégration des contraintes sécurité et pont M365 ↔ Azure.",
@@ -169,12 +306,9 @@ const missions = [
       "Sécurité dès la conception + conformité aux politiques internes",
       "Intégration M365 (SharePoint, Teams, OneDrive) avec Azure",
     ],
-    stack: ["Azure", "PowerShell", "Azure DevOps", "JIRA", "Git", "M365"],
   },
   {
     period: "2020–2021 · 5 mois",
-    client: "Bouygues Telecom",
-    clientLogo: "/company_logo/Bouygues.png",
     role: "Designer UX & Développeur FullStack",
     summary:
       "Création d’un outil pour aider une équipe à piloter l’agilité et améliorer la gestion des offres mobiles/box, avec une vision globale de l’avancement.",
@@ -185,22 +319,33 @@ const missions = [
       "Conception de maquettes et prototypes (itérations selon retours utilisateurs/équipe)",
       "Développement d’un dashboard (front Angular, back Node) et intégration de sources de données",
     ],
-    stack: ["TypeScript", "Angular", "Node.js", "Figma", "Adobe XD", "JIRA"],
   },
 ];
+
+// Les deux listes appariees par leur rang, plus ce qui ne change pas.
+const redige = langue === "en" ? missionsEn : missionsFr;
+const missions = missionsBase.map((b, i) => ({
+  ...b,
+  ...redige[i],
+  stack: b.stack.map((t) => (langue === "en" ? (pileTraduite[t] ?? t) : t)),
+}));
 
 // Les logos de la pile technique. Ils passent par astro:assets : sortis en WebP
 // de 256px au lieu des PNG d'origine, ou azure.png pesait a lui seul 698 Ko pour
 // 1,1 Mo au total. 256px suffit largement, le morphing echantillonne a ~202px.
+const rolesOutils = {
+  fr: ["Cloud", "Infra as code", "Orchestration", "Conteneurs", "Sources", "CI / CD", "Poste de travail"],
+  en: ["Cloud", "Infra as code", "Orchestration", "Containers", "Source control", "CI / CD", "Workstation"],
+};
 const brut = [
-  { src: logoAzure, nom: "Azure", role: "Cloud" },
-  { src: logoTerraform, nom: "Terraform", role: "Infra as code" },
-  { src: logoKube, nom: "Kubernetes", role: "Orchestration" },
-  { src: logoDocker, nom: "Docker", role: "Conteneurs" },
-  { src: logoGit, nom: "GitHub", role: "Sources" },
-  { src: logoAdo, nom: "Azure DevOps", role: "CI / CD" },
-  { src: logoVscode, nom: "VS Code", role: "Poste de travail" },
-];
+  { src: logoAzure, nom: "Azure" },
+  { src: logoTerraform, nom: "Terraform" },
+  { src: logoKube, nom: "Kubernetes" },
+  { src: logoDocker, nom: "Docker" },
+  { src: logoGit, nom: "GitHub" },
+  { src: logoAdo, nom: "Azure DevOps" },
+  { src: logoVscode, nom: "VS Code" },
+].map((o, i) => ({ ...o, role: rolesOutils[langue][i] }));
 const outils = await Promise.all(
   brut.map(async (o) => ({
     nom: o.nom,
@@ -209,31 +354,79 @@ const outils = await Promise.all(
   }))
 );
 
-const other = {
-  languages: [{ k: "Anglais", v: "Courant (TOEIC 830)" }],
-  // Reperes DERIVES des donnees deja presentes plus haut dans ce fichier : les
-  // roles sont ceux qui figurent deja dans les missions (Team Lead & PO sur
-  // Societe Generale, Designer UX & Developpeur FullStack sur Bouygues). Les
-  // secteurs sont la seule inference : ils qualifient les clients listes, ils
-  // ne sont ecrits nulle part ailleurs.
-  // Un repere « Clients : 7 depuis 2020 » a ete essaye puis retire : c'etait
-  // une redite du chapitre 03 juste en dessous, ET de la meta-row en haut de
-  // page qui affiche deja « 7 missions ».
-  reperes: [
-    { k: "Rôles", v: "Ingénieur · Team Lead · Product Owner" },
-    { k: "Secteurs", v: "Énergie · Transport · Banque · Fintech · Télécom · Environnement" },
-  ],
-  notes: [
-    "J’aime les environnements complexes et la qualité d’exécution (clarté, standards, sécurité).",
-    "Je privilégie la documentation courte, utile, et des templates réutilisables pour accélérer les équipes.",
-  ],
+const autres = {
+  fr: {
+    languages: [{ k: "Anglais", v: "Courant (TOEIC 830)" }],
+    reperes: [
+      { k: "Rôles", v: "Ingénieur · Team Lead · Product Owner" },
+      { k: "Secteurs", v: "Énergie · Transport · Banque · Fintech · Télécom · Environnement" },
+    ],
+    notes: [
+      "J’aime les environnements complexes et la qualité d’exécution (clarté, standards, sécurité).",
+      "Je privilégie la documentation courte, utile, et des templates réutilisables pour accélérer les équipes.",
+    ],
+  },
+  en: {
+    languages: [{ k: "English", v: "Fluent (TOEIC 830)" }],
+    reperes: [
+      { k: "Roles", v: "Engineer · Team Lead · Product Owner" },
+      { k: "Sectors", v: "Energy · Transport · Banking · Fintech · Telecom · Environment" },
+    ],
+    notes: [
+      "I like complex environments and quality of execution — clarity, standards, security.",
+      "I favour short, useful documentation and reusable templates that let teams move faster.",
+    ],
+  },
 };
+// Reperes DERIVES des donnees deja presentes plus haut dans ce fichier : les
+// roles sont ceux qui figurent deja dans les missions (Team Lead & PO sur
+// Societe Generale, Designer UX & Developpeur FullStack sur Bouygues). Les
+// secteurs sont la seule inference : ils qualifient les clients listes, ils
+// ne sont ecrits nulle part ailleurs.
+// Un repere « Clients : 7 depuis 2020 » a ete essaye puis retire : c'etait
+// une redite du chapitre 03 juste en dessous, ET de la meta-row en haut de
+// page qui affiche deja « 7 missions ».
+const other = autres[langue];
+
+const C = {
+  fr: {
+    metier: "Ingénieur Cloud & DevOps",
+    anciennete: "ans",
+    voirMissions: "Voir les missions",
+    apport: "Ce que j’apporte",
+    apportTexte:
+      "Je conçois et j’industrialise des plateformes cloud sécurisées, en mettant l’accent sur la fiabilité, la gouvernance et la fluidité des livraisons. Mon objectif est simple : permettre aux équipes de construire et déployer en confiance, avec des standards clairs.",
+    competences: "Compétences",
+    outils: "Outils",
+    missions: "Missions",
+    enCours: "En cours",
+    certifications: "Certifications",
+    reperes: "Quelques repères",
+    approche: "Approche",
+  },
+  en: {
+    metier: "Cloud & DevOps engineer",
+    anciennete: "years",
+    voirMissions: "See the missions",
+    apport: "What I bring",
+    apportTexte:
+      "I design and industrialise secure cloud platforms, with the emphasis on reliability, governance and how smoothly things ship. The goal is simple: let teams build and deploy with confidence, against clear standards.",
+    competences: "Skills",
+    outils: "Tools",
+    missions: "Missions",
+    enCours: "Ongoing",
+    certifications: "Certifications",
+    reperes: "A few markers",
+    approche: "Approach",
+  },
+}[langue];
 ---
 
 <Layout
   title={profile.title}
   description={profile.subtitle}
   mainClass="page editorial"
+  lang={langue}
 >
   {/* Ouverture au rythme de celle de l'accueil : de petits faits d'abord, qui
       donnent envie de lire, puis le titre bord a bord qui accroche l'oeil, puis
@@ -244,7 +437,7 @@ const other = {
       <span>
         <b>{missions.length}</b> missions &middot; <b>{certifications.length}</b> certifications
       </span>
-      <span>Ingénieur Cloud &amp; DevOps &middot; <b>+4</b> ans</span>
+      <span>{C.metier} &middot; <b>+4</b> {C.anciennete}</span>
     </div>
 
     <h1 class="titre-geant" data-reveal data-groupe="tete">{profile.title}</h1>
@@ -262,7 +455,7 @@ const other = {
             ))
           }
         </div>
-        <a class="jump" href="#missions">Voir les missions &#8595;</a>
+        <a class="jump" href="#missions">{C.voirMissions} &#8595;</a>
       </div>
       <figure class="ouverture-media">
         <Image src={photoPro} alt="Nabil Chebili" width={720} densities={[1, 2]} />
@@ -272,17 +465,12 @@ const other = {
 
   <section>
     <div class="section-head grande" data-reveal data-groupe="apport">
-      <span><i class="section-num">01</i> Ce que j’apporte</span>
+      <span><i class="section-num">01</i> {C.apport}</span>
       <span>({expertise.length})</span>
     </div>
     <div class="apport">
       <div class="prose" data-reveal data-groupe="apport">
-        <p>
-          Je conçois et j’industrialise des plateformes cloud sécurisées, en
-          mettant l’accent sur la fiabilité, la gouvernance et la fluidité des
-          livraisons. Mon objectif est simple&nbsp;: permettre aux équipes de
-          construire et déployer en confiance, avec des standards clairs.
-        </p>
+        <p>{C.apportTexte}</p>
       </div>
       <div class="colonnes">
         {
@@ -290,7 +478,7 @@ const other = {
             <article class="bloc" data-reveal data-groupe="expertise">
               <h3>{x.title}</h3>
               <p>{x.desc}</p>
-              <ul class="etiquettes" aria-label="Compétences">
+              <ul class="etiquettes" aria-label={C.competences}>
                 {x.tags.map((t) => (
                   <li>{t}</li>
                 ))}
@@ -307,7 +495,7 @@ const other = {
       dans un coin : elle EST le contenu de ce chapitre, et elle sert a le lire. */}
   <section id="outils">
     <div class="section-head grande" data-reveal data-groupe="outils">
-      <span><i class="section-num">02</i> Outils</span>
+      <span><i class="section-num">02</i> {C.outils}</span>
       <span>({outils.length})</span>
     </div>
     <div class="outils" data-reveal data-groupe="outils">
@@ -330,7 +518,7 @@ const other = {
 
   <section id="missions">
     <div class="section-head grande" data-reveal data-groupe="missions">
-      <span><i class="section-num">03</i> Missions</span>
+      <span><i class="section-num">03</i> {C.missions}</span>
       <span>({missions.length})</span>
     </div>
     <div class="missions">
@@ -338,12 +526,15 @@ const other = {
         missions.map((m) => (
           <article class="mission" data-reveal data-groupe="missions">
             <div class="mission-meta">
-              <span class="mission-periode">{m.period.replace(" (mission active)", "")}</span>
+              <span class="mission-periode">{m.period}</span>
               <span class="mission-client">{m.client}</span>
               {m.clientLogo ? (
                 <img class="mission-logo" src={m.clientLogo} alt={"Logo " + m.client} loading="lazy" />
               ) : null}
-              {m.period.includes("active") ? <span class="mission-encours">En cours</span> : null}
+              {/* Drapeau explicite plutot qu'une recherche de texte dans la
+                  periode : « mission active » n'existait qu'en francais, et la
+                  pastille aurait disparu de la version anglaise. */}
+              {m.active ? <span class="mission-encours">{C.enCours}</span> : null}
               <span class="rail-titre">Stack</span>
               <ul class="rail-liste">
                 {m.stack.map((t) => (
@@ -368,7 +559,7 @@ const other = {
 
   <section>
     <div class="section-head grande" data-reveal data-groupe="certifs">
-      <span><i class="section-num">04</i> Certifications</span>
+      <span><i class="section-num">04</i> {C.certifications}</span>
       <span>({certifications.length})</span>
     </div>
     <div class="certifs">
@@ -385,7 +576,7 @@ const other = {
 
   <section>
     <div class="section-head grande" data-reveal data-groupe="reperes">
-      <span><i class="section-num">05</i> Quelques repères</span>
+      <span><i class="section-num">05</i> {C.reperes}</span>
       <span>({other.languages.length + other.reperes.length + 1})</span>
     </div>
     <div class="certifs">
@@ -398,7 +589,7 @@ const other = {
         ))
       }
       <div class="certif" data-reveal data-groupe="reperes">
-        <span class="certif-nom">Approche</span>
+        <span class="certif-nom">{C.approche}</span>
         <div class="notes">
           {other.notes.map((n) => <p>{n}</p>)}
         </div>
@@ -406,10 +597,10 @@ const other = {
     </div>
   </section>
 
-  <Colophon />
+  <Colophon lang={langue} />
 
   <script>
-    import { morphOutils } from "../scripts/morphOutils.js";
+    import { morphOutils } from "../../scripts/morphOutils.js";
 
     const toile = document.getElementById("outils-scene");
     if (toile) {

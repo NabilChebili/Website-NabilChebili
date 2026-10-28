@@ -1,7 +1,14 @@
 ---
-import "../styles/global.css";
-import Layout from "../layouts/header.astro";
-import Colophon from "../components/Colophon.astro";
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import Colophon from "../../components/Colophon.astro";
+import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+	return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
 
 /* Relevé local, arrêté au 25/08/2026 : localconfig.vdf et appmanifest_*.acf pour
    Steam, manifestes Epic, RiotClientInstalls.json, GOG, .minecraft, et la
@@ -43,21 +50,115 @@ const defile = [
 	],
 ];
 
-const chaine = [
-	{ k: "En direct depuis", v: "Avril 2020" },
-	{ k: "Statut", v: "Affilié" },
-	{ k: "Scènes montées", v: "9" },
-	{ k: "Dernier passage", v: "Halo" },
-];
-
-/* Ce qui tourne le plus en direct — l'ordre est celui du temps de jeu, mais la
-   page ne l'affiche pas comme un palmarès. */
-const auProgramme = [
-	{ nom: "League of Legends", note: "Salé#9891 — la plus vieille habitude, jouée hier soir encore" },
-	{ nom: "Rocket League", note: "2 440 h au compteur. Des voitures, une balle, aucun plafond" },
-	{ nom: "Horreur coopérative", note: "Phasmophobia, Lethal Company, Content Warning — l'intérêt n'est pas d'avoir peur, c'est d'entendre les autres avoir peur" },
-	{ nom: "Le reste", note: "Party games, salles d'énigmes, retours en arrière sur des jeux Xbox 360" },
-];
+const T = {
+	fr: {
+		description:
+			"NabsLand sur Twitch : du League of Legends, du Rocket League et de l'horreur coopérative — en direct depuis 2020, et toujours à plusieurs.",
+		statut: "Affilié Twitch",
+		depuis: "en direct depuis",
+		intro1:
+			"Je joue depuis toujours, sans que ça prenne toute la place — mais c'est une des choses qui m'ont façonné. Ce n'est jamais le jeu qui m'a retenu : c'est ce qu'il permet. Se retrouver quelque part, avec des amis de quinze ans comme avec des gens croisés le soir même.",
+		intro2a: "Depuis avril 2020, ça se passe en direct sur Twitch, sous le nom de",
+		intro2b: ": League of Legends, Rocket League, et beaucoup de jeux d'horreur à plusieurs.",
+		regarder: "Regarder la chaîne",
+		defileTitre: "Tout ce qui est passé par là",
+		titres: "titres",
+		chapitre1: "La chaîne",
+		chaine1:
+			"La chaîne a six ans. Elle n'a jamais eu de plan de carrière : c'était au départ un moyen de garder le contact quand on ne pouvait plus se voir. Depuis, elle sert surtout à agrandir la table — il y a toujours une place libre en vocal, et il n'a jamais fallu être bon pour la prendre.",
+		chaine2:
+			"Il y a une scène montée pour deux caméras, parce que la moitié des streams se fait à deux. Une autre au format vertical, pour ce qui part sur TikTok. Le reste — alertes, compteur d'abonnés, mur d'émoticônes — c'est de la cuisine interne, mais elle dit assez bien que ce n'est pas improvisé.",
+		passer: "Passer sur la chaîne",
+		guitare: "— et s'il m'arrive d'y poser une guitare, ça se raconte plutôt du",
+		coteMusique: "côté musique",
+		suivre: "Suivre NabsLand",
+		chapitre2: "On n'y joue jamais seul",
+		douzeTitres: "12 titres",
+		ensemble1:
+			"Le relevé est sans appel : les jeux solo de la bibliothèque sont presque tous abandonnés au bout de quelques heures, pendant que les jeux à plusieurs se comptent en centaines. Ce n'est pas un hasard de goût, c'est la raison d'allumer le PC.",
+		ensemble2a:
+			"Derrière tout ça il y a un Discord qui tourne depuis des années, où les habitués croisent des gens arrivés la veille. Le jeu n'est souvent qu'un prétexte à la salle vocale :",
+		ensemble2b: "attache littéralement les joueurs les uns aux autres — c'est à peu près l'idée.",
+		chapitre3: "Ça vient de loin",
+		jalonsTexte1: "Onze ans de relevé,",
+		jalonsHeures: "4 635 heures",
+		jalonsTexte2:
+			"sur une centaine de titres. Ce n'est pas un trophée, et ça n'a jamais été un mode de vie : c'est simplement assez long pour compter dans ce qu'on devient. Les jeux ont changé bien plus souvent que les raisons d'y jouer.",
+		chaine: [
+			{ k: "En direct depuis", v: "Avril 2020" },
+			{ k: "Statut", v: "Affilié" },
+			{ k: "Scènes montées", v: "9" },
+			{ k: "Dernier passage", v: "Halo" },
+		],
+		auProgramme: [
+			{ nom: "League of Legends", note: "Salé#9891 — la plus vieille habitude, jouée hier soir encore" },
+			{ nom: "Rocket League", note: "2 440 h au compteur. Des voitures, une balle, aucun plafond" },
+			{ nom: "Horreur coopérative", note: "Phasmophobia, Lethal Company, Content Warning — l'intérêt n'est pas d'avoir peur, c'est d'entendre les autres avoir peur" },
+			{ nom: "Le reste", note: "Party games, salles d'énigmes, retours en arrière sur des jeux Xbox 360" },
+		],
+		jalons: [
+			{ an: "2015", fait: "Minecraft en 1.8.9, et les premières heures de Rocket League" },
+			{ an: "2020", fait: "Ouverture de la chaîne Twitch, en avril" },
+			{ an: "2024", fait: "Montage des VOD, passage au format vertical pour TikTok" },
+			{ an: "2026", fait: "Plus de jeu principal : de l'horreur à plusieurs, du Rocket League, un Halo de 2007 — ce qui fait envie sur le moment" },
+		],
+	},
+	en: {
+		description:
+			"NabsLand on Twitch: League of Legends, Rocket League and co-op horror — live since 2020, and never on my own.",
+		statut: "Twitch Affiliate",
+		depuis: "live since",
+		intro1:
+			"I've always played, without it taking over — but it is one of the things that shaped me. It was never the game that held me: it's what the game makes possible. Being somewhere together, with friends of fifteen years and with people met that same evening.",
+		intro2a: "Since April 2020 it happens live on Twitch, under the name",
+		intro2b: ": League of Legends, Rocket League, and a great deal of co-op horror.",
+		regarder: "Watch the channel",
+		defileTitre: "Everything that has been through here",
+		titres: "titles",
+		chapitre1: "The channel",
+		chaine1:
+			"The channel is six years old. It never had a career plan: it started as a way to stay in touch when we couldn't see each other. Since then it mostly serves to make the table bigger — there is always a free seat in voice chat, and you have never had to be good to take it.",
+		chaine2:
+			"There is a scene built for two cameras, because half the streams are done in pairs. Another one vertical, for whatever goes to TikTok. The rest — alerts, follower counter, emote wall — is back-of-house, but it says well enough that none of this is improvised.",
+		passer: "Drop by the channel",
+		guitare: "— and if a guitar occasionally turns up there, that story belongs on the",
+		coteMusique: "music side",
+		suivre: "Follow NabsLand",
+		chapitre2: "Never played alone",
+		douzeTitres: "12 titles",
+		ensemble1:
+			"The log is unambiguous: nearly every single-player game in the library is dropped after a few hours, while the multiplayer ones run into the hundreds. That is not a quirk of taste, it is the reason to turn the PC on.",
+		ensemble2a:
+			"Behind all of it there is a Discord that has been running for years, where the regulars meet people who showed up yesterday. The game is often just a pretext for the voice room:",
+		ensemble2b: "literally ties the players to one another — which is roughly the idea.",
+		chapitre3: "It goes back a while",
+		jalonsTexte1: "Eleven years of logs,",
+		jalonsHeures: "4,635 hours",
+		jalonsTexte2:
+			"across a hundred-odd titles. It is not a trophy, and it was never a way of life: it is simply long enough to count in who you turn into. The games changed far more often than the reasons for playing them.",
+		chaine: [
+			{ k: "Live since", v: "April 2020" },
+			{ k: "Status", v: "Affiliate" },
+			{ k: "Scenes built", v: "9" },
+			{ k: "Last on", v: "Halo" },
+		],
+		auProgramme: [
+			{ nom: "League of Legends", note: "Salé#9891 — the oldest habit, played again last night" },
+			{ nom: "Rocket League", note: "2,440 h logged. Cars, a ball, no ceiling" },
+			{ nom: "Co-op horror", note: "Phasmophobia, Lethal Company, Content Warning — the point is not being scared, it is hearing everyone else be scared" },
+			{ nom: "The rest", note: "Party games, escape rooms, and going back to Xbox 360 titles" },
+		],
+		jalons: [
+			{ an: "2015", fait: "Minecraft on 1.8.9, and the first hours of Rocket League" },
+			{ an: "2020", fait: "The Twitch channel opens, in April" },
+			{ an: "2024", fait: "Editing the VODs, moving to vertical for TikTok" },
+			{ an: "2026", fait: "No main game any more: co-op horror, Rocket League, a Halo from 2007 — whatever appeals that evening" },
+		],
+	},
+};
+const c = T[langue];
+const chaine = c.chaine;
+const auProgramme = c.auProgramme;
 
 const ensemble = [
 	{ nom: "Phasmophobia", h: "177 h" },
@@ -78,42 +179,29 @@ const ensemble = [
    suivait sinon a la main chaque titre ajoute au defile. */
 const nbTitres = defile.flat().length;
 
-const jalons = [
-	{ an: "2015", fait: "Minecraft en 1.8.9, et les premières heures de Rocket League" },
-	{ an: "2020", fait: "Ouverture de la chaîne Twitch, en avril" },
-	{ an: "2024", fait: "Montage des VOD, passage au format vertical pour TikTok" },
-	{ an: "2026", fait: "Plus de jeu principal : de l'horreur à plusieurs, du Rocket League, un Halo de 2007 — ce qui fait envie sur le moment" },
-];
+const jalons = c.jalons;
 ---
 
 <Layout
 	title="Gaming"
-	description="NabsLand sur Twitch : du League of Legends, du Rocket League et de l'horreur coopérative — en direct depuis 2020, et toujours à plusieurs."
+	description={c.description}
 	mainClass="page editorial"
+	lang={langue}
 >
 	<section class="tete-page">
 		{/* La chaine est annoncee avant le titre : c'est ce que la page vend, et
 		    le mot « Gaming » seul ne le dit pas. */}
 		<div class="meta-row meta-tete" data-reveal data-groupe="tete">
 			<span>Twitch &middot; <b>NabsLand</b></span>
-			<span><b>Affilié Twitch</b> &middot; en direct depuis <b>2020</b></span>
+			<span><b>{c.statut}</b> &middot; {c.depuis} <b>2020</b></span>
 		</div>
 		<h1 class="titre-page" data-reveal data-groupe="tete">Gaming</h1>
 		<div class="prose" data-reveal data-groupe="tete">
-			<p>
-				Je joue depuis toujours, sans que ça prenne toute la place — mais c'est
-				une des choses qui m'ont façonné. Ce n'est jamais le jeu qui m'a retenu :
-				c'est ce qu'il permet. Se retrouver quelque part, avec des amis de quinze
-				ans comme avec des gens croisés le soir même.
-			</p>
-			<p>
-				Depuis avril 2020, ça se passe en direct sur Twitch, sous le nom de
-				<b>NabsLand</b> : League of Legends, Rocket League, et beaucoup de jeux
-				d'horreur à plusieurs.
-			</p>
+			<p>{c.intro1}</p>
+			<p>{c.intro2a} <b>NabsLand</b>{c.intro2b}</p>
 		</div>
 		<a class="bouton bouton-tete" href={TWITCH} target="_blank" rel="noopener"
-			data-reveal data-groupe="tete">Regarder la chaîne &#8599;</a>
+			data-reveal data-groupe="tete">{c.regarder} &#8599;</a>
 	</section>
 
 	{/* --------------------------------------------------------------- defile ---
@@ -126,8 +214,8 @@ const jalons = [
 	    le truc au lieu de donner l'impression que ça continue. */}
 	<section class="defile-bloc" data-reveal data-groupe="defile">
 		<div class="defile-intitule">
-			<span>Tout ce qui est passé par là</span>
-			<span>{nbTitres} titres</span>
+			<span>{c.defileTitre}</span>
+			<span>{nbTitres} {c.titres}</span>
 		</div>
 
 		<div class="defile">
@@ -152,29 +240,18 @@ const jalons = [
 
 	<section>
 		<div class="section-head grande" data-reveal data-groupe="chaine">
-			<span><i class="section-num">01</i>La chaîne</span>
+			<span><i class="section-num">01</i>{c.chapitre1}</span>
 			<span>twitch.tv/nabsland</span>
 		</div>
 
 		<div class="duo bloc-chaine">
 			<div class="prose" data-reveal data-groupe="chaine">
+				<p>{c.chaine1}</p>
+				<p>{c.chaine2}</p>
 				<p>
-					La chaîne a six ans. Elle n'a jamais eu de plan de carrière : c'était au
-					départ un moyen de garder le contact quand on ne pouvait plus se voir.
-					Depuis, elle sert surtout à agrandir la table — il y a toujours une place
-					libre en vocal, et il n'a jamais fallu être bon pour la prendre.
-				</p>
-				<p>
-					Il y a une scène montée pour deux caméras, parce que la moitié des
-					streams se fait à deux. Une autre au format vertical, pour ce qui part
-					sur TikTok. Le reste — alertes, compteur d'abonnés, mur d'émoticônes —
-					c'est de la cuisine interne, mais elle dit assez bien que ce n'est pas
-					improvisé.
-				</p>
-				<p>
-					<a class="lien" href={TWITCH} target="_blank" rel="noopener">Passer sur la chaîne</a>
-					— et s'il m'arrive d'y poser une guitare, ça se raconte plutôt du
-					<a class="lien" href="/musique">côté musique</a>.
+					<a class="lien" href={TWITCH} target="_blank" rel="noopener">{c.passer}</a>
+					{c.guitare}
+					<a class="lien" href={cheminLocalise("/musique", langue)}>{c.coteMusique}</a>.
 				</p>
 			</div>
 
@@ -189,7 +266,7 @@ const jalons = [
 						))
 					}
 				</div>
-				<a class="bouton" href={TWITCH} target="_blank" rel="noopener">Suivre NabsLand &#8599;</a>
+				<a class="bouton" href={TWITCH} target="_blank" rel="noopener">{c.suivre} &#8599;</a>
 			</div>
 		</div>
 
@@ -207,23 +284,13 @@ const jalons = [
 
 	<section>
 		<div class="section-head grande" data-reveal data-groupe="ensemble">
-			<span><i class="section-num">02</i>On n'y joue jamais seul</span>
-			<span>12 titres</span>
+			<span><i class="section-num">02</i>{c.chapitre2}</span>
+			<span>{c.douzeTitres}</span>
 		</div>
 
 		<div class="prose bloc-prose" data-reveal data-groupe="ensemble">
-			<p>
-				Le relevé est sans appel : les jeux solo de la bibliothèque sont presque
-				tous abandonnés au bout de quelques heures, pendant que les jeux à
-				plusieurs se comptent en centaines. Ce n'est pas un hasard de goût, c'est
-				la raison d'allumer le PC.
-			</p>
-			<p>
-				Derrière tout ça il y a un Discord qui tourne depuis des années, où les
-				habitués croisent des gens arrivés la veille. Le jeu n'est souvent qu'un
-				prétexte à la salle vocale : <b>Chained Together</b> attache littéralement
-				les joueurs les uns aux autres — c'est à peu près l'idée.
-			</p>
+			<p>{c.ensemble1}</p>
+			<p>{c.ensemble2a} <b>Chained Together</b> {c.ensemble2b}</p>
 		</div>
 
 		<ul class="jeux">
@@ -240,17 +307,12 @@ const jalons = [
 
 	<section>
 		<div class="section-head grande" data-reveal data-groupe="jalons">
-			<span><i class="section-num">03</i>Ça vient de loin</span>
+			<span><i class="section-num">03</i>{c.chapitre3}</span>
 			<span>2015 &rarr; 2026</span>
 		</div>
 
 		<div class="prose bloc-prose" data-reveal data-groupe="jalons">
-			<p>
-				Onze ans de relevé, <b>4 635 heures</b> sur une centaine de titres. Ce
-				n'est pas un trophée, et ça n'a jamais été un mode de vie : c'est
-				simplement assez long pour compter dans ce qu'on devient. Les jeux ont
-				changé bien plus souvent que les raisons d'y jouer.
-			</p>
+			<p>{c.jalonsTexte1} <b>{c.jalonsHeures}</b> {c.jalonsTexte2}</p>
 		</div>
 
 		<ol class="jalons">
@@ -265,7 +327,7 @@ const jalons = [
 		</ol>
 	</section>
 
-	<Colophon />
+	<Colophon lang={langue} />
 </Layout>
 
 <style>

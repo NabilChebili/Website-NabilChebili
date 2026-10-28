@@ -1,11 +1,18 @@
 ---
-import "../styles/global.css";
-import Layout from "../layouts/header.astro";
-import galleries from "../data/galleries.json";
-import vietnam from "../data/vietnam.json";
-import indonesie from "../data/indonesie.json";
-import { listBlobsFromPublicContainer } from "../lib/blobList.js";
-import Colophon from "../components/Colophon.astro";
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import galleries from "../../data/galleries.json";
+import vietnam from "../../data/vietnam.json";
+import indonesie from "../../data/indonesie.json";
+import { listBlobsFromPublicContainer } from "../../lib/blobList.js";
+import Colophon from "../../components/Colophon.astro";
+import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
 
 const fallbackCover = "/photos/A7401177.jpg";
 
@@ -20,19 +27,56 @@ async function firstPhoto(url) {
 // couper en plein milieu par object-fit: cover).
 const eventDatabricksCover = `${galleries.eventDatabricks}A7405096.jpg`;
 
-const destinations = [
-  { slug: "indonesie", title: "Indonésie", cover: indonesie.post[0]?.url },
-  { slug: "vietnam", title: "Vietnam", cover: vietnam.post[0]?.url },
-  { slug: "supersonic", title: "SuperSonic", cover: await firstPhoto(galleries.superSonic) },
-  { slug: "event-databricks", title: "Event Databricks I-Shane", cover: eventDatabricksCover },
-  { slug: "illumination", title: "Illumination", cover: await firstPhoto(galleries.illumination) },
-  { slug: "londres", title: "Londres", cover: await firstPhoto(galleries.londres) },
-  { slug: "gr1-1", title: "GR1 (1)", cover: await firstPhoto(galleries.paris) },
-  { slug: "gr1-2", title: "GR1 (2)", cover: await firstPhoto(galleries.GR1_2) },
-  { slug: "gr1-3", title: "GR1 (3)", cover: await firstPhoto(galleries.GR3) },
-  { slug: "mariage", title: "Mariage", cover: await firstPhoto(galleries.mariage) },
-  { slug: "croatie", title: "Croatie", cover: await firstPhoto(galleries.croatie) },
+// Les titres repris a l'identique des pages de galerie : une vignette doit
+// annoncer le titre de la page qu'elle ouvre.
+const titres = {
+  fr: {
+    indonesie: "Indonésie",
+    vietnam: "Vietnam",
+    supersonic: "SuperSonic",
+    "event-databricks": "Event Databricks I-Shane",
+    illumination: "Illumination",
+    londres: "Londres",
+    "gr1-1": "GR1 (1)",
+    "gr1-2": "GR1 (2)",
+    "gr1-3": "GR1 (3)",
+    mariage: "Mariage",
+    croatie: "Croatie",
+  },
+  en: {
+    indonesie: "Indonesia",
+    vietnam: "Vietnam",
+    supersonic: "SuperSonic",
+    "event-databricks": "Databricks Event at I-Shane",
+    illumination: "Illumination",
+    londres: "London",
+    "gr1-1": "GR1 (1)",
+    "gr1-2": "GR1 (2)",
+    "gr1-3": "GR1 (3)",
+    mariage: "Wedding",
+    croatie: "Croatia",
+  },
+};
+
+const couvertures = [
+  { slug: "indonesie", cover: indonesie.post[0]?.url },
+  { slug: "vietnam", cover: vietnam.post[0]?.url },
+  { slug: "supersonic", cover: await firstPhoto(galleries.superSonic) },
+  { slug: "event-databricks", cover: eventDatabricksCover },
+  { slug: "illumination", cover: await firstPhoto(galleries.illumination) },
+  { slug: "londres", cover: await firstPhoto(galleries.londres) },
+  { slug: "gr1-1", cover: await firstPhoto(galleries.paris) },
+  { slug: "gr1-2", cover: await firstPhoto(galleries.GR1_2) },
+  { slug: "gr1-3", cover: await firstPhoto(galleries.GR3) },
+  { slug: "mariage", cover: await firstPhoto(galleries.mariage) },
+  { slug: "croatie", cover: await firstPhoto(galleries.croatie) },
 ];
+
+const destinations = couvertures.map((d) => ({
+  ...d,
+  title: titres[langue][d.slug],
+  href: cheminLocalise(`/${d.slug}`, langue),
+}));
 
 // Les photographies commentees : celles des recits Vietnam et Indonesie, les
 // seules a porter une legende. Compte depuis les donnees, donc juste et tenu a
@@ -40,13 +84,38 @@ const destinations = [
 // lister toutes les galeries distantes au build, et le « 958 » de l'accueil est
 // une valeur ecrite en dur que rien ne verifie.
 const commentees = vietnam.post.length + indonesie.post.length;
+
+const T = {
+  fr: {
+    titre: "Photographie",
+    description: "Galeries photo : voyages, villes, portraits et instantanés.",
+    galeriesMot: "galeries",
+    commenteesMot: "photographies commentées",
+    accroche: "Voyages, villes et instantanés",
+    intro:
+      "Un aperçu de voyages, de moments et d’instants précieux — appareil en main.",
+    voir: "Voir les galeries",
+    chapitre: "Galeries",
+    apport:
+      "À travers le design et la recherche d’esthétique dans les détails, la photographie s’est rapidement imposée comme un moyen d’expression naturel. Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main. Chaque déplacement est devenu une occasion de raconter une histoire, de figer une ambiance, un regard, un instant.",
+  },
+  en: {
+    titre: "Photography",
+    description: "Photo galleries: travels, cities, portraits and snapshots.",
+    galeriesMot: "galleries",
+    commenteesMot: "captioned photographs",
+    accroche: "Travels, cities and snapshots",
+    intro: "A look at journeys, moments and small things worth keeping — camera in hand.",
+    voir: "See the galleries",
+    chapitre: "Galleries",
+    apport:
+      "Coming from design, and from a habit of looking for beauty in the details, photography quickly became a natural way to say things. Over time the urge to capture what was actually in front of me led to a first camera, and to travelling with it in hand. Every trip turned into a chance to tell a story — to hold on to a mood, a look, a moment.",
+  },
+};
+const c = T[langue];
 ---
 
-<Layout
-  title="Photographie"
-  description="Galeries photo : voyages, villes, portraits et instantanés."
-  mainClass="page editorial"
->
+<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue}>
   {/* Le viseur de l'accueil, en mode mise au point : le temoin rouge d'un
       enregistrement devient le point vert d'une mise au point confirmee — c'est
       le signal qu'affiche un boitier quand l'autofocus a accroche. */}
@@ -61,43 +130,33 @@ const commentees = vietnam.post.length + indonesie.post.length;
   <section class="ouverture">
     <div class="meta-row" data-reveal data-groupe="tete">
       <span>
-        <b>{destinations.length}</b> galeries &middot; <b>{commentees}</b> photographies commentées
+        <b>{destinations.length}</b> {c.galeriesMot} &middot; <b>{commentees}</b> {c.commenteesMot}
       </span>
-      <span>Voyages, villes et instantanés</span>
+      <span>{c.accroche}</span>
     </div>
 
-    <h1 class="titre-geant" data-reveal data-groupe="tete">Photographie</h1>
+    <h1 class="titre-geant" data-reveal data-groupe="tete" lang={langue}>{c.titre}</h1>
 
     <div class="ouverture-pied" data-reveal data-groupe="tete">
-      <p>
-        Un aperçu de voyages, de moments et d’instants précieux — appareil en
-        main.
-      </p>
-      <a class="jump" href="#galeries">Voir les galeries &#8595;</a>
+      <p>{c.intro}</p>
+      <a class="jump" href="#galeries">{c.voir} &#8595;</a>
     </div>
   </section>
 
   <section id="galeries">
     <div class="section-head grande" data-reveal data-groupe="galeries">
-      <span><i class="section-num">01</i> Galeries</span>
+      <span><i class="section-num">01</i> {c.chapitre}</span>
       <span>({destinations.length})</span>
     </div>
     <div class="apport">
       <div class="prose" data-reveal data-groupe="galeries">
-        <p>
-          À travers le design et la recherche d’esthétique dans les détails, la
-          photographie s’est rapidement imposée comme un moyen d’expression
-          naturel. Avec le temps, l’envie de capturer le réel m’a poussé à
-          acheter mon premier appareil photo et à voyager, appareil en main.
-          Chaque déplacement est devenu une occasion de raconter une histoire,
-          de figer une ambiance, un regard, un instant.
-        </p>
+        <p>{c.apport}</p>
       </div>
     </div>
     <div class="vignettes">
       {
         destinations.map((d) => (
-          <a class="vignette" href={`/${d.slug}`} data-reveal data-groupe="vignettes">
+          <a class="vignette" href={d.href} data-reveal data-groupe="vignettes">
             <span class="vignette-visuel">
               <img src={d.cover} alt="" loading="lazy" decoding="async" />
             </span>
@@ -108,7 +167,7 @@ const commentees = vietnam.post.length + indonesie.post.length;
     </div>
   </section>
 
-  <Colophon />
+  <Colophon lang={langue} />
 </Layout>
 
 <style>
@@ -122,7 +181,11 @@ const commentees = vietnam.post.length + indonesie.post.length;
     overflow: clip;
     padding: 8px var(--edge) 0;
   }
-  /* Declaration montee dans editorial.css ; 8 pour « PHOTOGRAPHIE ». */
+  /* Declaration montee dans editorial.css ; 8 pour « PHOTOGRAPHIE ».
+     Le meme diviseur sert aux deux langues : il fixe le CORPS du titre, et
+     c'est le corps qui doit rester constant d'une version a l'autre.
+     « PHOTOGRAPHY » rend simplement un peu plus court, comme « Musique » est
+     deja bien plus court que « Cloud DevOps » a corps egal. */
   .titre-geant {
     --titre-div: 8;
   }
@@ -251,8 +314,6 @@ const commentees = vietnam.post.length + indonesie.post.length;
     30% { opacity: 0.72; }
     100% { opacity: 1; }
   }
-  /* Le temoin reste neutre pendant la recherche et passe au vert a l'accroche,
-     comme sur un boitier. */
   /* Le temoin reste GRIS pendant toute la recherche et ne passe au vert qu'a
      l'accroche. Une premiere version le faisait virer au vert a chaque
      approche du point : c'est faux — un temoin de mise au point confirme une

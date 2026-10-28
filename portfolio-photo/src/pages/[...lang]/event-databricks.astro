@@ -1,0 +1,33 @@
+---
+import GalleryPage from "../../components/GalleryPage.astro";
+import galleries from "../../data/galleries.json";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    titre: "Event Databricks I-Shane",
+    description: "Galerie photo : Event Databricks chez I-Shane.",
+    intro: "Un événement Databricks organisé chez I-Shane, entre présentations, échanges et moments conviviaux.",
+  },
+  en: {
+    titre: "Databricks Event at I-Shane",
+    description: "Photo gallery: Databricks event at I-Shane.",
+    intro: "A Databricks event hosted at I-Shane — talks, conversations, and the easy moments in between.",
+  },
+};
+const c = T[langue];
+---
+
+<GalleryPage
+  title={c.titre}
+  description={c.description}
+  intro={c.intro}
+  galleryUrl={galleries.eventDatabricks}
+  lang={langue}
+/>

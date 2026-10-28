@@ -54,6 +54,34 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
   redirection IONOS **écrase le CNAME `www` existant**. Ne jamais la cocher — la redirection doit
   cibler uniquement l'apex, le `www` reste géré par un CNAME classique dans la zone DNS.
 
+## Site bilingue — français / anglais
+
+- **Le français n'a pas de préfixe**, l'anglais vit sous `/en/`. Les URL françaises
+  étaient indexées et le domaine est en `.fr` : les déplacer aurait coûté le
+  référencement acquis pour rien.
+- **Une seule page par route, deux sorties.** Toutes les pages vivent sous
+  `src/pages/[...lang]/` avec un `getStaticPaths()` qui renvoie
+  `[{ lang: undefined }, { lang: "en" }]`. Le gabarit ne s'écrit donc qu'une fois ;
+  seul le texte est dédoublé. **Ne jamais recréer une page à la racine de
+  `src/pages/`** : elle n'existerait qu'en français et la bascule mènerait à un 404.
+- **Où vit quoi** : les chaînes du chrome (nav, pied, visionneuse, bloc contact)
+  dans `src/i18n/ui.ts` ; le texte propre à une page dans un `const T = { fr, en }`
+  en tête de cette page, pour voir les deux versions côte à côte en les modifiant.
+- **Les légendes de photos** ont une clé `captionEn` à côté de `caption` dans
+  `src/data/vietnam.json` et `indonesie.json`. Une photo ajoutée sans `captionEn`
+  retombe sur le français plutôt que de n'afficher rien.
+- **Le slug ne se traduit pas** : `/croatie` et `/en/croatie`. Un slug traduit
+  obligerait à tenir une table de correspondance pour que la bascule retombe sur la
+  bonne page, pour un gain nul sur des galeries personnelles.
+- **La bascule** est dans `header.astro`, hors du menu repliable : c'est l'état de
+  la page courante, pas une destination de plus. Elle ne prend donc pas les
+  crochets `[ ]`, qui dans ce système signalent « ceci mène ailleurs ».
+- **Piège** : ne pas calibrer un `--titre-div` propre à l'anglais. Ce diviseur fixe
+  le **corps** du titre, pas la largeur qu'il occupe — mesure à l'appui, « Musique »
+  n'occupe déjà que 41 % de la largeur disponible. Un diviseur réduit pour « MUSIC »
+  l'avait sorti à 244px contre 174 en français.
+- **Coût à connaître** : toute modification de contenu se fait désormais deux fois.
+
 ## Architecture du site photo (évolution récente)
 
 Le site a été refait plusieurs fois dans la même session avant de converger ; la version actuelle :

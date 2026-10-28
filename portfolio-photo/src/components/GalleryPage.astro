@@ -3,6 +3,7 @@ import "../styles/global.css";
 import Layout from "../layouts/header.astro";
 import PhotoGrid from "./PhotoGrid.astro";
 import { listBlobsFromPublicContainer } from "../lib/blobList.js";
+import { cheminLocalise, traduire, type Langue } from "../i18n/ui";
 
 // photo.css n'est plus importee ici : PhotoGrid style lui-meme la grille, les
 // cartes, la visionneuse et le bouton de telechargement. Ce qui restait dans
@@ -17,27 +18,31 @@ const {
   galleryUrl = "",
   fallback = ["/photos/A7401177.jpg", "/photos/A7401113.jpg", "/photos/A7401167.jpg", "/photos/A7401181.jpg"],
   password = null,
+  lang = "fr",
 } = Astro.props;
+
+const langue = lang as Langue;
+const t = traduire(langue);
 
 const listed = galleryUrl ? await listBlobsFromPublicContainer(galleryUrl) : [];
 const photos = listed.length ? listed : fallback;
 ---
 
-<Layout title={title} description={description} mainClass="page editorial">
+<Layout title={title} description={description} mainClass="page editorial" lang={langue}>
   {password ? (
     <div class="password-gate" id="password-gate">
       <div class="password-gate-box">
-        <p>Cette galerie est temporairement protégée.</p>
-        <input type="password" id="password-gate-input" placeholder="Mot de passe" autocomplete="off" />
-        <button id="password-gate-submit" type="button">Voir les photos</button>
-        <p class="password-gate-error" id="password-gate-error" hidden>Mot de passe incorrect.</p>
+        <p>{t("verrou.message")}</p>
+        <input type="password" id="password-gate-input" placeholder={t("verrou.motDePasse")} autocomplete="off" />
+        <button id="password-gate-submit" type="button">{t("verrou.voir")}</button>
+        <p class="password-gate-error" id="password-gate-error" hidden>{t("verrou.erreur")}</p>
       </div>
     </div>
   ) : null}
 
   <div class:list={["gated-content", { "is-locked": password }]} id="gated-content">
     <section class="tete-page">
-      <a class="retour" href="/photo">← Toutes les galeries</a>
+      <a class="retour" href={cheminLocalise("/photo", langue)}>{t("retour.galeries")}</a>
       <h1 class="titre-page" data-reveal data-groupe="tete">{title}</h1>
       {intro ? (
         <div class="prose" data-reveal data-groupe="tete">
@@ -48,11 +53,11 @@ const photos = listed.length ? listed : fallback;
 
     <section>
       <div class="section-head" data-reveal data-groupe="galerie">
-        <span>Photographies</span>
+        <span>{t("galerie.photographies")}</span>
         <span>({photos.length})</span>
       </div>
       <div class="galerie">
-        <PhotoGrid photos={photos} name={title} />
+        <PhotoGrid photos={photos} name={title} lang={langue} />
       </div>
     </section>
   </div>

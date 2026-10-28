@@ -115,6 +115,44 @@ body {
   background-size: 100% 1px;
 }
 
+/* La bascule de langue n'est pas une destination : elle change l'etat de la
+   page ouverte. Elle ne prend donc pas les crochets, qui dans ce systeme
+   signalent « ceci mene ailleurs ». Un filet la separe des entrees de nav, et
+   elle reste en retrait tant qu'on ne la survole pas. */
+.nav-langue {
+  padding-left: 12px;
+  border-left: 1px solid var(--rule, #c9c9c4);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-55, #5c5c58);
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: color 240ms cubic-bezier(0.2, 0, 0, 1),
+    background-size 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+.nav-langue:hover,
+.nav-langue:focus-visible {
+  color: var(--ink, #000);
+  background-size: 100% 1px;
+}
+
+/* Sur grand ecran elle se range apres les sections, a l'extremite de la barre.
+   Dans le flux du document elle les precede, pour qu'au telephone — ou les
+   sections se replient derriere le bouton — elle reste visible a cote de lui. */
+@media (min-width: 591px) {
+  .nav-langue { order: 3; margin-left: 6px; }
+  .site-nav { order: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-langue { transition: none; }
+}
+
 /* hide mobile toggle by default */
 .nav-toggle { display: none; color: var(--muted); }
 .site-footer {
