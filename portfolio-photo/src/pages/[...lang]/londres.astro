@@ -1,0 +1,33 @@
+---
+import GalleryPage from "../../components/GalleryPage.astro";
+import galleries from "../../data/galleries.json";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    titre: "Londres",
+    description: "Galerie photo : Londres.",
+    intro: "Quelques jours à Londres, entre rues iconiques, ambiance britannique et lumière changeante.",
+  },
+  en: {
+    titre: "London",
+    description: "Photo gallery: London.",
+    intro: "A few days in London — landmark streets, a very British mood, and light that never holds still.",
+  },
+};
+const c = T[langue];
+---
+
+<GalleryPage
+  title={c.titre}
+  description={c.description}
+  intro={c.intro}
+  galleryUrl={galleries.londres}
+  lang={langue}
+/>

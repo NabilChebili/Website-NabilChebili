@@ -1,11 +1,29 @@
 ---
-const { photos = [], name = "photos" } = Astro.props;
+import { traduire, type Langue } from "../i18n/ui";
+
+const { photos = [], name = "photos", lang = "fr" } = Astro.props;
+const langue = lang as Langue;
+const t = traduire(langue);
 const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null } : p));
+
+// Les libelles que le script affiche en cours de route passent par des
+// attributs de donnees. `define:vars` les y porterait aussi, mais au prix
+// d'un script inline duplique a chaque grille — et Vietnam en compte dix.
+const mots = {
+  copie: t("vue.copie"),
+  enCours: t("vue.enCours"),
+  echecImage: t("vue.echecImage"),
+  preparation: t("vue.preparation"),
+  progression: t("vue.progression"),
+  archive: t("vue.archive"),
+  compression: t("vue.compression"),
+  echecArchive: t("vue.echecArchive"),
+};
 ---
 
-<div class="photo-grid" data-zip-name={name}>
+<div class="photo-grid" data-zip-name={name} data-mots={JSON.stringify(mots)}>
   <div class="photo-grid-head">
-    <button class="download-all-btn" type="button" aria-label={`Télécharger toutes les photos de ${name}`}>Télécharger tout</button>
+    <button class="download-all-btn" type="button" aria-label={`${t("grille.toutesLesPhotos")} ${name}`}>{t("grille.toutTelecharger")}</button>
   </div>
   <div class="photo-grid-cards">
     {items.map((p, i) => (
@@ -20,19 +38,19 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
        Le glissement lateral deplace la piste entiere, si bien que la photo
        voisine entre par le bord au rythme du doigt, au lieu d'apparaitre une
        fois le geste termine. -->
-  <div class="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Visionneuse">
+  <div class="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label={t("vue.titre")}>
     <div class="lb-fond"></div>
     <div class="lb-piste">
       <div class="lb-vue"><img alt="" hidden /></div>
       <div class="lb-vue"><img alt="" hidden /></div>
       <div class="lb-vue"><img alt="" hidden /></div>
     </div>
-    <button class="lb-fleche lb-prec" type="button" aria-label="Photo précédente">&lsaquo;</button>
-    <button class="lb-fleche lb-suiv" type="button" aria-label="Photo suivante">&rsaquo;</button>
+    <button class="lb-fleche lb-prec" type="button" aria-label={t("vue.precedente")}>&lsaquo;</button>
+    <button class="lb-fleche lb-suiv" type="button" aria-label={t("vue.suivante")}>&rsaquo;</button>
     <div class="lb-controls">
-      <button class="lb-download" type="button">Télécharger</button>
-      <button class="lb-share" type="button">Partager</button>
-      <button class="lb-close" type="button" aria-label="Fermer">✕</button>
+      <button class="lb-download" type="button">{t("vue.telecharger")}</button>
+      <button class="lb-share" type="button">{t("vue.partager")}</button>
+      <button class="lb-close" type="button" aria-label={t("vue.fermer")}>✕</button>
     </div>
     <p class="lb-compteur"><span class="lb-rang">1</span> / <span class="lb-total">1</span></p>
   </div>
@@ -44,6 +62,25 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
     grids.forEach((grid) => {
       if (grid.dataset.wired === "true") return;
       grid.dataset.wired = "true";
+
+      // Les libelles affiches en cours de telechargement, poses par le gabarit
+      // dans la langue de la page. Repli en francais si l'attribut manque.
+      let mots = {
+        copie: "Copié",
+        enCours: "Téléchargement...",
+        echecImage: "Impossible de télécharger l'image. Réessayez.",
+        preparation: "Préparation...",
+        progression: "Téléchargement",
+        archive: "Création archive...",
+        compression: "Compression",
+        echecArchive:
+          "Impossible de créer l'archive. Réessayez ou téléchargez les images individuellement.",
+      };
+      try {
+        if (grid.dataset.mots) mots = { ...mots, ...JSON.parse(grid.dataset.mots) };
+      } catch (e) {
+        /* on garde le repli */
+      }
 
       const cards = Array.from(grid.querySelectorAll(".photo-card"));
 
@@ -639,7 +676,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
           try {
             await navigator.clipboard.writeText(url);
             const original = lbShare.textContent;
-            lbShare.textContent = "Copié";
+            lbShare.textContent = mots.copie;
             setTimeout(() => (lbShare.textContent = original), 1400);
           } catch (err) {
             window.open(url, "_blank");
@@ -653,7 +690,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
         if (!url) return;
         lbDownload.disabled = true;
         const originalText = lbDownload.textContent;
-        lbDownload.textContent = "Téléchargement...";
+        lbDownload.textContent = mots.enCours;
         try {
           const res = await fetch(url);
           if (!res.ok) throw new Error("Fetch failed");
@@ -669,7 +706,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
           URL.revokeObjectURL(blobUrl);
         } catch (err) {
           console.error("Download failed:", err);
-          alert("Impossible de télécharger l'image. Réessayez.");
+          alert(mots.echecImage);
         } finally {
           lbDownload.disabled = false;
           lbDownload.textContent = originalText;
@@ -702,13 +739,13 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
         if (!urls.length) return;
         downloadAllBtn.disabled = true;
         const originalText = downloadAllBtn.textContent;
-        downloadAllBtn.textContent = "Préparation...";
+        downloadAllBtn.textContent = mots.preparation;
         try {
           const JSZip = await loadJSZip();
           const zip = new JSZip();
           for (let i = 0; i < urls.length; i++) {
             const url = urls[i];
-            downloadAllBtn.textContent = `Téléchargement ${i + 1}/${urls.length}`;
+            downloadAllBtn.textContent = `${mots.progression} ${i + 1}/${urls.length}`;
             try {
               const res = await fetch(url);
               if (!res.ok) throw new Error("Fetch failed");
@@ -719,10 +756,10 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
               console.warn("Failed to fetch", url, err);
             }
           }
-          downloadAllBtn.textContent = "Création archive...";
+          downloadAllBtn.textContent = mots.archive;
           const content = await zip.generateAsync({ type: "blob" }, (meta) => {
             const pct = Math.round(meta.percent || 0);
-            downloadAllBtn.textContent = `Compression ${pct}%`;
+            downloadAllBtn.textContent = `${mots.compression} ${pct}%`;
           });
           const zipName = `${grid.dataset.zipName || "photos"}.zip`;
           const blobUrl = URL.createObjectURL(content);
@@ -735,7 +772,7 @@ const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null
           URL.revokeObjectURL(blobUrl);
         } catch (err) {
           console.error(err);
-          alert("Impossible de créer l'archive. Réessayez ou téléchargez les images individuellement.");
+          alert(mots.echecArchive);
         } finally {
           downloadAllBtn.disabled = false;
           downloadAllBtn.textContent = originalText;

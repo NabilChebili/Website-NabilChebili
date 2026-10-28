@@ -1,0 +1,134 @@
+---
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import PhotoGrid from "../../components/PhotoGrid.astro";
+import AccordionSection from "../../components/AccordionSection.astro";
+import indonesie from "../../data/indonesie.json";
+import { listGalleries } from "../../lib/blobList.js";
+import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+const t = traduire(langue);
+
+const fallback = [
+  "/photos/A7401177.jpg",
+  "/photos/A7401113.jpg",
+  "/photos/A7401167.jpg",
+  "/photos/A7401181.jpg",
+];
+
+const photosByKey = await listGalleries(indonesie.galleries, fallback);
+
+const recit = indonesie.post.map((p) => ({
+  url: p.url,
+  caption: langue === "en" ? (p.captionEn ?? p.caption) : p.caption,
+}));
+
+// Les noms de lieux restent. Seules les deux etapes dont le libelle est une
+// description francaise — « Falaise Lombok », « Village Lombok », « Paysages
+// Lombok » — basculent.
+const labels = {
+  fr: {
+    batur: "Batur",
+    "black-lava": "Black Lava",
+    "falaise-lombok": "Falaise Lombok",
+    gwk: "GWK",
+    jitawali: "Jatiluwih",
+    "lombok-village": "Village Lombok",
+    "lombok-paysage": "Paysages Lombok",
+    "monkey-forest": "Monkey Forest",
+    "spot-insta": "Spot Insta",
+    ulluwatu: "Uluwatu",
+    "water-temple": "Water Temple",
+  },
+  en: {
+    batur: "Batur",
+    "black-lava": "Black Lava",
+    "falaise-lombok": "Lombok Cliffs",
+    gwk: "GWK",
+    jitawali: "Jatiluwih",
+    "lombok-village": "Lombok Village",
+    "lombok-paysage": "Lombok Landscapes",
+    "monkey-forest": "Monkey Forest",
+    "spot-insta": "Insta Spot",
+    ulluwatu: "Uluwatu",
+    "water-temple": "Water Temple",
+  },
+};
+
+const T = {
+  fr: {
+    titre: "Indonésie",
+    description:
+      "Récit photo d'un voyage à Bali et Lombok : temples, volcans, rizières et plages.",
+    intro:
+      "Bali et Lombok : temples flottants, volcans noirs, rizières en terrasses et falaises face à l'océan.",
+    recit: "Le récit",
+    etapes: "Les étapes du voyage",
+  },
+  en: {
+    titre: "Indonesia",
+    description:
+      "A photo story from Bali and Lombok: temples, volcanoes, rice terraces and beaches.",
+    intro:
+      "Bali and Lombok: floating temples, black volcanoes, terraced rice fields, and cliffs facing the ocean.",
+    recit: "The story",
+    etapes: "Stops along the way",
+  },
+};
+const c = T[langue];
+const nomsEtapes = labels[langue];
+---
+
+<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue}>
+  <section class="tete-page">
+    <a class="retour" href={cheminLocalise("/photo", langue)}>{t("retour.galeries")}</a>
+    <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p>{c.intro}</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head" data-reveal data-groupe="recit">
+      <span>{c.recit}</span>
+      <span>({recit.length})</span>
+    </div>
+    <div class="galerie">
+      <PhotoGrid photos={recit} name="Indonesie" lang={langue} />
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head" data-reveal data-groupe="etapes">
+      <span>{c.etapes}</span>
+      <span>({Object.keys(indonesie.galleries).length})</span>
+    </div>
+    <div class="etapes">
+      {
+        Object.keys(indonesie.galleries).map((key) => (
+          <AccordionSection
+            id={key}
+            title={nomsEtapes[key] ?? key}
+            photos={photosByKey[key]}
+            lang={langue}
+          />
+        ))
+      }
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .galerie,
+  .etapes {
+    padding: 0 var(--edge);
+  }
+  .etapes {
+    padding-top: var(--pas-3);
+  }
+</style>

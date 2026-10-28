@@ -1,11 +1,20 @@
 ---
 import "../styles/layout.css";
 import "../styles/editorial.css";
+import {
+	autreLangue,
+	cheminLocalise,
+	codeLangue,
+	langueDepuisChemin,
+	routeNue,
+	sections as sectionsDe,
+	traduire,
+	type Langue,
+} from "../i18n/ui";
 
 const {
 	title = "Nabil Chebili",
-	description =
-		"Portfolio de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
+	description,
 	image = "/LogoRond.svg",
 	ogType = "website",
 	// Les deux familles du systeme editorial. Chargees partout depuis que le
@@ -15,24 +24,41 @@ const {
 	// Classe portee par le <main>. Les pages n'emettent plus le leur : il y en
 	// avait deux imbriques sur chaque page, ce que le HTML interdit.
 	mainClass = "page",
+	// La langue vient de la page, qui la tient de son parametre de route. Le
+	// repli sur l'URL sert les gabarits qui ne la passent pas encore.
+	lang,
 } = Astro.props;
+
+const chemin = (Astro.url?.pathname ?? "/").replace(/\/+$/, "") || "/";
+const langue: Langue = lang ?? langueDepuisChemin(chemin);
+const t = traduire(langue);
+const nue = routeNue(chemin);
 
 const siteUrl = Astro.site ?? new URL("https://www.nabilchebili.fr");
 const canonicalUrl = Astro.url && siteUrl ? new URL(Astro.url.pathname, siteUrl).href : undefined;
 const ogImageUrl = siteUrl ? new URL(image, siteUrl).href : image;
 
+const metaDescription = description ?? t("meta.description");
 const fullTitle = String(title).includes("Nabil Chebili") ? String(title) : `${title} — Nabil Chebili`;
+
+// Chaque page declare sa jumelle dans l'autre langue. Sans ces liens, les deux
+// versions se concurrencent au lieu de se completer.
+const alternates = siteUrl
+	? [
+			{ code: codeLangue.fr, href: new URL(cheminLocalise(nue, "fr"), siteUrl).href },
+			{ code: codeLangue.en, href: new URL(cheminLocalise(nue, "en"), siteUrl).href },
+			{ code: "x-default", href: new URL(cheminLocalise(nue, "fr"), siteUrl).href },
+		]
+	: [];
+
+const versAutreLangue = cheminLocalise(nue, autreLangue(langue));
 
 // Les crochets de la nav signalent une destination. L'entree de la page ouverte
 // n'en porte donc pas — on y est deja — et ne se souligne pas au survol. La
-// correspondance est exacte : /vietnam ne marque pas /photo comme courant.
-const chemin = (Astro.url?.pathname ?? "/").replace(/\/+$/, "") || "/";
-const sections = [
-	{ href: "/clouddevops", label: "Cloud DevOps" },
-	{ href: "/photo", label: "Photo" },
-	{ href: "/musique", label: "Musique" },
-	{ href: "/gaming", label: "Gaming" },
-];
+// correspondance se fait sur la route NUE : /en/photo marque la meme entree
+// que /photo.
+const sections = sectionsDe(langue);
+const accueil = cheminLocalise("/", langue);
 
 const schemaPerson = {
 	"@context": "https://schema.org",
@@ -53,7 +79,7 @@ const schemaWebsite = {
 ---
 
 <!doctype html>
-<html lang="fr">
+<html lang={codeLangue[langue]}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -73,20 +99,21 @@ const schemaWebsite = {
 			) : null
 		}
 		<title>{fullTitle}</title>
-		<meta name="description" content={description} />
+		<meta name="description" content={metaDescription} />
 		<meta name="robots" content="index,follow" />
 		{canonicalUrl ? <link rel="canonical" href={canonicalUrl} /> : null}
+		{alternates.map((a) => <link rel="alternate" hreflang={a.code} href={a.href} />)}
 
 		<meta property="og:site_name" content="Nabil Chebili" />
 		<meta property="og:title" content={fullTitle} />
-		<meta property="og:description" content={description} />
+		<meta property="og:description" content={metaDescription} />
 		{canonicalUrl ? <meta property="og:url" content={canonicalUrl} /> : null}
 		<meta property="og:type" content={ogType} />
 		<meta property="og:image" content={ogImageUrl} />
 
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:title" content={fullTitle} />
-		<meta name="twitter:description" content={description} />
+		<meta name="twitter:description" content={metaDescription} />
 		<meta name="twitter:image" content={ogImageUrl} />
 
 		<script type="application/ld+json">{JSON.stringify(schemaPerson)}</script>
@@ -101,20 +128,38 @@ const schemaWebsite = {
 		<header class="site-header">
 			<div class="container header-inner">
 				<div class="brand">
-					<a href="/">Nabil Chebili</a>
+					<a href={accueil}>Nabil Chebili</a>
 				</div>
 				<div class="nav-wrap">
-					<a class="nav-home" href="/" aria-current={chemin === "/" ? "page" : undefined}>Accueil</a>
-					<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Ouvrir le menu">
+					<a class="nav-home" href={accueil} aria-current={nue === "/" ? "page" : undefined}>{t("nav.accueil")}</a>
+					{/* La bascule reste hors du menu repliable : c'est l'etat de la page
+					    courante, pas une destination de plus.
+
+					    Les DEUX langues sont ecrites, la courante marquee. Une seule
+					    lettre-paire « EN » n'annoncait pas qu'un choix existait : on la
+					    lisait comme une etiquette, pas comme un selecteur. Montrer le
+					    couple dit le choix avant meme qu'on ait survole. */}
+					<span class="nav-langues">
+						<b class="nav-langue-courante" aria-current="true">{langue.toUpperCase()}</b>
+						<span class="nav-langues-sep" aria-hidden="true">/</span>
+						<a
+							class="nav-langue"
+							href={versAutreLangue}
+							hreflang={codeLangue[autreLangue(langue)]}
+							aria-label={t("langue.bascule")}
+							>{autreLangue(langue).toUpperCase()}</a
+						>
+					</span>
+					<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label={t("nav.ouvrir")}>
 						<span class="hamburger" aria-hidden="true">☰</span>
 					</button>
-					<nav id="site-nav" class="site-nav" aria-label="Sections">
+					<nav id="site-nav" class="site-nav" aria-label={t("nav.sections")}>
 						{
 							sections.map((s) => (
 								// Aucun blanc entre <a> et <span> : Astro ne le supprime pas,
 								// et il se voit comme un decalage du libelle sur l entree
 								// courante, qui n a pas de crochet pour l absorber.
-								<a href={s.href} aria-current={chemin === s.href ? "page" : undefined}><span>{s.label}</span></a>
+								<a href={s.href} aria-current={nue === s.route ? "page" : undefined}><span>{s.label}</span></a>
 							))
 						}
 					</nav>
@@ -128,10 +173,11 @@ const schemaWebsite = {
 
 		<section class="section footer-nav">
 			<div class="container">
-				<nav aria-label="Navigation finale">
-				<a href="/photo">Photographie</a> · <a href="/clouddevops">Cloud DevOps</a> · <a
-					href="/musique">Musique</a
-				> · <a href="/gaming">Gaming</a>
+				<nav aria-label={t("pied.navigation")}>
+				<a href={cheminLocalise("/photo", langue)}>{t("pied.photo")}</a> · <a
+					href={cheminLocalise("/clouddevops", langue)}>{t("nav.clouddevops")}</a
+				> · <a href={cheminLocalise("/musique", langue)}>{t("nav.musique")}</a
+				> · <a href={cheminLocalise("/gaming", langue)}>{t("nav.gaming")}</a>
 				</nav>
 			</div>
 		</section>

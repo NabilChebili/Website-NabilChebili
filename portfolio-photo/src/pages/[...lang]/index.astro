@@ -1,60 +1,118 @@
 ---
-import "../styles/global.css";
+import "../../styles/global.css";
 // layout.css et editorial.css viennent de header.astro. index.css est l'ancienne
 // feuille de la home : elle ne definit plus aucune classe utilisee ici, et son
 // `main > section { background: var(--ui-bg) }` ecrasait le fond papier depuis
 // que le systeme partage se charge avant les feuilles de page.
-import "../styles/home-editorial.css";
-import Layout from "../layouts/header.astro";
+import "../../styles/home-editorial.css";
+import Layout from "../../layouts/header.astro";
 import { Image } from "astro:assets";
 
 // Visuels importes depuis src/assets : Astro les redimensionne et les convertit
 // en WebP a la construction. En public/ ils partaient bruts — 2,4 / 2,0 / 2,7 Mo
 // pour des vignettes affichees en 322px de large.
-import visuelCloud from "../assets/nabil-ishane.jpg";
-import visuelPhoto from "../assets/A7401833.jpg";
-import visuelMusique from "../assets/image.png";
-import visuelGaming from "../assets/twitch.png";
+import visuelCloud from "../../assets/nabil-ishane.jpg";
+import visuelPhoto from "../../assets/A7401833.jpg";
+import visuelMusique from "../../assets/image.png";
+import visuelGaming from "../../assets/twitch.png";
+import Colophon from "../../components/Colophon.astro";
+import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
 
-// Les quatre activites de la page d'origine : memes titres, memes descriptions,
-// memes images, memes destinations.
-const univers = [
-  {
-    titre: "Cloud & DevOps",
-    note: "Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.",
-    href: "/clouddevops",
-    img: visuelCloud,
-    alt: "Nabil Chebili chez I-Shane",
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    description:
+      "Site personnel de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
+    photographies: "photographies",
+    galeries: "galeries",
+    metier: "Ingénieur Cloud & DevOps",
+    anciennete: "ans",
+    chapo: "Cloud & DevOps, photographie et musique — projets, galeries et inspirations.",
+    explorerLien: "Explorer",
+    aproposTitre: "Vous vous demandez sûrement qui je suis ?",
+    aproposTexte:
+      "Je suis quelqu’un de curieux, attiré par les choses que l’on construit et que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à ce que tout fasse sens.",
+    portraitAlt: "Portrait de Nabil Chebili",
+    explorer: "Explorer",
+    voir: "Voir",
+    univers: [
+      {
+        titre: "Cloud & DevOps",
+        note: "Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.",
+        alt: "Nabil Chebili chez I-Shane",
+      },
+      {
+        titre: "Photographie",
+        note: "Galeries & séries photographiques : voyages, portraits et instantanés.",
+        alt: "Photographie",
+      },
+      {
+        titre: "Musique",
+        note: "Petites avancées dans le monde la guitare (autodidacte)",
+        alt: "Musique",
+      },
+      { titre: "Gaming", note: "Twitch, streaming et jeux vidéo.", alt: "Gaming" },
+    ],
   },
-  {
-    titre: "Photographie",
-    note: "Galeries & séries photographiques : voyages, portraits et instantanés.",
-    href: "/photo",
-    img: visuelPhoto,
-    alt: "Photographie",
+  en: {
+    description:
+      "Nabil Chebili’s personal site: Cloud & DevOps (Azure), photography and music. Projects, field notes and galleries.",
+    photographies: "photographs",
+    galeries: "galleries",
+    metier: "Cloud & DevOps engineer",
+    anciennete: "years",
+    chapo: "Cloud & DevOps, photography and music — projects, galleries and things that stick.",
+    explorerLien: "Explore",
+    aproposTitre: "Wondering who I am?",
+    aproposTexte:
+      "I’m a curious sort, drawn to things that get built and understood over time. I’ve always liked making, taking apart and putting back together — Lego first, now ideas, systems and images. What interests me as much as the result is the road to it: watching, testing, adjusting, simplifying, until the whole thing makes sense.",
+    portraitAlt: "Portrait of Nabil Chebili",
+    explorer: "Explore",
+    voir: "View",
+    univers: [
+      {
+        titre: "Cloud & DevOps",
+        note: "Projects, automation and experiments around cloud and infrastructure.",
+        alt: "Nabil Chebili at I-Shane",
+      },
+      {
+        titre: "Photography",
+        note: "Galleries and photo series: travels, portraits and snapshots.",
+        alt: "Photography",
+      },
+      {
+        titre: "Music",
+        note: "Small steps into the guitar, self-taught.",
+        alt: "Music",
+      },
+      { titre: "Gaming", note: "Twitch, streaming and video games.", alt: "Gaming" },
+    ],
   },
-  {
-    titre: "Musique",
-    note: "Petites avancées dans le monde la guitare (autodidacte)",
-    href: "/musique",
-    img: visuelMusique,
-    alt: "Musique",
-  },
-  {
-    titre: "Gaming",
-    note: "Twitch, streaming et jeux vidéo.",
-    href: "/gaming",
-    img: visuelGaming,
-    alt: "Gaming",
-  },
-];
+};
+const c = T[langue];
+
+// Les quatre activites de la page d'origine : memes images, memes
+// destinations ; seuls les libelles changent de langue.
+const visuels = [visuelCloud, visuelPhoto, visuelMusique, visuelGaming];
+const routes = ["/clouddevops", "/photo", "/musique", "/gaming"];
+const univers = c.univers.map((u, i) => ({
+  ...u,
+  img: visuels[i],
+  href: cheminLocalise(routes[i], langue),
+}));
 ---
 
 <Layout
   title="Nabil Chebili"
-  description="Site personnel de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries."
+  description={c.description}
   webfont={true}
   mainClass="page home editorial"
+  lang={langue}
 >
   {/* Le viseur. Le cadre est FIXE et le contenu defile derriere : c'est ce qui
       le rend honnete plutot que decoratif — il cadre reellement une image qui
@@ -71,8 +129,8 @@ const univers = [
 
   <section class="opening">
     <div class="meta-row" data-reveal data-groupe="manchette">
-      <span><b>958</b> photographies &middot; <b>11</b> galeries</span>
-      <span>Ingénieur Cloud &amp; DevOps &middot; <b>+4</b> ans</span>
+      <span><b>958</b> {c.photographies} &middot; <b>11</b> {c.galeries}</span>
+      <span>{c.metier} &middot; <b>+4</b> {c.anciennete}</span>
     </div>
 
     <h1 class="mega">
@@ -86,31 +144,21 @@ const univers = [
     </h1>
 
     <div class="opening-foot" data-reveal data-groupe="manchette">
-      <p>
-        Cloud &amp; DevOps, photographie et musique — projets, galeries et
-        inspirations.
-      </p>
-      <a class="jump" href="#explorer">Explorer &#8595;</a>
+      <p>{c.chapo}</p>
+      <a class="jump" href="#explorer">{c.explorerLien} &#8595;</a>
     </div>
   </section>
 
   <section class="about">
     <div>
-      <h2 class="about-title" data-reveal data-groupe="apropos">Vous vous demandez sûrement qui je suis ?</h2>
-      <p class="about-text" data-reveal data-groupe="apropos">
-      Je suis quelqu’un de curieux, attiré par les choses que l’on construit et
-      que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et
-      reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des
-      systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est
-      le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à
-        ce que tout fasse sens.
-      </p>
+      <h2 class="about-title" data-reveal data-groupe="apropos">{c.aproposTitre}</h2>
+      <p class="about-text" data-reveal data-groupe="apropos">{c.aproposTexte}</p>
     </div>
 
     <figure class="about-media" data-reveal data-groupe="apropos">
       <img
         src="https://stnchvlqvproduction.blob.core.windows.net/photos/Vietnam/post/A7403120.jpg"
-        alt="Portrait de Nabil Chebili"
+        alt={c.portraitAlt}
         width="2200"
         height="1579"
         loading="lazy"
@@ -121,7 +169,7 @@ const univers = [
 
   <section id="explorer">
     <div class="section-head" data-reveal data-groupe="explorer">
-      <span>Explorer</span>
+      <span>{c.explorer}</span>
       <span>({univers.length})</span>
     </div>
     <div class="activites">
@@ -141,7 +189,7 @@ const univers = [
             <span class="activite-titre">{u.titre}</span>
             <span class="activite-note">{u.note}</span>
             <span class="activite-lien">
-              <span>Voir</span>
+              <span>{c.voir}</span>
               <i aria-hidden="true">&#8594;</i>
             </span>
           </a>
@@ -150,33 +198,10 @@ const univers = [
     </div>
   </section>
 
-  <section class="colophon">
-    <div data-reveal data-groupe="contact">
-      <h2>Contact</h2>
-      <p class="fine">
-        Pour toute question, collaboration ou prise de contact rapide —
-        écrivez-moi.
-      </p>
-      <p class="fine fine-after">
-        Je réponds généralement sous quelques heures.
-      </p>
-    </div>
-
-    <div class="colophon-links" data-reveal data-groupe="contact">
-      <a href="mailto:nabilchebili1999@gmail.com">
-        <span>Envoyer un email</span>
-        <i aria-hidden="true">&#8594;</i>
-      </a>
-      <a
-        href="https://www.linkedin.com/in/chebili-nabil/"
-        target="_blank"
-        rel="noopener"
-      >
-        <span>LinkedIn</span>
-        <i aria-hidden="true">&#8599;</i>
-      </a>
-    </div>
-  </section>
+  {/* Le bloc de contact etait recopie ici a l'identique du composant que les
+      autres pages utilisent deja. Le traduire deux fois pour un balisage
+      identique n'aurait servi personne : il passe par le composant. */}
+  <Colophon lang={langue} />
 </Layout>
 
 <style>

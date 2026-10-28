@@ -1,0 +1,33 @@
+---
+import GalleryPage from "../../components/GalleryPage.astro";
+import galleries from "../../data/galleries.json";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    titre: "SuperSonic",
+    description: "Galerie photo : concert SuperSonic.",
+    intro: "Le concert d'Apolline avec SuperSonic — lumières de scène, énergie et ambiance live.",
+  },
+  en: {
+    titre: "SuperSonic",
+    description: "Photo gallery: SuperSonic in concert.",
+    intro: "Apolline's concert with SuperSonic — stage lights, energy, and the feel of a live room.",
+  },
+};
+const c = T[langue];
+---
+
+<GalleryPage
+  title={c.titre}
+  description={c.description}
+  intro={c.intro}
+  galleryUrl={galleries.superSonic}
+  lang={langue}
+/>

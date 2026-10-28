@@ -1,0 +1,33 @@
+---
+import GalleryPage from "../../components/GalleryPage.astro";
+import galleries from "../../data/galleries.json";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    titre: "Illumination",
+    description: "Galerie photo : Exposition Lumière.",
+    intro: "Une soirée à l'exposition Lumière, entre jeux de lumière, ombres et architecture réinventée par la nuit.",
+  },
+  en: {
+    titre: "Illumination",
+    description: "Photo gallery: the Lumière exhibition.",
+    intro: "An evening at the Lumière exhibition — light, shadow, and architecture made over by the night.",
+  },
+};
+const c = T[langue];
+---
+
+<GalleryPage
+  title={c.titre}
+  description={c.description}
+  intro={c.intro}
+  galleryUrl={galleries.illumination}
+  lang={langue}
+/>

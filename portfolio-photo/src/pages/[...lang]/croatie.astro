@@ -1,0 +1,33 @@
+---
+import GalleryPage from "../../components/GalleryPage.astro";
+import galleries from "../../data/galleries.json";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+const T = {
+  fr: {
+    titre: "Croatie",
+    description: "Galerie photo : Croatie.",
+    intro: "Un voyage en Croatie, entre côte adriatique, ruelles de Dubrovnik et moments entre amis.",
+  },
+  en: {
+    titre: "Croatia",
+    description: "Photo gallery: Croatia.",
+    intro: "A trip through Croatia — the Adriatic coast, the lanes of Dubrovnik, and time spent with friends.",
+  },
+};
+const c = T[langue];
+---
+
+<GalleryPage
+  title={c.titre}
+  description={c.description}
+  intro={c.intro}
+  galleryUrl={galleries.croatie}
+  lang={langue}
+/>

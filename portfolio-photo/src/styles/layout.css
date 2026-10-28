@@ -115,6 +115,71 @@ body {
   background-size: 100% 1px;
 }
 
+/* La bascule de langue n'est pas une destination : elle change l'etat de la
+   page ouverte. Elle ne prend donc pas les crochets, qui dans ce systeme
+   signalent « ceci mene ailleurs ». Un filet la separe des entrees de nav.
+
+   Les DEUX langues sont ecrites, la courante a pleine encre et l'autre en
+   retrait. Une seule paire de lettres ne disait pas qu'un choix existait : on
+   la lisait comme une etiquette. Le couple, lui, se lit comme un selecteur
+   avant meme le survol. */
+.nav-langues {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding-left: 12px;
+  border-left: 1px solid var(--rule, #c9c9c4);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nav-langue-courante {
+  color: var(--ink, #000);
+  font-weight: 700;
+}
+.nav-langues-sep {
+  color: var(--rule, #c9c9c4);
+}
+.nav-langue {
+  color: var(--ink-55, #5c5c58);
+  text-decoration: none;
+  /* « EN » ne fait que 15x16 au naturel, loin des 44px recommandes (WCAG
+     2.5.5) — la meme regle qui fixe les fleches du carrousel a 48. Le
+     remplissage agrandit la zone atteignable, la marge negative annule son
+     effet sur la mise en page : la barre ne bouge pas d'un pixel. */
+  display: inline-block;
+  padding: 14px 10px;
+  margin: -14px -10px;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  /* Sans cela le trait de survol se poserait sous le REMPLISSAGE, soit 14px
+     trop bas, au lieu de souligner le mot. */
+  background-origin: content-box;
+  background-clip: content-box;
+  transition: color 240ms cubic-bezier(0.2, 0, 0, 1),
+    background-size 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+.nav-langue:hover,
+.nav-langue:focus-visible {
+  color: var(--ink, #000);
+  background-size: 100% 1px;
+}
+
+/* Sur grand ecran elle se range apres les sections, a l'extremite de la barre.
+   Dans le flux du document elle les precede, pour qu'au telephone — ou les
+   sections se replient derriere le bouton — elle reste visible a cote de lui. */
+@media (min-width: 591px) {
+  .nav-langues { order: 3; margin-left: 6px; }
+  .site-nav { order: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-langue { transition: none; }
+}
+
 /* hide mobile toggle by default */
 .nav-toggle { display: none; color: var(--muted); }
 .site-footer {
