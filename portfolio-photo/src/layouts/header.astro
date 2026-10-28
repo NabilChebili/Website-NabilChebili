@@ -133,15 +133,23 @@ const schemaWebsite = {
 				<div class="nav-wrap">
 					<a class="nav-home" href={accueil} aria-current={nue === "/" ? "page" : undefined}>{t("nav.accueil")}</a>
 					{/* La bascule reste hors du menu repliable : c'est l'etat de la page
-					    courante, pas une destination de plus. Elle affiche la langue vers
-					    laquelle elle mene, et garde la page ouverte. */}
-					<a
-						class="nav-langue"
-						href={versAutreLangue}
-						hreflang={codeLangue[autreLangue(langue)]}
-						aria-label={t("langue.bascule")}
-						>{autreLangue(langue).toUpperCase()}</a
-					>
+					    courante, pas une destination de plus.
+
+					    Les DEUX langues sont ecrites, la courante marquee. Une seule
+					    lettre-paire « EN » n'annoncait pas qu'un choix existait : on la
+					    lisait comme une etiquette, pas comme un selecteur. Montrer le
+					    couple dit le choix avant meme qu'on ait survole. */}
+					<span class="nav-langues">
+						<b class="nav-langue-courante" aria-current="true">{langue.toUpperCase()}</b>
+						<span class="nav-langues-sep" aria-hidden="true">/</span>
+						<a
+							class="nav-langue"
+							href={versAutreLangue}
+							hreflang={codeLangue[autreLangue(langue)]}
+							aria-label={t("langue.bascule")}
+							>{autreLangue(langue).toUpperCase()}</a
+						>
+					</span>
 					<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label={t("nav.ouvrir")}>
 						<span class="hamburger" aria-hidden="true">☰</span>
 					</button>
