@@ -1,0 +1,471 @@
+---
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+// Ce qui ne depend pas de la langue : l'horizon et l'etat. Les separer du
+// redige evite le piege rencontre sur /clouddevops, ou la pastille « En
+// cours » tenait au TEXTE francais de la periode et disparaissait en anglais.
+//
+// L'ordre est chronologique, du plus ancien au plus lointain. Un seul jalon
+// porte « en cours » : c'est lui qui arrete le trace.
+const jalonsBase = [
+  { horizon: "2025 · T2", etat: "fait" },
+  { horizon: "2025 · T4", etat: "fait" },
+  { horizon: "2026 · T1", etat: "fait" },
+  { horizon: "2026 · T3", etat: "fait" },
+  { horizon: "2026 · T4", etat: "en cours" },
+  { horizon: "2027 · T1", etat: "a venir" },
+  { horizon: "2027 · T2", etat: "a venir" },
+  { horizon: "2027", etat: "a venir" },
+];
+
+const jalonsFr = [
+  {
+    titre: "Socle Azure hub & spoke",
+    resume:
+      "Le réseau central, l'état Terraform centralisé et les premières souscriptions rattachées au hub.",
+  },
+  {
+    titre: "Plateforme d'onboarding",
+    resume:
+      "Un projet qui démarre reçoit ses souscriptions, son réseau, ses coffres et ses identités depuis un seul pipeline.",
+  },
+  {
+    titre: "Gouvernance Azure Policy",
+    resume:
+      "Définitions, initiatives et affectations écrites en Terraform au niveau groupe de gestion, versionnées et relues en revue.",
+  },
+  {
+    titre: "DNS privé automatique",
+    resume:
+      "Les endpoints privés s'enregistrent seuls dans les zones DNS du hub, sans intervention à la création.",
+  },
+  {
+    titre: "Mise en conformité ISO 27001",
+    resume:
+      "Reprendre en policies maison le sous-ensemble de la norme qui concerne les services déjà gérés, plutôt que d'hériter d'un socle opaque.",
+  },
+  {
+    titre: "Automatisation des cas que la policy ne couvre pas",
+    resume:
+      "Certaines ressources tirent un nom de zone DNS décidé à leur création : une policy statique ne peut pas le deviner, une automatisation si.",
+  },
+  {
+    titre: "Migration de la plateforme en v2",
+    resume: "Faire passer les projets existants sur la nouvelle génération du socle.",
+  },
+  {
+    titre: "Publier un outil",
+    resume:
+      "Sortir quelque chose du cadre client : un module ou un utilitaire, documenté et maintenu.",
+  },
+];
+
+const jalonsEn = [
+  {
+    titre: "Azure hub & spoke foundation",
+    resume:
+      "The central network, centralised Terraform state, and the first subscriptions attached to the hub.",
+  },
+  {
+    titre: "Onboarding platform",
+    resume:
+      "A project that starts up gets its subscriptions, network, vaults and identities from a single pipeline.",
+  },
+  {
+    titre: "Azure Policy governance",
+    resume:
+      "Definitions, initiatives and assignments written in Terraform at management group level, versioned and reviewed.",
+  },
+  {
+    titre: "Automatic private DNS",
+    resume:
+      "Private endpoints register themselves in the hub's DNS zones, with nothing to do at creation time.",
+  },
+  {
+    titre: "ISO 27001 baseline",
+    resume:
+      "Rebuilding, as our own policies, the part of the standard that covers the services we already run — rather than inheriting an opaque baseline.",
+  },
+  {
+    titre: "Automating what policy cannot reach",
+    resume:
+      "Some resources draw a DNS zone name decided at creation; a static policy cannot guess it, an automation can.",
+  },
+  {
+    titre: "Platform migration to v2",
+    resume: "Moving the existing projects onto the next generation of the foundation.",
+  },
+  {
+    titre: "Publish a tool",
+    resume:
+      "Taking something outside client work: a module or a utility, documented and maintained.",
+  },
+];
+
+const redige = langue === "en" ? jalonsEn : jalonsFr;
+const jalons = jalonsBase.map((b, i) => ({ ...b, ...redige[i] }));
+
+const T = {
+  fr: {
+    titre: "Roadmap",
+    description:
+      "Les grands chantiers de Nabil Chebili : ce qui est derrière, ce qui est en cours, ce qui vient.",
+    intro:
+      "Les gros chantiers, ce qui est derrière et ce qui vient. Le rail se remplit jusqu'à aujourd'hui.",
+    section: "Les jalons",
+    fait: "Fait",
+    aujourdhui: "Aujourd'hui",
+  },
+  en: {
+    titre: "Roadmap",
+    description:
+      "Nabil Chebili's major projects: what is behind, what is under way, what comes next.",
+    intro:
+      "The big pieces of work — what is behind, and what comes next. The rail fills up to today.",
+    section: "The milestones",
+    fait: "Done",
+    aujourdhui: "Today",
+  },
+};
+const c = T[langue];
+
+const classeEtat = (j) =>
+  j.etat === "fait" ? "fait" : j.etat === "en cours" ? "jalon-actif" : "avenir";
+---
+
+<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue}>
+  {/* L'en-tete reste en haut pendant que le rail defile dessous. Il porte un
+      fond opaque — sans lui le rail passerait au travers — et un filet, sans
+      lequel le contenu glisserait dessous sans frontiere visible. */}
+  <section class="tete-page tete-collee">
+    <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p>{c.intro}</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head" data-reveal data-groupe="rail">
+      <span>{c.section}</span>
+      <span>({jalons.length})</span>
+    </div>
+    <div class="bloc">
+      <ol class="rail">
+        <span class="trace" aria-hidden="true"></span>
+        {
+          jalons.map((j) => (
+            <li class={`jalon ${classeEtat(j)}`} data-reveal data-groupe="rail">
+              <span class="marque" aria-hidden="true" />
+              <span class="etiquette horizon">
+                {j.horizon}
+                {j.etat === "fait" ? <i class="fini">{c.fait}</i> : null}
+              </span>
+              {j.etat === "en cours" ? <span class="puce">{c.aujourdhui}</span> : null}
+              <h2>{j.titre}</h2>
+              <p>{j.resume}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  /* --------------------------------------------- l'en-tete qui ne bouge pas */
+  /* editorial.css donne au <main> un retrait haut de 64px pour une barre qui
+     n'en fait que 56. Sur une page ordinaire ces 8px ne se voient pas — du
+     papier sur du papier. Ici l'en-tete partirait de 64 et SAUTERAIT a 56 en
+     s'accrochant, et le rail defilerait dans la fente. On aligne le retrait
+     sur la hauteur reelle de la barre, mesuree et non lue dans la feuille. */
+  :global(main.page.editorial) {
+    padding-top: 56px;
+  }
+  .tete-collee {
+    position: sticky;
+    top: 56px;
+    z-index: 5;
+    background: var(--paper);
+    padding-bottom: var(--pas-3);
+    border-bottom: 1px solid var(--rule);
+  }
+  .tete-collee .prose {
+    margin-top: 14px;
+    max-width: 62ch;
+  }
+
+  .bloc {
+    padding: var(--pas-3) var(--edge) var(--pas-10);
+  }
+
+  .etiquette {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+
+  /* ------------------------------------------------------------- le rail --- */
+  .rail {
+    position: relative;
+    margin: 0;
+    padding: 0 0 0 var(--pas-6);
+    list-style: none;
+  }
+  /* Le filet de fond couvre toute la hauteur ; par-dessus, le trace a l'encre
+     suit le defilement et se BLOQUE a la marque d'aujourd'hui. Il ne descend
+     jamais dans le a-venir : ce serait dire qu'on y est deja. */
+  .rail::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    bottom: 7px;
+    left: 5px;
+    width: 1px;
+    background: var(--rule);
+  }
+  .trace {
+    position: absolute;
+    top: 7px;
+    left: 4px;
+    width: 3px;
+    height: 0;
+    background: var(--ink);
+  }
+  .jalon {
+    position: relative;
+    padding: 0 0 var(--pas-6);
+  }
+  .jalon:last-child {
+    padding-bottom: 0;
+  }
+  .horizon {
+    display: block;
+    margin-bottom: 6px;
+  }
+  .jalon h2 {
+    margin: 0 0 8px;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .jalon p {
+    margin: 0;
+    max-width: 68ch;
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--ink-55);
+  }
+
+  /* Trois etats, lisibles sans legende : fait, aujourd'hui, a venir. */
+  .marque {
+    position: absolute;
+    top: 6px;
+    left: calc(-1 * var(--pas-6) + 1px);
+    width: 9px;
+    height: 9px;
+    background: var(--paper);
+    border: 1px solid var(--ink-55);
+    transition: background-color 240ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .fait .marque {
+    border-color: var(--ink);
+  }
+  /* Une marque ne se remplit qu'au passage du trait, jamais avant : c'est le
+     script qui pose .franchi. */
+  .fait.franchi .marque {
+    background: var(--ink);
+  }
+  .jalon-actif .marque {
+    top: 3px;
+    left: calc(-1 * var(--pas-6) - 2px);
+    width: 15px;
+    height: 15px;
+    border-color: var(--ink);
+  }
+  .jalon-actif.franchi .marque {
+    background: var(--ink);
+  }
+  .avenir .marque {
+    top: 7px;
+    left: calc(-1 * var(--pas-6) + 2px);
+    width: 7px;
+    height: 7px;
+    border-color: var(--rule);
+  }
+  .fait h2 {
+    color: var(--ink-55);
+  }
+  .jalon-actif h2 {
+    font-size: 36px;
+  }
+  .avenir h2,
+  .avenir .horizon {
+    color: var(--ink-55);
+  }
+
+  .puce {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 3px 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  /* « Fait » se pose a cote de la date, pas sur une ligne a lui : huit jalons
+     portant chacun une pastille feraient une colonne de pastilles. */
+  .fini {
+    margin-left: 10px;
+    padding: 2px 6px;
+    border: 1px solid var(--rule);
+    font-size: 9px;
+    font-style: normal;
+    letter-spacing: 0.09em;
+    color: var(--ink-55);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marque {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Deux choses distinctes, souvent confondues :
+  //
+  //   1. le TRACE suit le defilement — il monte jusqu'a la hauteur ou on lit,
+  //      et bute sur la marque d'aujourd'hui, jamais au-dela ;
+  //   2. a l'ARRIVEE la page descend d'elle-meme jusqu'a aujourd'hui, une
+  //      seule fois, puis rend la main.
+  //
+  // Le point 2 n'anime pas le trait : il deplace la page, et le trait suit
+  // parce qu'il suit toujours.
+  (function () {
+    const rail = document.querySelector(".rail");
+    if (!rail) return;
+    const trace = rail.querySelector(".trace");
+    const jalons = Array.from(rail.querySelectorAll(".jalon"));
+    const aujourdhui = rail.querySelector(".jalon-actif");
+    if (!trace || !aujourdhui) return;
+
+    const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Position dans le DOCUMENT, par la chaine des offsetParent.
+    //
+    // Surtout pas getBoundingClientRect : les blocs a reveler portent une
+    // translation tant qu'ils ne sont pas vus, et le rectangle client
+    // l'inclut. Mesure ainsi, le plafond tombait 24px trop bas et le trace
+    // depassait aujourd'hui. offsetTop donne la position de MISE EN PAGE,
+    // insensible aux transformations.
+    function hautDansLaPage(el) {
+      let y = 0;
+      for (let n = el; n; n = n.offsetParent) y += n.offsetTop;
+      return y;
+    }
+
+    // Hauteur du centre d'une marque, comptee depuis le haut du trace, qui
+    // demarre a 7px du haut du rail. La chaine tient parce que .rail et
+    // .jalon sont tous deux positionnes : marque -> .jalon -> .rail.
+    const centre = (jalon) => {
+      const m = jalon.querySelector(".marque");
+      return m ? jalon.offsetTop + m.offsetTop + m.offsetHeight / 2 - 7 : Infinity;
+    };
+
+    const LECTURE = 0.58; // la ligne de l'oeil, un peu sous le milieu
+
+    let enAttente = false;
+
+    function poser() {
+      enAttente = false;
+      const depart = hautDansLaPage(rail) + 7;
+      const plafond = centre(aujourdhui);
+      const lecture = window.scrollY + window.innerHeight * LECTURE;
+      const h = Math.max(0, Math.min(plafond, lecture - depart));
+      // On lit toutes les positions, PUIS on ecrit : l'inverse forcerait un
+      // recalcul de mise en page a chaque jalon.
+      const centres = jalons.map(centre);
+      trace.style.height = h + "px";
+      jalons.forEach((j, i) => j.classList.toggle("franchi", centres[i] <= h + 1));
+    }
+
+    function auDefilement() {
+      if (enAttente) return;
+      enAttente = true;
+      requestAnimationFrame(poser);
+    }
+
+    poser();
+    window.addEventListener("scroll", auDefilement, { passive: true });
+    window.addEventListener("resize", auDefilement);
+    window.addEventListener("load", auDefilement);
+
+    // ------------------------------------------------ la descente d'arrivee
+    // On vise la position ou aujourd'hui arrive a hauteur de lecture : c'est
+    // exactement l'endroit ou le trace atteint son plafond. La descente et le
+    // remplissage finissent donc ensemble, sans qu'on ait a les synchroniser.
+    function cible() {
+      const depart = hautDansLaPage(rail) + 7;
+      const y = depart + centre(aujourdhui) - window.innerHeight * LECTURE;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      return Math.max(0, Math.min(max, y));
+    }
+
+    // Mouvement reduit : aucune descente imposee. La page reste ou elle est.
+    if (reduit) return;
+
+    let descente = null;
+    // La main rendue au premier geste : une page qui continue de glisser
+    // pendant qu'on essaie de remonter est insupportable.
+    const guets = ["wheel", "touchstart", "pointerdown", "keydown"];
+    const rendreLaMain = () => {
+      if (descente) cancelAnimationFrame(descente);
+      descente = null;
+      guets.forEach((g) => window.removeEventListener(g, rendreLaMain));
+    };
+
+    function descendre() {
+      // Si on arrive avec une ancre ou une position restauree, on ne bouge
+      // rien : le lecteur a deja dit ou il voulait etre.
+      if (window.scrollY > 4 || location.hash) return;
+      const depart = window.scrollY;
+      const course = cible() - depart;
+      if (Math.abs(course) < 8) return;
+      // Duree proportionnee a la distance, bornee : une descente de 2000px a
+      // la meme vitesse qu'une de 200 paraitrait soit lente soit brutale.
+      const duree = Math.max(700, Math.min(1600, Math.abs(course) * 1.6));
+      const t0 = performance.now();
+      guets.forEach((g) => window.addEventListener(g, rendreLaMain, { passive: true, once: true }));
+
+      (function pas(t) {
+        const p = Math.min(1, (t - t0) / duree);
+        // Meme sortie que le reste du site : rapide puis posee.
+        const e = 1 - Math.pow(1 - p, 3);
+        window.scrollTo(0, depart + course * e);
+        if (p < 1) descente = requestAnimationFrame(pas);
+        else rendreLaMain();
+      })(t0);
+    }
+
+    // La descente attend que la page soit posee : polices, images et
+    // revelations deplacent le rail, donc la cible.
+    if (document.readyState === "complete") requestAnimationFrame(descendre);
+    else window.addEventListener("load", () => requestAnimationFrame(descendre), { once: true });
+  })();
+</script>

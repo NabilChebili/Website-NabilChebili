@@ -53,6 +53,7 @@ export const ui = {
     "nav.photo": "Photo",
     "nav.musique": "Musique",
     "nav.gaming": "Gaming",
+    "nav.roadmap": "Roadmap",
     "nav.sections": "Sections",
     "nav.ouvrir": "Ouvrir le menu",
     "pied.navigation": "Navigation finale",
@@ -96,6 +97,7 @@ export const ui = {
     "nav.photo": "Photo",
     "nav.musique": "Music",
     "nav.gaming": "Gaming",
+    "nav.roadmap": "Roadmap",
     "nav.sections": "Sections",
     "nav.ouvrir": "Open menu",
     "pied.navigation": "Footer navigation",
@@ -146,6 +148,7 @@ export function sections(langue: Langue) {
     { href: cheminLocalise("/photo", langue), route: "/photo", label: t("nav.photo") },
     { href: cheminLocalise("/musique", langue), route: "/musique", label: t("nav.musique") },
     { href: cheminLocalise("/gaming", langue), route: "/gaming", label: t("nav.gaming") },
+    { href: cheminLocalise("/roadmap", langue), route: "/roadmap", label: t("nav.roadmap") },
   ];
 }
 
