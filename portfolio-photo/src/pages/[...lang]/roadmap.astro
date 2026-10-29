@@ -27,7 +27,10 @@ const langue = langueDepuisParam(Astro.params.lang);
 // piege rencontre sur /clouddevops, ou la pastille tenait au TEXTE francais
 // et disparaissait en anglais.
 const parcoursBase = [
-  { horizon: "2025 · T4" },
+  { horizon: "2022" },
+  { horizon: "2022 · T4" },
+  { horizon: "2024 · T2" },
+  { horizon: "2025" },
   { horizon: "2026 · T1" },
   { horizon: "2026 · T2" },
   { horizon: "2026 · T3" },
@@ -35,49 +38,41 @@ const parcoursBase = [
 ];
 
 const parcoursFr = [
-  {
-    titre: "Le site, première version",
-    resume: "Un portfolio à moi, écrit à la main, déployé en continu.",
-  },
-  {
-    titre: "Un mois au Vietnam",
-    resume: "Du sud au centre, pendant le Têt. Le récit photo et le film du voyage.",
-  },
-  {
-    titre: "Bali et Lombok",
-    resume: "Temples, volcans et falaises. Deuxième récit, deuxième film.",
-  },
-  {
-    titre: "Les galeries se feuillettent au doigt",
-    resume: "On glisse d'une photo à l'autre, et un geste vers le bas la repose dans sa case.",
-  },
-  {
-    titre: "Le site passe en deux langues",
-    resume: "Seize pages en français et en anglais, et la bascule dans la barre.",
-  },
+  { titre: "Diplôme d'ingénieur",
+    resume: "ECE Paris, objets connectés, réseaux et services." },
+  { titre: "Premières certifications Azure",
+    resume: "Azure Fundamentals, puis Azure Administrator Associate dans la foulée." },
+  { titre: "DevOps Engineer Expert",
+    resume: "La certification qui ferme la boucle : concevoir et tenir une chaîne de livraison." },
+  { titre: "Réseaux Azure et GitHub Actions",
+    resume: "AZ-700 sur les architectures réseau, et la certification GitHub Actions la même année." },
+  { titre: "Le site, première version",
+    resume: "Un portfolio à moi, écrit à la main, déployé en continu." },
+  { titre: "Une bibliothèque de modules Terraform",
+    resume: "Réseau, stockage, coffres, identités, journaux : des briques versionnées qu'un correctif propage par un tag." },
+  { titre: "La gouvernance écrite en Terraform",
+    resume: "Définitions, initiatives et affectations au niveau groupe de gestion, versionnées et relues en revue." },
+  { titre: "Claude Certified Architect — Foundations",
+    resume: "Après le FullStack et le DevOps, l'IA : les mêmes fondations pour sortir du POC." },
 ];
 
 const parcoursEn = [
-  {
-    titre: "The site, first version",
-    resume: "A portfolio of my own, hand-written, continuously deployed.",
-  },
-  {
-    titre: "A month in Vietnam",
-    resume: "South to centre, during Tết. The photo story and the film of the trip.",
-  },
-  {
-    titre: "Bali and Lombok",
-    resume: "Temples, volcanoes and cliffs. A second story, a second film.",
-  },
-  {
-    titre: "Galleries you leaf through with a thumb",
-    resume: "Swipe from one photo to the next, and a downward flick sets it back in its cell.",
-  },
-  {
-    titre: "The site goes bilingual",
-    resume: "Sixteen pages in French and English, with the switch up in the bar.",
-  },
+  { titre: "Engineering degree",
+    resume: "ECE Paris — connected devices, networks and services." },
+  { titre: "First Azure certifications",
+    resume: "Azure Fundamentals, then Azure Administrator Associate soon after." },
+  { titre: "DevOps Engineer Expert",
+    resume: "The certification that closes the loop: designing and running a delivery chain." },
+  { titre: "Azure networking and GitHub Actions",
+    resume: "AZ-700 on network architecture, and the GitHub Actions certification the same year." },
+  { titre: "The site, first version",
+    resume: "A portfolio of my own, hand-written, continuously deployed." },
+  { titre: "A library of Terraform modules",
+    resume: "Network, storage, vaults, identities, logs — versioned blocks where one fix travels by a tag." },
+  { titre: "Governance written in Terraform",
+    resume: "Definitions, initiatives and assignments at management group level, versioned and reviewed." },
+  { titre: "Claude Certified Architect — Foundations",
+    resume: "After FullStack and DevOps, AI: the same foundations are what take it past the POC." },
 ];
 
 const redige = langue === "en" ? parcoursEn : parcoursFr;
@@ -86,41 +81,29 @@ const parcours = parcoursBase.map((b, i) => ({ ...b, ...redige[i] }));
 // La suite : pas de dates, des themes. L'ordre des colonnes est l'ordre de
 // lecture, pas une priorite.
 const suiteFr = [
-  {
-    theme: "Cloud & DevOps",
-    items: ["Certification Azure Solutions Architect", "Publier un module Terraform", "Monter un labo maison"],
-  },
-  {
-    theme: "Voyages",
-    items: ["Un troisième récit long", "Un film monté pour de bon", "Repartir en Asie"],
-  },
-  {
-    theme: "Publications",
-    items: ["Écrire plus souvent", "Un article de fond par trimestre", "Parler en public une fois"],
-  },
-  {
-    theme: "I-Shane",
-    items: ["Le jeu du drone", "Transmettre ce qui marche", "Un projet interne qui sort"],
-  },
+  { theme: "Cloud & DevOps",
+    items: ["Renouveler DevOps Engineer Expert", "AZ-305 Solutions Architect", "Publier un module Terraform"] },
+  { theme: "IA",
+    items: ["Des agents jusqu'en production", "Industrialiser l'IA générative"] },
+  { theme: "Voyages",
+    items: ["Un troisième récit long", "Un film monté pour de bon"] },
+  { theme: "Publications",
+    items: ["Reprendre les articles de fond", "Écrire plus souvent", "Parler en public une fois"] },
+  { theme: "I-Shane",
+    items: ["Le jeu du drone", "Transmettre ce qui marche"] },
 ];
 
 const suiteEn = [
-  {
-    theme: "Cloud & DevOps",
-    items: ["Azure Solutions Architect certification", "Publish a Terraform module", "Build a home lab"],
-  },
-  {
-    theme: "Travel",
-    items: ["A third long story", "A film properly edited", "Back to Asia"],
-  },
-  {
-    theme: "Writing",
-    items: ["Write more often", "One long piece a quarter", "Speak in public once"],
-  },
-  {
-    theme: "I-Shane",
-    items: ["The drone game", "Pass on what works", "An internal project that ships"],
-  },
+  { theme: "Cloud & DevOps",
+    items: ["Renew DevOps Engineer Expert", "AZ-305 Solutions Architect", "Publish a Terraform module"] },
+  { theme: "AI",
+    items: ["Agents all the way to production", "Take generative AI to scale"] },
+  { theme: "Travel",
+    items: ["A third long story", "A film properly edited"] },
+  { theme: "Writing",
+    items: ["Back to long-form articles", "Write more often", "Speak in public once"] },
+  { theme: "I-Shane",
+    items: ["The drone game", "Pass on what works"] },
 ];
 
 const suite = langue === "en" ? suiteEn : suiteFr;
@@ -377,10 +360,12 @@ const c = T[langue];
   /* En colonnes et non sur la frise : ces projets n'ont pas de date, et les
      poser sur un axe du temps leur en inventerait une. Le theme remplace
      l'horizon comme cle de lecture. */
+  /* auto-fit plutot qu'un nombre fige : ajouter ou retirer un theme ne
+     demande alors aucune retouche de la grille. */
   .colonnes {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--pas-6);
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--pas-6) var(--pas-3);
   }
   .colonne-tete {
     display: flex;
@@ -415,12 +400,6 @@ const c = T[langue];
     border-bottom: 0;
   }
 
-  @media (max-width: 1000px) {
-    .colonnes {
-      grid-template-columns: repeat(2, 1fr);
-      gap: var(--pas-6) var(--pas-3);
-    }
-  }
   @media (max-width: 560px) {
     .colonnes {
       grid-template-columns: 1fr;
