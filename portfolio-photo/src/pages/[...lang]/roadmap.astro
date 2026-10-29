@@ -31,10 +31,12 @@ const parcoursBase = [
   { horizon: "2022 · T4" },
   { horizon: "2024 · T2" },
   { horizon: "2025" },
-  { horizon: "2026 · T1" },
-  { horizon: "2026 · T2" },
-  { horizon: "2026 · T3" },
-  { horizon: "2026 · T4", dernier: true },
+  { horizon: "janv. 2026" },
+  { horizon: "juin 2026" },
+  { horizon: "été 2026" },
+  { horizon: "oct. 2026" },
+  { horizon: "oct. 2026" },
+  { horizon: "oct. 2026", dernier: true },
 ];
 
 const parcoursFr = [
@@ -48,12 +50,16 @@ const parcoursFr = [
     resume: "AZ-700 sur les architectures réseau, et la certification GitHub Actions la même année." },
   { titre: "Le site, première version",
     resume: "Un portfolio à moi, écrit à la main, déployé en continu." },
-  { titre: "Une bibliothèque de modules Terraform",
-    resume: "Réseau, stockage, coffres, identités, journaux : des briques versionnées qu'un correctif propage par un tag." },
-  { titre: "La gouvernance écrite en Terraform",
-    resume: "Définitions, initiatives et affectations au niveau groupe de gestion, versionnées et relues en revue." },
+  { titre: "Arrivée chez I-Shane",
+    resume: "Consultant Cloud & DevOps. Dans le mois, un meetup Databricks dont j'ai fait les images." },
+  { titre: "Un socle Azure industrialisé",
+    resume: "Une bibliothèque de modules Terraform et la gouvernance écrite en code : des briques versionnées qu'un correctif propage par un tag." },
   { titre: "Claude Certified Architect — Foundations",
     resume: "Après le FullStack et le DevOps, l'IA : les mêmes fondations pour sortir du POC." },
+  { titre: "Drone Racer",
+    resume: "Un jeu conçu et servi en direct pour l'I-Share, la journée où l'équipe se retrouve." },
+  { titre: "Le site passe en deux langues",
+    resume: "Seize pages en français et en anglais, et la bascule dans la barre." },
 ];
 
 const parcoursEn = [
@@ -67,12 +73,16 @@ const parcoursEn = [
     resume: "AZ-700 on network architecture, and the GitHub Actions certification the same year." },
   { titre: "The site, first version",
     resume: "A portfolio of my own, hand-written, continuously deployed." },
-  { titre: "A library of Terraform modules",
-    resume: "Network, storage, vaults, identities, logs — versioned blocks where one fix travels by a tag." },
-  { titre: "Governance written in Terraform",
-    resume: "Definitions, initiatives and assignments at management group level, versioned and reviewed." },
+  { titre: "Joining I-Shane",
+    resume: "Cloud & DevOps consultant. Within the month, a Databricks meetup I shot the pictures for." },
+  { titre: "An industrialised Azure foundation",
+    resume: "A library of Terraform modules and governance written as code — versioned blocks where one fix travels by a tag." },
   { titre: "Claude Certified Architect — Foundations",
     resume: "After FullStack and DevOps, AI: the same foundations are what take it past the POC." },
+  { titre: "Drone Racer",
+    resume: "A game built and served live for I-Share, the day the team gets together." },
+  { titre: "The site goes bilingual",
+    resume: "Sixteen pages in French and English, with the switch up in the bar." },
 ];
 
 const redige = langue === "en" ? parcoursEn : parcoursFr;
@@ -84,26 +94,26 @@ const suiteFr = [
   { theme: "Cloud & DevOps",
     items: ["Renouveler DevOps Engineer Expert", "AZ-305 Solutions Architect", "Publier un module Terraform"] },
   { theme: "IA",
-    items: ["Des agents jusqu'en production", "Industrialiser l'IA générative"] },
+    items: ["Des agents jusqu'en production", "La suite du parcours Claude"] },
   { theme: "Voyages",
     items: ["Un troisième récit long", "Un film monté pour de bon"] },
   { theme: "Publications",
     items: ["Reprendre les articles de fond", "Écrire plus souvent", "Parler en public une fois"] },
   { theme: "I-Shane",
-    items: ["Le jeu du drone", "Transmettre ce qui marche"] },
+    items: ["Transmettre ce qui marche", "Le prochain I-Share"] },
 ];
 
 const suiteEn = [
   { theme: "Cloud & DevOps",
     items: ["Renew DevOps Engineer Expert", "AZ-305 Solutions Architect", "Publish a Terraform module"] },
   { theme: "AI",
-    items: ["Agents all the way to production", "Take generative AI to scale"] },
+    items: ["Agents all the way to production", "The rest of the Claude track"] },
   { theme: "Travel",
     items: ["A third long story", "A film properly edited"] },
   { theme: "Writing",
     items: ["Back to long-form articles", "Write more often", "Speak in public once"] },
   { theme: "I-Shane",
-    items: ["The drone game", "Pass on what works"] },
+    items: ["Pass on what works", "The next I-Share"] },
 ];
 
 const suite = langue === "en" ? suiteEn : suiteFr;
