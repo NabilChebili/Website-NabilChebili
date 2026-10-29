@@ -455,6 +455,14 @@ const c = T[langue];
 
     const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // On reprend au navigateur la restauration du defilement. Sans cela il
+    // repose la page a l'endroit quitte AVANT que le script ne tourne, et
+    // l'arrivee sur la page n'est plus une arrivee. Pose tot, et seulement
+    // ici : les autres pages gardent le comportement par defaut.
+    if (!reduit && "scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+
     // Position dans le DOCUMENT, par la chaine des offsetParent.
     //
     // Surtout pas getBoundingClientRect : les blocs a reveler portent une
@@ -530,9 +538,18 @@ const c = T[langue];
     };
 
     function descendre() {
-      // Si on arrive avec une ancre ou une position restauree, on ne bouge
-      // rien : le lecteur a deja dit ou il voulait etre.
-      if (window.scrollY > 4 || location.hash) return;
+      // Une ancre est une demande explicite : on ne la contredit pas.
+      // En revanche on ne renonce PLUS parce que la page n'est pas en haut.
+      //
+      // Le garde-fou precedent testait `scrollY > 4` pour respecter une
+      // position restauree par le navigateur. Consequence : des le deuxieme
+      // chargement, Chrome rendait la main a l'ancienne position — mesure a
+      // 701px — et la descente ne se faisait plus jamais. Au rechargement
+      // comme au retour arriere, la page ne bougeait plus.
+      //
+      // L'animation part donc de la position courante, quelle qu'elle soit,
+      // et rejoint la derniere livraison.
+      if (location.hash) return;
       const depart = window.scrollY;
       const course = cible() - depart;
       if (Math.abs(course) < 8) return;
@@ -546,7 +563,13 @@ const c = T[langue];
         const p = Math.min(1, (t - t0) / duree);
         // Meme sortie que le reste du site : rapide puis posee.
         const e = 1 - Math.pow(1 - p, 3);
-        window.scrollTo(0, depart + course * e);
+        // « instant » explicitement : `html` porte `scroll-behavior: smooth`
+        // dans le systeme editorial, et cette regle s'applique AUSSI aux
+        // defilements programmes. Chaque appel devenait donc une animation du
+        // navigateur, qui tramait derriere la mienne et continuait apres son
+        // annulation — un geste ne rendait pas vraiment la main, et la page
+        // glissait encore de 70px. Le meme piege est note dans PhotoGrid.
+        window.scrollTo({ top: depart + course * e, behavior: "instant" });
         if (p < 1) descente = requestAnimationFrame(pas);
         else rendreLaMain();
       })(t0);
