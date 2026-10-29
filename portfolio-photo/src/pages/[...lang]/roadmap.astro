@@ -9,140 +9,151 @@ export function getStaticPaths() {
 
 const langue = langueDepuisParam(Astro.params.lang);
 
-// Ce qui ne depend pas de la langue : l'horizon et l'etat. Les separer du
-// redige evite le piege rencontre sur /clouddevops, ou la pastille « En
-// cours » tenait au TEXTE francais de la periode et disparaissait en anglais.
+// =========================================================================
+//  LA PAGE SE LIT EN DEUX TEMPS
 //
-// L'ordre est chronologique, du plus ancien au plus lointain. Un seul jalon
-// porte « en cours » : c'est lui qui arrete le trace.
-const jalonsBase = [
-  { horizon: "2025 · T2", etat: "fait" },
-  { horizon: "2025 · T4", etat: "fait" },
-  { horizon: "2026 · T1", etat: "fait" },
-  { horizon: "2026 · T3", etat: "fait" },
-  { horizon: "2026 · T4", etat: "en cours" },
-  { horizon: "2027 · T1", etat: "a venir" },
-  { horizon: "2027 · T2", etat: "a venir" },
-  { horizon: "2027", etat: "a venir" },
+//  1. Le parcours — ce qui est fait, date, sur un rail. Il finit sur la
+//     derniere livraison, et le trace s'y arrete.
+//  2. La suite — ce qui vient, SANS dates, range par theme en colonnes.
+//     Un projet qui n'a pas de date ne doit pas en inventer une : le mettre
+//     sur une frise le ferait mentir.
+//
+//  Registre : perso, et le travail a hauteur d'intention — une certification
+//  visee, un objectif, une avancee marquante. Rien du detail de ce qui se
+//  fait chez un client.
+// =========================================================================
+
+// Ce qui ne depend pas de la langue. Separer l'invariant du redige evite le
+// piege rencontre sur /clouddevops, ou la pastille tenait au TEXTE francais
+// et disparaissait en anglais.
+const parcoursBase = [
+  { horizon: "2025 · T4" },
+  { horizon: "2026 · T1" },
+  { horizon: "2026 · T2" },
+  { horizon: "2026 · T3" },
+  { horizon: "2026 · T4", dernier: true },
 ];
 
-const jalonsFr = [
+const parcoursFr = [
   {
-    titre: "Socle Azure hub & spoke",
-    resume:
-      "Le réseau central, l'état Terraform centralisé et les premières souscriptions rattachées au hub.",
+    titre: "Le site, première version",
+    resume: "Un portfolio à moi, écrit à la main, déployé en continu.",
   },
   {
-    titre: "Plateforme d'onboarding",
-    resume:
-      "Un projet qui démarre reçoit ses souscriptions, son réseau, ses coffres et ses identités depuis un seul pipeline.",
+    titre: "Un mois au Vietnam",
+    resume: "Du sud au centre, pendant le Têt. Le récit photo et le film du voyage.",
   },
   {
-    titre: "Gouvernance Azure Policy",
-    resume:
-      "Définitions, initiatives et affectations écrites en Terraform au niveau groupe de gestion, versionnées et relues en revue.",
+    titre: "Bali et Lombok",
+    resume: "Temples, volcans et falaises. Deuxième récit, deuxième film.",
   },
   {
-    titre: "DNS privé automatique",
-    resume:
-      "Les endpoints privés s'enregistrent seuls dans les zones DNS du hub, sans intervention à la création.",
+    titre: "Les galeries se feuillettent au doigt",
+    resume: "On glisse d'une photo à l'autre, et un geste vers le bas la repose dans sa case.",
   },
   {
-    titre: "Mise en conformité ISO 27001",
-    resume:
-      "Reprendre en policies maison le sous-ensemble de la norme qui concerne les services déjà gérés, plutôt que d'hériter d'un socle opaque.",
-  },
-  {
-    titre: "Automatisation des cas que la policy ne couvre pas",
-    resume:
-      "Certaines ressources tirent un nom de zone DNS décidé à leur création : une policy statique ne peut pas le deviner, une automatisation si.",
-  },
-  {
-    titre: "Migration de la plateforme en v2",
-    resume: "Faire passer les projets existants sur la nouvelle génération du socle.",
-  },
-  {
-    titre: "Publier un outil",
-    resume:
-      "Sortir quelque chose du cadre client : un module ou un utilitaire, documenté et maintenu.",
+    titre: "Le site passe en deux langues",
+    resume: "Seize pages en français et en anglais, et la bascule dans la barre.",
   },
 ];
 
-const jalonsEn = [
+const parcoursEn = [
   {
-    titre: "Azure hub & spoke foundation",
-    resume:
-      "The central network, centralised Terraform state, and the first subscriptions attached to the hub.",
+    titre: "The site, first version",
+    resume: "A portfolio of my own, hand-written, continuously deployed.",
   },
   {
-    titre: "Onboarding platform",
-    resume:
-      "A project that starts up gets its subscriptions, network, vaults and identities from a single pipeline.",
+    titre: "A month in Vietnam",
+    resume: "South to centre, during Tết. The photo story and the film of the trip.",
   },
   {
-    titre: "Azure Policy governance",
-    resume:
-      "Definitions, initiatives and assignments written in Terraform at management group level, versioned and reviewed.",
+    titre: "Bali and Lombok",
+    resume: "Temples, volcanoes and cliffs. A second story, a second film.",
   },
   {
-    titre: "Automatic private DNS",
-    resume:
-      "Private endpoints register themselves in the hub's DNS zones, with nothing to do at creation time.",
+    titre: "Galleries you leaf through with a thumb",
+    resume: "Swipe from one photo to the next, and a downward flick sets it back in its cell.",
   },
   {
-    titre: "ISO 27001 baseline",
-    resume:
-      "Rebuilding, as our own policies, the part of the standard that covers the services we already run — rather than inheriting an opaque baseline.",
-  },
-  {
-    titre: "Automating what policy cannot reach",
-    resume:
-      "Some resources draw a DNS zone name decided at creation; a static policy cannot guess it, an automation can.",
-  },
-  {
-    titre: "Platform migration to v2",
-    resume: "Moving the existing projects onto the next generation of the foundation.",
-  },
-  {
-    titre: "Publish a tool",
-    resume:
-      "Taking something outside client work: a module or a utility, documented and maintained.",
+    titre: "The site goes bilingual",
+    resume: "Sixteen pages in French and English, with the switch up in the bar.",
   },
 ];
 
-const redige = langue === "en" ? jalonsEn : jalonsFr;
-const jalons = jalonsBase.map((b, i) => ({ ...b, ...redige[i] }));
+const redige = langue === "en" ? parcoursEn : parcoursFr;
+const parcours = parcoursBase.map((b, i) => ({ ...b, ...redige[i] }));
+
+// La suite : pas de dates, des themes. L'ordre des colonnes est l'ordre de
+// lecture, pas une priorite.
+const suiteFr = [
+  {
+    theme: "Cloud & DevOps",
+    items: ["Certification Azure Solutions Architect", "Publier un module Terraform", "Monter un labo maison"],
+  },
+  {
+    theme: "Voyages",
+    items: ["Un troisième récit long", "Un film monté pour de bon", "Repartir en Asie"],
+  },
+  {
+    theme: "Publications",
+    items: ["Écrire plus souvent", "Un article de fond par trimestre", "Parler en public une fois"],
+  },
+  {
+    theme: "I-Shane",
+    items: ["Le jeu du drone", "Transmettre ce qui marche", "Un projet interne qui sort"],
+  },
+];
+
+const suiteEn = [
+  {
+    theme: "Cloud & DevOps",
+    items: ["Azure Solutions Architect certification", "Publish a Terraform module", "Build a home lab"],
+  },
+  {
+    theme: "Travel",
+    items: ["A third long story", "A film properly edited", "Back to Asia"],
+  },
+  {
+    theme: "Writing",
+    items: ["Write more often", "One long piece a quarter", "Speak in public once"],
+  },
+  {
+    theme: "I-Shane",
+    items: ["The drone game", "Pass on what works", "An internal project that ships"],
+  },
+];
+
+const suite = langue === "en" ? suiteEn : suiteFr;
 
 const T = {
   fr: {
     titre: "Roadmap",
     description:
-      "Les grands chantiers de Nabil Chebili : ce qui est derrière, ce qui est en cours, ce qui vient.",
+      "Le parcours de Nabil Chebili et ce qui vient : cloud, voyages, écriture.",
     intro:
-      "Les gros chantiers, ce qui est derrière et ce qui vient. Le rail se remplit jusqu'à aujourd'hui.",
-    section: "Les jalons",
+      "Ce qui est derrière, jusqu'à la dernière chose livrée. Puis ce qui vient, par thème — sans dates, parce qu'il n'y en a pas encore.",
+    parcours: "Le parcours",
+    suite: "La suite",
+    livre: "Dernière livraison",
     fait: "Fait",
-    aujourdhui: "Aujourd'hui",
   },
   en: {
     titre: "Roadmap",
     description:
-      "Nabil Chebili's major projects: what is behind, what is under way, what comes next.",
+      "Nabil Chebili's track record and what comes next: cloud, travel, writing.",
     intro:
-      "The big pieces of work — what is behind, and what comes next. The rail fills up to today.",
-    section: "The milestones",
+      "What is behind, up to the last thing shipped. Then what comes next, by theme — undated, because there are no dates yet.",
+    parcours: "The track record",
+    suite: "What comes next",
+    livre: "Last shipped",
     fait: "Done",
-    aujourdhui: "Today",
   },
 };
 const c = T[langue];
-
-const classeEtat = (j) =>
-  j.etat === "fait" ? "fait" : j.etat === "en cours" ? "jalon-actif" : "avenir";
 ---
 
 <Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue}>
-  {/* L'en-tete reste en haut pendant que le rail defile dessous. Il porte un
+  {/* L'en-tete reste en haut pendant que la page defile dessous. Il porte un
       fond opaque — sans lui le rail passerait au travers — et un filet, sans
       lequel le contenu glisserait dessous sans frontiere visible. */}
   <section class="tete-page tete-collee">
@@ -152,29 +163,57 @@ const classeEtat = (j) =>
     </div>
   </section>
 
+  <!-- ===================================================== 1 — LE PARCOURS -->
   <section>
     <div class="section-head" data-reveal data-groupe="rail">
-      <span>{c.section}</span>
-      <span>({jalons.length})</span>
+      <span>{c.parcours}</span>
+      <span>({parcours.length})</span>
     </div>
     <div class="bloc">
       <ol class="rail">
         <span class="trace" aria-hidden="true"></span>
         {
-          jalons.map((j) => (
-            <li class={`jalon ${classeEtat(j)}`} data-reveal data-groupe="rail">
+          parcours.map((j) => (
+            <li class={`jalon ${j.dernier ? "dernier" : "fait"}`} data-reveal data-groupe="rail">
               <span class="marque" aria-hidden="true" />
               <span class="etiquette horizon">
                 {j.horizon}
-                {j.etat === "fait" ? <i class="fini">{c.fait}</i> : null}
+                {j.dernier ? null : <i class="fini">{c.fait}</i>}
               </span>
-              {j.etat === "en cours" ? <span class="puce">{c.aujourdhui}</span> : null}
+              {j.dernier ? <span class="puce">{c.livre}</span> : null}
               <h2>{j.titre}</h2>
               <p>{j.resume}</p>
             </li>
           ))
         }
       </ol>
+    </div>
+  </section>
+
+  <!-- ======================================================== 2 — LA SUITE -->
+  <section>
+    <div class="section-head" data-reveal data-groupe="suite">
+      <span>{c.suite}</span>
+      <span>({suite.length})</span>
+    </div>
+    <div class="bloc">
+      <div class="colonnes">
+        {
+          suite.map((col, i) => (
+            <div class="colonne" data-reveal data-groupe="suite">
+              <div class="colonne-tete">
+                <i class="colonne-num">{String(i + 1).padStart(2, "0")}</i>
+                <span class="etiquette">{col.theme}</span>
+              </div>
+              <ul class="colonne-liste">
+                {col.items.map((x) => (
+                  <li>{x}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
     </div>
   </section>
 </Layout>
@@ -214,24 +253,31 @@ const classeEtat = (j) =>
     color: var(--ink-55);
   }
 
-  /* ------------------------------------------------------------- le rail --- */
+  /* ------------------------------------------------- 1 — le parcours ------ */
   .rail {
     position: relative;
     margin: 0;
     padding: 0 0 0 var(--pas-6);
     list-style: none;
   }
-  /* Le filet de fond couvre toute la hauteur ; par-dessus, le trace a l'encre
-     suit le defilement et se BLOQUE a la marque d'aujourd'hui. Il ne descend
-     jamais dans le a-venir : ce serait dire qu'on y est deja. */
-  .rail::before {
+  /* Le filet est fait de SEGMENTS, un par jalon, et le dernier n'en porte
+     pas : le rail s'arrete donc net sur la derniere livraison.
+
+     Un filet unique courant sur toute la hauteur du <ol> pendait sous la
+     derniere marque, jusqu'au bas du dernier paragraphe — il annoncait une
+     suite qui n'existe pas, puisque ce rail est le passe et que la suite est
+     en colonnes plus bas. */
+  .jalon::before {
     content: "";
     position: absolute;
-    top: 7px;
-    bottom: 7px;
-    left: 5px;
+    top: 11px;
+    left: calc(-1 * var(--pas-6) + 5px);
     width: 1px;
+    height: 100%;
     background: var(--rule);
+  }
+  .jalon:last-child::before {
+    content: none;
   }
   .trace {
     position: absolute;
@@ -240,6 +286,10 @@ const classeEtat = (j) =>
     width: 3px;
     height: 0;
     background: var(--ink);
+    /* Les segments gris appartiennent aux <li>, places APRES le trace dans le
+       document : sans cet ordre explicite ils se peignaient par-dessus lui et
+       laissaient un lisere clair le long du trait noir. */
+    z-index: 1;
   }
   .jalon {
     position: relative;
@@ -270,7 +320,6 @@ const classeEtat = (j) =>
     color: var(--ink-55);
   }
 
-  /* Trois etats, lisibles sans legende : fait, aujourd'hui, a venir. */
   .marque {
     position: absolute;
     top: 6px;
@@ -278,43 +327,27 @@ const classeEtat = (j) =>
     width: 9px;
     height: 9px;
     background: var(--paper);
-    border: 1px solid var(--ink-55);
+    border: 1px solid var(--ink);
+    /* Au-dessus du trace, qui passe derriere elles. */
+    z-index: 2;
     transition: background-color 240ms cubic-bezier(0.2, 0, 0, 1);
-  }
-  .fait .marque {
-    border-color: var(--ink);
   }
   /* Une marque ne se remplit qu'au passage du trait, jamais avant : c'est le
      script qui pose .franchi. */
-  .fait.franchi .marque {
+  .jalon.franchi .marque {
     background: var(--ink);
   }
-  .jalon-actif .marque {
+  .dernier .marque {
     top: 3px;
     left: calc(-1 * var(--pas-6) - 2px);
     width: 15px;
     height: 15px;
-    border-color: var(--ink);
-  }
-  .jalon-actif.franchi .marque {
-    background: var(--ink);
-  }
-  .avenir .marque {
-    top: 7px;
-    left: calc(-1 * var(--pas-6) + 2px);
-    width: 7px;
-    height: 7px;
-    border-color: var(--rule);
   }
   .fait h2 {
     color: var(--ink-55);
   }
-  .jalon-actif h2 {
+  .dernier h2 {
     font-size: 36px;
-  }
-  .avenir h2,
-  .avenir .horizon {
-    color: var(--ink-55);
   }
 
   .puce {
@@ -328,7 +361,7 @@ const classeEtat = (j) =>
     letter-spacing: 0.09em;
     text-transform: uppercase;
   }
-  /* « Fait » se pose a cote de la date, pas sur une ligne a lui : huit jalons
+  /* « Fait » se pose a cote de la date, pas sur une ligne a lui : cinq jalons
      portant chacun une pastille feraient une colonne de pastilles. */
   .fini {
     margin-left: 10px;
@@ -338,6 +371,61 @@ const classeEtat = (j) =>
     font-style: normal;
     letter-spacing: 0.09em;
     color: var(--ink-55);
+  }
+
+  /* ---------------------------------------------------- 2 — la suite ------ */
+  /* En colonnes et non sur la frise : ces projets n'ont pas de date, et les
+     poser sur un axe du temps leur en inventerait une. Le theme remplace
+     l'horizon comme cle de lecture. */
+  .colonnes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--pas-6);
+  }
+  .colonne-tete {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .colonne-num {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--rule);
+  }
+  .colonne-liste {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .colonne-liste li {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+  }
+  .colonne-liste li:last-child {
+    border-bottom: 0;
+  }
+
+  @media (max-width: 1000px) {
+    .colonnes {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--pas-6) var(--pas-3);
+    }
+  }
+  @media (max-width: 560px) {
+    .colonnes {
+      grid-template-columns: 1fr;
+      gap: var(--pas-3);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -351,9 +439,9 @@ const classeEtat = (j) =>
   // Deux choses distinctes, souvent confondues :
   //
   //   1. le TRACE suit le defilement — il monte jusqu'a la hauteur ou on lit,
-  //      et bute sur la marque d'aujourd'hui, jamais au-dela ;
-  //   2. a l'ARRIVEE la page descend d'elle-meme jusqu'a aujourd'hui, une
-  //      seule fois, puis rend la main.
+  //      et bute sur la marque de la derniere livraison, jamais au-dela ;
+  //   2. a l'ARRIVEE la page descend d'elle-meme jusqu'a ce jalon, une seule
+  //      fois, puis rend la main.
   //
   // Le point 2 n'anime pas le trait : il deplace la page, et le trait suit
   // parce qu'il suit toujours.
@@ -362,8 +450,8 @@ const classeEtat = (j) =>
     if (!rail) return;
     const trace = rail.querySelector(".trace");
     const jalons = Array.from(rail.querySelectorAll(".jalon"));
-    const aujourdhui = rail.querySelector(".jalon-actif");
-    if (!trace || !aujourdhui) return;
+    const dernier = rail.querySelector(".dernier");
+    if (!trace || !dernier) return;
 
     const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -372,7 +460,7 @@ const classeEtat = (j) =>
     // Surtout pas getBoundingClientRect : les blocs a reveler portent une
     // translation tant qu'ils ne sont pas vus, et le rectangle client
     // l'inclut. Mesure ainsi, le plafond tombait 24px trop bas et le trace
-    // depassait aujourd'hui. offsetTop donne la position de MISE EN PAGE,
+    // depassait sa cible. offsetTop donne la position de MISE EN PAGE,
     // insensible aux transformations.
     function hautDansLaPage(el) {
       let y = 0;
@@ -395,7 +483,7 @@ const classeEtat = (j) =>
     function poser() {
       enAttente = false;
       const depart = hautDansLaPage(rail) + 7;
-      const plafond = centre(aujourdhui);
+      const plafond = centre(dernier);
       const lecture = window.scrollY + window.innerHeight * LECTURE;
       const h = Math.max(0, Math.min(plafond, lecture - depart));
       // On lit toutes les positions, PUIS on ecrit : l'inverse forcerait un
@@ -417,12 +505,13 @@ const classeEtat = (j) =>
     window.addEventListener("load", auDefilement);
 
     // ------------------------------------------------ la descente d'arrivee
-    // On vise la position ou aujourd'hui arrive a hauteur de lecture : c'est
-    // exactement l'endroit ou le trace atteint son plafond. La descente et le
-    // remplissage finissent donc ensemble, sans qu'on ait a les synchroniser.
+    // On vise la position ou la derniere livraison arrive a hauteur de
+    // lecture : c'est exactement l'endroit ou le trace atteint son plafond.
+    // La descente et le remplissage finissent donc ensemble, sans qu'on ait
+    // a les synchroniser.
     function cible() {
       const depart = hautDansLaPage(rail) + 7;
-      const y = depart + centre(aujourdhui) - window.innerHeight * LECTURE;
+      const y = depart + centre(dernier) - window.innerHeight * LECTURE;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       return Math.max(0, Math.min(max, y));
     }
