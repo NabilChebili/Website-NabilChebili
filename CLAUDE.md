@@ -82,6 +82,32 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
   l'avait sorti à 244px contre 174 en français.
 - **Coût à connaître** : toute modification de contenu se fait désormais deux fois.
 
+## Page Roadmap
+
+- **Deux temps, deux grammaires.** *Le parcours* — ce qui est fait — est daté, sur
+  un rail vertical qui s'arrête sur la dernière chose livrée. *La suite* est **sans
+  dates**, rangée par thème en colonnes. Un projet qui n'a pas de date ne doit pas
+  en inventer une : le poser sur une frise le ferait mentir.
+- **Le tracé suit le défilement** et bute sur la marque de la dernière livraison,
+  jamais au-delà — au-delà il dirait qu'on est déjà dans ce qui vient. À l'arrivée
+  la page descend d'elle-même jusqu'à ce jalon, **une seule fois**, et rend la main
+  au premier geste : molette, doigt, clic ou touche. En mouvement réduit, aucune
+  descente n'est imposée.
+- **Le contenu vit en haut du fichier**, dans `src/pages/[...lang]/roadmap.astro` :
+  `parcoursBase` porte les horizons et le drapeau `dernier: true` ; `parcoursFr` /
+  `parcoursEn` et `suiteFr` / `suiteEn` portent le rédigé. Séparer l'invariant du
+  texte évite le piège rencontré sur `/clouddevops`, où une pastille tenait au
+  **texte français** d'une période et disparaissait en anglais.
+- **Registre des intitulés.** Le parcours parle du métier, jamais de
+  l'implémentation : aucune référence client, aucun identifiant interne, aucun nom
+  d'outil. « Accompagnement d'architecture Cloud » et non la liste des modules
+  Terraform — c'est une page publique.
+- **Les jalons sont sourcés, pas inventés** : dates de commits, CV, profil public,
+  messagerie. Un horizon au mois dès que le mois est connu ; annoncer un trimestre
+  quand on a la date exacte est une perte de précision.
+- **Les colonnes sont en `auto-fit`** : ajouter ou retirer un thème ne demande
+  aucune retouche de la grille.
+
 ## Architecture du site photo (évolution récente)
 
 Le site a été refait plusieurs fois dans la même session avant de converger ; la version actuelle :
@@ -126,7 +152,7 @@ tokens).
 
 ## Refonte éditoriale — état au 23/08/2026
 
-Les 16 pages partagent désormais un seul système visuel. **La référence est
+Les 17 pages partagent désormais un seul système visuel. **La référence est
 [`portfolio-photo/DESIGN.md`](portfolio-photo/DESIGN.md)** : jetons, primitives, mécanisme de
 révélation, recette pour ajouter une page, et la liste des pièges déjà payés. À lire avant tout
 ajustement de mise en forme — plusieurs de ces pièges ont coûté des tours entiers.

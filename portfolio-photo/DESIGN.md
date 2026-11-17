@@ -27,7 +27,7 @@ Ces règles ne sont pas décoratives : elles sont vérifiées par le script de c
 
 | Interdit | Pourquoi |
 |---|---|
-| `border-radius` | Aucun coin arrondi sur les 16 pages. Un rayon suffit à faire basculer la page dans le registre « template ». |
+| `border-radius` | Aucun coin arrondi sur les 17 pages. Un rayon suffit à faire basculer la page dans le registre « template ». |
 | `box-shadow` | Idem. La hiérarchie se fait par les filets et l'échelle typographique, pas par la profondeur. |
 | Dégradés, lueurs, verre dépoli | Les pastilles en verre dépoli de `/clouddevops` ont été retirées pour cette raison. L'orbite des outils, elle, a été **redessinée** dans le vocabulaire du système : pistes en SVG à filets de 1px, aucun rayon CSS, aucune ombre, et la seule couleur vient des logos. Un motif animé n'est pas interdit — les effets le sont. |
 | Texte posé sur une photo | Le libellé va **sous** l'image. Les cartes de `/photo` le faisaient. |
@@ -161,30 +161,48 @@ Un seul mécanisme, dans `header.astro`, disponible sur toutes les pages.
 
 ## 6. Ajouter une page
 
+Le fichier va dans **`src/pages/[...lang]/`**, jamais à la racine de `src/pages/` : le site est
+bilingue et une page posée à la racine n'existerait qu'en français, la bascule menant à un 404.
+D'où les chemins d'import à deux niveaux.
+
 ```astro
 ---
-import "../styles/global.css";
-import Layout from "../layouts/header.astro";
-import Colophon from "../components/Colophon.astro";
+import "../../styles/global.css";
+import Layout from "../../layouts/header.astro";
+import Colophon from "../../components/Colophon.astro";
+import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+
+// Les deux versions côte à côte : on les modifie d'un seul regard.
+const T = {
+  fr: { titre: "Titre", intro: "Une phrase d'intention.", bloc: "Intitulé" },
+  en: { titre: "Title", intro: "A sentence of intent.", bloc: "Heading" },
+};
+const c = T[langue];
 ---
 
-<Layout title="Titre" description="…" mainClass="page editorial">
+<Layout title={c.titre} description="…" mainClass="page editorial" lang={langue}>
   <section class="tete-page">
-    <h1 class="titre-page" data-reveal data-groupe="tete">Titre</h1>
+    <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
     <div class="prose" data-reveal data-groupe="tete">
-      <p>Une phrase d'intention.</p>
+      <p>{c.intro}</p>
     </div>
   </section>
 
   <section>
     <div class="section-head" data-reveal data-groupe="bloc">
-      <span>Intitulé</span>
+      <span>{c.bloc}</span>
       <span>(3)</span>
     </div>
     <div class="mon-bloc">…</div>
   </section>
 
-  <Colophon />
+  <Colophon lang={langue} />
 </Layout>
 
 <style>
@@ -193,6 +211,10 @@ import Colophon from "../components/Colophon.astro";
   }
 </style>
 ```
+
+Pour qu'elle soit atteignable, l'ajouter aussi à `sections()` dans `src/i18n/ui.ts` (barre de nav)
+et au pied de page dans `header.astro` — puis **rebalayer les largeurs** : une entrée de plus peut
+remettre la nav sur deux lignes (§7).
 
 Trois règles à respecter :
 
@@ -242,12 +264,54 @@ Trois règles à respecter :
   `conteneur − marges`. C'est le mécanisme du piège précédent, et il vaut pour tout élément
   positionné sur ses quatre côtés.
 
+- **`getBoundingClientRect` inclut la translation des blocs à révéler.** Tant qu'un `[data-reveal]`
+  n'est pas `.vu`, il porte un décalage ; le rectangle client le compte, la position de mise en page
+  non. Un plafond d'animation calculé au chargement tombait donc 24px trop bas — 416 au lieu de 392 —
+  et le tracé dépassait sa cible. Pour toute géométrie de **mise en page**, remonter la chaîne des
+  `offsetParent` en sommant `offsetTop`.
+- **`scroll-behavior: smooth` s'applique aussi aux défilements programmés.** `html` le porte (§3).
+  Chaque `window.scrollTo` d'une animation devenait donc une animation du navigateur, qui traînait
+  derrière la mienne et continuait **après son annulation** : la page glissait encore de 70px après
+  une touche censée rendre la main. Dans une boucle d'animation, passer `behavior: "instant"`
+  explicitement — `"auto"` retombe sur la valeur CSS. `PhotoGrid.astro` note déjà le même piège pour
+  la restauration de position après la visionneuse.
+- **Le navigateur restaure la position de défilement avant que le script ne tourne.** Un garde-fou
+  qui renonce « si la page n'est pas en haut » ne s'exécute alors qu'à la première visite : au
+  rechargement comme au retour arrière, la position restaurée — mesurée à 701px — l'annulait, et la
+  page ne se posait plus jamais d'elle-même. Si une page doit se placer à l'arrivée, lui reprendre la
+  main par `history.scrollRestoration = "manual"`, et seulement sur cette page.
+- **La barre fixe fait 56px, pas 64.** `editorial.css` la pose à 56 sans rupture et gagne, étant
+  chargée après `layout.css` qui annonce 64. Mais `.page.editorial` garde un retrait haut de 64 : sur
+  une page ordinaire ces 8px ne se voient pas — du papier sur du papier — alors qu'un en-tête collant
+  calé à 64 laissait une **fente** par laquelle le contenu défilait, et sautait de 8px en
+  s'accrochant. Mesurer la barre plutôt que lire la feuille.
+- **Le seuil de repli de la nav dépend de son contenu, pas d'une taille d'écran.** La barre a une
+  hauteur figée : dès que les entrées ne tiennent plus sur une ligne, elles passent à deux et
+  **débordent par-dessus la page**. Le repli derrière le bouton se fait donc avant ce point — 940px
+  aujourd'hui — et **toute entrée ajoutée oblige à rebalayer les largeurs**. Mesures : la paire FR/EN
+  avait étendu la bande cassée de 600-650 à 600-770, puis « Roadmap » seul a fait remonter le seuil
+  de 860 à 940.
+- **`position: sticky` n'annonce pas en CSS qu'il est figé.** Pour réagir au moment où il s'accroche,
+  poser une sentinelle d'un pixel juste au-dessus et l'observer : tant qu'elle est visible l'élément
+  est dans le flux, dès qu'elle passe derrière la barre il est collé. Aucun calcul au défilement.
+
 ### Sur la méthode de vérification
 
 - **Un `✓` de son propre script est suspect.** Trois faux positifs sur cette refonte : « images
   cassées » (c'était l'emplacement vide de la visionneuse), « 142 cartes cachées » (elles étaient
   dans des accordéons fermés) et « bords droits faux » (je mesurais la première carte au lieu du
   conteneur de la grille).
+- **Une assertion sur un seuil accepte ce qu'elle devrait rejeter.** `y > 50` était censé prouver
+  qu'une page descendait d'elle-même ; une position restaurée par le navigateur à 701px le
+  satisfaisait tout autant. Comparer à la **valeur attendue**, pas à un plancher.
+- **Un état final correct ne prouve pas le mécanisme.** Le point d'arrivée d'une animation était
+  juste — parce que le navigateur finissait par y glisser tout seul. Le mouvement n'était pas le
+  mien. Échantillonner la grandeur **dans le temps** : la courbe montrait deux phases là où il ne
+  devait y en avoir qu'une.
+- **Un contexte neuf ne reproduit pas ce que vit l'utilisateur.** Le même contrôle passait à chaque
+  fois parce qu'il ouvrait un navigateur vierge, sans historique donc sans restauration de position.
+  Le défaut n'apparaissait qu'au **rechargement**. Rejouer le geste réel : recharger, revenir en
+  arrière, arriver par un lien.
 - **Vérifier sur le build, pas sur le serveur de dev.** Après plusieurs heures, le HMR CSS de Vite
   décroche et sert une version périmée — trois vérifications de suite ont porté sur du CSS obsolète.
 - **La comparaison pixel est l'outil décisif** pour un remaniement à iso-rendu. L'extraction du
@@ -256,7 +320,7 @@ Trois règles à respecter :
 
 ### Le script de contrôle
 
-Critères passés sur les 16 pages, aux deux largeurs, à chaque changement structurel :
+Critères passés sur les 17 pages, aux deux largeurs, à chaque changement structurel :
 
 un seul `<main>` · zéro `border-radius` · zéro `box-shadow` · aucun `[data-reveal]` ou `.photo-card`
 resté sous `opacity: 0.99` (hors accordéon fermé) · aucun débordement horizontal · aucun
