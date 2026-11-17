@@ -9,8 +9,9 @@ et [nabilchebili.fr](https://nabilchebili.fr) (redirection).
 ```
 .
 ├── portfolio-photo/         Application Astro (le site en lui-même)
-│   ├── src/pages/            Toutes les pages (voir ci-dessous)
-│   ├── src/components/       PhotoGrid, AccordionSection, GalleryPage
+│   ├── src/pages/[...lang]/  Toutes les pages — une par route, deux sorties (fr + /en/)
+│   ├── src/i18n/ui.ts        Chaînes du chrome et aides de route bilingues
+│   ├── src/components/       PhotoGrid, AccordionSection, GalleryPage, Colophon
 │   ├── src/data/             galleries.json, vietnam.json, indonesie.json
 │   ├── src/lib/blobList.js   Listing des blobs Azure (partagé par toutes les galeries)
 │   └── public/               Assets statiques (logo, favicon, images de repli)
@@ -30,6 +31,7 @@ pour Azure Static Web Apps). Sitemap généré via `@astrojs/sitemap`.
 
 - `/` — accueil
 - `/clouddevops`, `/musique`, `/gaming` — sections non-photo
+- `/roadmap` — le parcours daté sur un rail, puis ce qui vient par thème (voir `CLAUDE.md`)
 - `/photo` — **hub récapitulatif** : une carte (photo de couverture + titre) par destination,
   qui renvoie vers la page dédiée de chaque galerie
 - `/vietnam`, `/indonesie` — récit de voyage : quelques photos "Post" en tête (grille + légende
@@ -37,6 +39,18 @@ pour Azure Static Web Apps). Sitemap généré via `@astrojs/sitemap`.
   aperçu miniature, la grille complète s'affiche au clic)
 - `/illumination`, `/londres`, `/gr1-1`, `/gr1-2`, `/gr1-3`, `/mariage`, `/croatie`, `/supersonic`,
   `/event-databricks` — une page par galerie classique, chacune une simple grille de photos
+
+### Deux langues
+
+Toutes les pages vivent sous `src/pages/[...lang]/` et sortent **en deux exemplaires** : le français
+sans préfixe (`/photo`), l'anglais sous `/en/` (`/en/photo`). Le gabarit ne s'écrit qu'une fois ;
+seul le texte est dédoublé, dans un `const T = { fr, en }` en tête de page. Les chaînes communes —
+nav, pied de page, visionneuse, bloc contact — vivent dans `src/i18n/ui.ts`.
+
+⚠️ **Ne jamais créer une page à la racine de `src/pages/`** : elle n'existerait qu'en français et la
+bascule FR/EN mènerait à un 404. Le slug, lui, ne se traduit pas (`/croatie` et `/en/croatie`).
+
+Le détail et les pièges sont dans [CLAUDE.md](CLAUDE.md#site-bilingue--français--anglais).
 
 ### Composants photo
 
@@ -57,7 +71,7 @@ pour Azure Static Web Apps). Sitemap généré via `@astrojs/sitemap`.
 
 ### Styles
 
-Les 16 pages partagent un seul système visuel, documenté dans **[DESIGN.md](portfolio-photo/DESIGN.md)** :
+Les 17 pages partagent un seul système visuel, documenté dans **[DESIGN.md](portfolio-photo/DESIGN.md)** :
 jetons, primitives, mécanisme de révélation, recette pour ajouter une page, et les pièges déjà
 rencontrés. Quatre feuilles seulement :
 
@@ -94,12 +108,15 @@ rien à changer dans le code — la liste est reconstruite à chaque build/dépl
 **Pour ajouter une nouvelle galerie classique** (page dédiée type `/croatie`) :
 1. Uploader les photos dans un nouveau préfixe du container `photos`.
 2. Ajouter l'entrée dans `galleries.json`.
-3. Créer `src/pages/<slug>.astro` sur le modèle des fichiers existants (3 lignes, cf. `croatie.astro`).
-4. Ajouter une carte dans le tableau `destinations` de `src/pages/photo.astro`.
+3. Créer `src/pages/[...lang]/<slug>.astro` sur le modèle de `croatie.astro` : `getStaticPaths()`,
+   la langue lue dans le paramètre de route, un `const T = { fr, en }` pour le titre et l'intro,
+   puis `<GalleryPage … lang={langue} />`.
+4. Ajouter une carte dans le tableau `destinations` de `src/pages/[...lang]/photo.astro`.
 
 **Pour ajouter une nouvelle destination façon Vietnam/Indonésie** (Post + accordéon par étape) :
-créer `src/data/<nom>.json` (`galleries` + `post`), créer `src/pages/<nom>.astro` sur le modèle de
-`vietnam.astro`, ajouter une carte dans `photo.astro`.
+créer `src/data/<nom>.json` (`galleries` + `post`, chaque entrée de `post` portant `caption` **et**
+`captionEn`), créer `src/pages/[...lang]/<nom>.astro` sur le modèle de `vietnam.astro`, ajouter une
+carte dans `photo.astro`.
 
 ### Commandes
 
@@ -137,9 +154,11 @@ toutes les routes).
 - `www.nabilchebili.fr` — CNAME chez IONOS vers la Static Web App, custom domain Azure validé
   (SSL auto). **Ne pas** cocher "Domain forwarding for the www subdomain" côté IONOS : ça écrase le
   CNAME.
-- `nabilchebili.fr` (apex) — redirection HTTP (301) chez IONOS vers `https://www.nabilchebili.fr`
-  (le service Azure Static Web Apps n'étant pas disponible en `francecentral`, ni utilisable
-  facilement en apex sans ALIAS/ANAME, IONOS gère la redirection directement).
+- `nabilchebili.fr` (apex) — **sert désormais le site directement en HTTPS** (vérifié : `200`),
+  et le HTTP y redirige en 301 vers l'apex en HTTPS, non plus vers `www`. La description
+  précédente — une redirection IONOS vers `www` — est caduque. Le mécanisme exact (enregistrement
+  et certificat) reste à confirmer contre la zone DNS avant d'y toucher ; `terraform/main.tf` ne
+  déclare toujours que le domaine `www`.
 
 ## Infrastructure (`terraform/`)
 

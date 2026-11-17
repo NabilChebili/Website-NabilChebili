@@ -48,8 +48,11 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
 
 - `www.nabilchebili.fr` = CNAME vers `<default_host_name>` de la Static Web App (validation
   `cname-delegation` côté Terraform).
-- `nabilchebili.fr` (apex) = redirection HTTP chez IONOS vers `https://www.nabilchebili.fr` (pas
-  d'ALIAS/ANAME sur l'offre IONOS standard, et Azure ne facilite pas l'apex sans ça).
+- `nabilchebili.fr` (apex) = **sert le site directement en HTTPS** (mesuré le 17/11/2026 : `200`
+  en HTTPS, et le HTTP y redirige en 301 vers l'apex en HTTPS, non plus vers `www`). Ce n'est donc
+  plus la redirection IONOS décrite ici auparavant. Le mécanisme exact — enregistrement DNS et
+  certificat — reste à confirmer contre la zone avant d'y toucher, et `terraform/main.tf` ne déclare
+  toujours que le domaine `www`.
 - **Piège rencontré** : la case "Domain forwarding for the www subdomain" dans l'écran de
   redirection IONOS **écrase le CNAME `www` existant**. Ne jamais la cocher — la redirection doit
   cibler uniquement l'apex, le `www` reste géré par un CNAME classique dans la zone DNS.
@@ -196,11 +199,10 @@ ajustement de mise en forme — plusieurs de ces pièges ont coûté des tours e
 - **Push / PR** : la branche `feat/home-cinematic` a **37 commits** d'avance sur `origin/main` et
   n'a pas de branche amont — rien n'a jamais été poussé. Chaque push déclenche un déploiement réel,
   donc attendre la demande explicite.
-- **TLS de l'apex `nabilchebili.fr`** : diagnostic clos, correctif écrit et parqué. `https://nabilchebili.fr`
-  n'a aucun certificat (alerte TLS 80, confirmée en IPv4 et IPv6) ; le certificat de `www` ne porte
-  que le SAN `www.nabilchebili.fr`. Correctif retenu : rattacher l'apex à la SWA via un `A` vers
-  `stableInboundIP` + un `TXT` de validation chez IONOS, puis aligner `terraform/main.tf` par
-  `terraform import`.
+- **TLS de l'apex `nabilchebili.fr`** : ~~sans certificat~~ — **résolu depuis**. Au 17/11/2026
+  `https://nabilchebili.fr` répond `200`. Reste à faire : constater comment (enregistrement et
+  certificat), puis aligner `terraform/main.tf`, qui ne déclare toujours que le domaine `www` — la
+  configuration vit donc hors du code.
 - **Sept galeries jamais revues visuellement une par une** (`event-databricks`, `illumination`,
   `londres`, `mariage`, `gr1-1`, `gr1-2`, `gr1-3`). Elles passent par `GalleryPage`, le même
   composant que `croatie` et `supersonic` qui ont été revues, et elles passent le script de contrôle.

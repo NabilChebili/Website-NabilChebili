@@ -1,46 +1,34 @@
-# Astro Starter Kit: Basics
+# portfolio-photo
 
-```sh
-npm create astro@latest -- --template basics
+L'application [Astro](https://astro.build) du site. Build 100 % statique
+(`output: 'static'`), requis par Azure Static Web Apps, sitemap via
+`@astrojs/sitemap`.
+
+```bash
+npm install
+npm run dev       # serveur local — http://localhost:4321
+npm run build     # build statique -> dist/
+npm run preview   # prévisualiser le build
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Où lire quoi
 
-## 🚀 Project Structure
+Ce fichier ne décrit que le paquet npm. Tout le reste est documenté à côté,
+et c'est là qu'il faut aller **avant** de toucher à une page :
 
-Inside of your Astro project, you'll see the following folders and files:
+| Document | Ce qu'on y trouve |
+| :--- | :--- |
+| [`../README.md`](../README.md) | Le dépôt : pages, galeries photo, déploiement, domaine, infrastructure |
+| [`DESIGN.md`](DESIGN.md) | Le système éditorial : jetons, primitives, révélation, recette pour ajouter une page, et les pièges déjà payés |
+| [`REFERENCES.md`](REFERENCES.md) | Les références visuelles qui servent de cible sur un geste créatif |
+| [`../CLAUDE.md`](../CLAUDE.md) | Contexte du projet, préférences de travail, état des chantiers |
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+## Deux choses à savoir avant d'écrire une ligne
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+**Le site est bilingue.** Toutes les pages vivent sous `src/pages/[...lang]/`
+et sortent en deux exemplaires : le français sans préfixe, l'anglais sous
+`/en/`. Une page posée à la racine de `src/pages/` n'existerait qu'en français
+et la bascule mènerait à un 404.
 
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+**Une page n'importe que `global.css`.** Toute autre feuille de mise en forme
+reprend le dessus sur le système éditorial — voir §2 de `DESIGN.md`.
