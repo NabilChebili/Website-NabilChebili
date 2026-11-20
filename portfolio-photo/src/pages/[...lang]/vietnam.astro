@@ -91,6 +91,7 @@ const ordreEtapes = [
 ];
 const points = vietnam.carte.map((p) => ({
   ...p,
+  lieu: langue === "en" ? (p.lieuEn ?? p.lieu) : p.lieu,
   etapes: p.etapes.map((id) => ({ id, titre: nomsEtapes[id] ?? id })),
 }));
 ---

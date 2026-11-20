@@ -158,7 +158,10 @@ const c = T[lang] ?? T.fr;
 
 <div class="globe-voyage" data-reveal data-groupe="carte">
   <figure class="globe-cadre">
-    <svg class="globe" viewBox="0 0 600 600" role="img" aria-label={c.region}></svg>
+    <div class="globe-scene">
+      <svg class="globe" viewBox="0 0 600 600" role="img" aria-label={c.region}></svg>
+      <div class="globe-bulle" role="dialog" hidden></div>
+    </div>
     <script type="application/json" class="globe-donnees" set:html={JSON.stringify(donnees)} />
     <figcaption class="globe-vues">
       <button type="button" class="globe-vue" data-vue="monde">{c.monde}</button>
@@ -247,6 +250,17 @@ const c = T[lang] ?? T.fr;
   .globe :global(.g-repere.actif rect) {
     transform: scale(1.25);
   }
+  /* Le focus clavier : un second cadre a l'encre, pas l'anneau orange du
+     navigateur. */
+  .globe :global(.g-repere:focus) {
+    outline: none;
+  }
+  .globe :global(.g-repere:focus-visible rect) {
+    transform: scale(1.25);
+    stroke: var(--ink);
+    stroke-width: 2;
+    paint-order: stroke;
+  }
   .globe :global(.g-fil) {
     stroke: var(--ink);
     stroke-width: 1;
@@ -297,6 +311,60 @@ const c = T[lang] ?? T.fr;
   .globe-aide {
     font-size: 12px;
     color: var(--ink-55);
+  }
+
+  /* La bulle d'un lieu a plusieurs etapes : posee au-dessus de son repere,
+     elle les liste toutes. Papier, filet a l'encre, ni rayon ni ombre. */
+  .globe-scene {
+    position: relative;
+  }
+  .globe-bulle {
+    position: absolute;
+    z-index: 3;
+    min-width: 170px;
+    max-width: 240px;
+    padding: 12px 16px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    transform: translate(-50%, calc(-100% - 20px));
+  }
+  .globe-bulle.dessous {
+    transform: translate(-50%, 20px);
+  }
+  .globe-bulle[hidden] {
+    display: none;
+  }
+  .globe-bulle :global(.bulle-lieu) {
+    margin: 0 0 6px;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  .globe-bulle :global(ul) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .globe-bulle :global(li + li) {
+    border-top: 1px solid var(--rule);
+  }
+  .globe-bulle :global(button) {
+    display: block;
+    width: 100%;
+    padding: 7px 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .globe-bulle :global(button:hover),
+  .globe-bulle :global(button:focus-visible) {
+    text-decoration: underline;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -386,6 +454,15 @@ const c = T[lang] ?? T.fr;
     const paysFeature = region.features.find((f) => String(f.id) === pays);
     const autres = { type: "FeatureCollection", features: region.features.filter((f) => f !== paysFeature) };
     const grilleGeo = geoGraticule10();
+    // Positions des reperes au dernier dessin (coordonnees du viewBox), pour
+    // poser la bulle sur le bon.
+    let derniere = [];
+    const bulle = bloc.querySelector(".globe-bulle");
+    let bulleDe = -1;
+    const fermerBulle = () => {
+      if (bulle) bulle.hidden = true;
+      bulleDe = -1;
+    };
 
     function dessiner() {
       projection.scale(R * etat.zoom).rotate([etat.lambda, etat.phi]);
@@ -445,6 +522,7 @@ const c = T[lang] ?? T.fr;
         }
         if (!bouge) break;
       }
+      derniere = pose;
       pose.forEach((p, i) => {
         const g = reperes[i];
         const { fil, point } = attaches[i];
@@ -468,6 +546,7 @@ const c = T[lang] ?? T.fr;
     const boutons = bloc.querySelectorAll(".globe-vue");
     let anim = null;
     function allerVers(cibleEtat, duree) {
+      fermerBulle();
       if (anim) cancelAnimationFrame(anim);
       if (reduit || duree <= 0) {
         Object.assign(etat, cibleEtat);
@@ -507,6 +586,7 @@ const c = T[lang] ?? T.fr;
     svg.addEventListener("pointerdown", (ev) => {
       if (ev.target instanceof Element && ev.target.closest(".g-repere")) return;
       if (anim) cancelAnimationFrame(anim), (anim = null);
+      fermerBulle();
       saisie = { x: ev.clientX, y: ev.clientY, lambda: etat.lambda, phi: etat.phi, id: ev.pointerId };
       svg.setPointerCapture(ev.pointerId);
       svg.classList.add("saisi");
@@ -551,15 +631,46 @@ const c = T[lang] ?? T.fr;
       g.addEventListener("pointerleave", () => activer(ouvert()));
       g.addEventListener("focus", () => activer(i));
       g.addEventListener("blur", () => activer(ouvert()));
-      // Un clic ouvre la galerie de l'etape — et referme l'autre, puisque
-      // les etapes forment un groupe. Un lieu a plusieurs etapes (Saigon,
-      // Batur, Lombok) : chaque clic passe a la suivante.
+      // Une seule etape : le clic ouvre sa galerie (et referme l'autre, les
+      // etapes formant un groupe). Plusieurs (Saigon, Batur, Lombok sud) :
+      // une bulle les liste toutes, et c'est dans la bulle qu'on choisit.
       const ouvrir = () => {
-        const ids = points[i].etapes.map((e) => e.id);
-        const actuelle = ids.findIndex((id) => document.getElementById(id)?.hasAttribute("open"));
-        const id = ids[(actuelle + 1) % ids.length];
-        ouvrirEtape(id);
-        history.replaceState(null, "", "#" + id);
+        const etapes = points[i].etapes;
+        if (etapes.length === 1 || !bulle) {
+          fermerBulle();
+          ouvrirEtape(etapes[0].id);
+          history.replaceState(null, "", "#" + etapes[0].id);
+          return;
+        }
+        if (bulleDe === i) return fermerBulle();
+        bulle.replaceChildren();
+        const titre = document.createElement("p");
+        titre.className = "bulle-lieu";
+        titre.textContent = points[i].lieu;
+        const liste = document.createElement("ul");
+        etapes.forEach((e) => {
+          const li = document.createElement("li");
+          const b = document.createElement("button");
+          b.type = "button";
+          b.textContent = e.titre;
+          b.addEventListener("click", () => {
+            fermerBulle();
+            ouvrirEtape(e.id);
+            history.replaceState(null, "", "#" + e.id);
+          });
+          li.appendChild(b);
+          liste.appendChild(li);
+        });
+        bulle.append(titre, liste);
+        const p = derniere[i];
+        const echelle = svg.getBoundingClientRect().width / TAILLE;
+        bulle.style.left = `${p.x * echelle}px`;
+        bulle.style.top = `${p.y * echelle}px`;
+        // Pres du haut du globe, la bulle passerait hors cadre : dessous.
+        bulle.classList.toggle("dessous", p.y < 200);
+        bulle.hidden = false;
+        bulleDe = i;
+        bulle.querySelector("button")?.focus({ preventScroll: true });
       };
       g.addEventListener("click", ouvrir);
       g.addEventListener("keydown", (ev) => {
@@ -568,6 +679,18 @@ const c = T[lang] ?? T.fr;
           ouvrir();
         }
       });
+    });
+    // La bulle se ferme a Echap ou d'un clic ailleurs.
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && bulleDe >= 0) {
+        reperes[bulleDe]?.focus();
+        fermerBulle();
+      }
+    });
+    document.addEventListener("pointerdown", (ev) => {
+      if (bulleDe < 0 || !(ev.target instanceof Element)) return;
+      if (ev.target.closest(".globe-bulle") || ev.target.closest(".g-repere")) return;
+      fermerBulle();
     });
     // Une etape ouverte depuis la liste allume aussi son repere.
     document.querySelectorAll("details.etape").forEach((d) =>
