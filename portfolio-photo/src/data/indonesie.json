@@ -1,4 +1,14 @@
 {
+  "carte": [
+    { "lieu": "Jatiluwih", "lat": -8.37, "lng": 115.131, "etapes": ["jitawali"] },
+    { "lieu": "Ulun Danu Beratan", "lat": -8.2752, "lng": 115.1668, "etapes": ["water-temple"] },
+    { "lieu": "Wanagiri", "lat": -8.2493, "lng": 115.1107, "etapes": ["spot-insta"] },
+    { "lieu": "Batur", "lat": -8.2421, "lng": 115.3751, "etapes": ["batur", "black-lava"] },
+    { "lieu": "Ubud", "lat": -8.5188, "lng": 115.2585, "etapes": ["monkey-forest"] },
+    { "lieu": "Lombok", "lat": -8.87, "lng": 116.29, "etapes": ["falaise-lombok", "lombok-village", "lombok-paysage"] },
+    { "lieu": "Uluwatu", "lat": -8.8291, "lng": 115.0849, "etapes": ["ulluwatu"] },
+    { "lieu": "GWK", "lat": -8.8104, "lng": 115.1676, "etapes": ["gwk"] }
+  ],
   "galleries": {
     "batur": "https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/batur/",
     "black-lava": "https://stnchvlqvproduction.blob.core.windows.net/photos/Indonesie/black-lava/",

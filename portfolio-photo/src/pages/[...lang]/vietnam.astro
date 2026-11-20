@@ -3,6 +3,7 @@ import "../../styles/global.css";
 import Layout from "../../layouts/header.astro";
 import PhotoGrid from "../../components/PhotoGrid.astro";
 import AccordionSection from "../../components/AccordionSection.astro";
+import CarteVoyage from "../../components/CarteVoyage.astro";
 import vietnam from "../../data/vietnam.json";
 import { listGalleries } from "../../lib/blobList.js";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
@@ -79,6 +80,19 @@ const T = {
 };
 const c = T[langue];
 const nomsEtapes = labels[langue];
+
+// La carte fixe l'ordre du voyage ; les etapes la suivent, pour que le numero
+// d'un repere corresponde a sa place dans la liste. Une galerie absente de la
+// carte garde sa place a la fin plutot que de disparaitre.
+const surLaCarte = vietnam.carte.flatMap((p) => p.etapes);
+const ordreEtapes = [
+  ...surLaCarte.filter((k) => k in vietnam.galleries),
+  ...Object.keys(vietnam.galleries).filter((k) => !surLaCarte.includes(k)),
+];
+const points = vietnam.carte.map((p) => ({
+  ...p,
+  etapes: p.etapes.map((id) => ({ id, titre: nomsEtapes[id] ?? id })),
+}));
 ---
 
 <Layout title="Vietnam" description={c.description} mainClass="page editorial" lang={langue}>
@@ -120,13 +134,16 @@ const nomsEtapes = labels[langue];
   <section>
     <div class="section-head" data-reveal data-groupe="etapes">
       <span>{c.etapes}</span>
-      <span>({Object.keys(vietnam.galleries).length})</span>
+      <span>({ordreEtapes.length})</span>
     </div>
+    <CarteVoyage points={points} pays="704" lang={langue} />
     <div class="etapes">
       {
-        Object.keys(vietnam.galleries).map((key) => (
+        ordreEtapes.map((key) => (
           <AccordionSection
             id={key}
+            groupe="etapes"
+            numero={vietnam.carte.findIndex((p) => p.etapes.includes(key)) + 1 || undefined}
             title={nomsEtapes[key] ?? key}
             photos={photosByKey[key]}
             lang={langue}

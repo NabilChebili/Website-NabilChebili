@@ -1,14 +1,18 @@
 ---
 import PhotoGrid from "./PhotoGrid.astro";
 
-const { id = "section", title = "", photos = [], lang = "fr" } = Astro.props;
+// groupe : les etapes qui partagent un groupe s'excluent — en ouvrir une
+// referme l'autre (attribut name des <details>, natif dans les navigateurs).
+// numero : le numero du repere de cette etape sur le globe, s'il y en a un.
+const { id = "section", title = "", photos = [], lang = "fr", groupe, numero } = Astro.props;
 const previewPhotos = photos.slice(0, 4);
 ---
 
-<details class="etape" id={id}>
+<details class="etape" id={id} name={groupe} data-numero={numero}>
   <summary class="etape-tete">
     <span class="etape-gauche">
       <span class="etape-signe" aria-hidden="true"></span>
+      {numero ? <span class="etape-numero">{String(numero).padStart(2, "0")}</span> : null}
       <span class="etape-titre">{title}</span>
       <span class="etape-compte">{photos.length} photos</span>
     </span>
@@ -93,6 +97,18 @@ const previewPhotos = photos.slice(0, 4);
     white-space: nowrap;
   }
 
+  /* Le numero du repere sur le globe : le meme carre a l'encre, en petit,
+     pour que l'oeil fasse le lien sans legende. */
+  .etape-numero {
+    align-self: center;
+    padding: 3px 5px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+  }
   .etape-compte {
     font-size: 11px;
     font-weight: 700;
