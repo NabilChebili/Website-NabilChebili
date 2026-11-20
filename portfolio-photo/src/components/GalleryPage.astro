@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import Layout from "../layouts/header.astro";
 import PhotoGrid from "./PhotoGrid.astro";
+import CarteVoyage from "./CarteVoyage.astro";
 import { listBlobsFromPublicContainer } from "../lib/blobList.js";
 import { cheminLocalise, traduire, type Langue } from "../i18n/ui";
 
@@ -19,6 +20,9 @@ const {
   fallback = ["/photos/A7401177.jpg", "/photos/A7401113.jpg", "/photos/A7401167.jpg", "/photos/A7401181.jpg"],
   password = null,
   lang = "fr",
+  // Facultatif : { pays, points } pour poser la galerie sur le globe, apres
+  // les photos. Seules les galeries de voyage en ont un.
+  carte = null,
 } = Astro.props;
 
 const langue = lang as Langue;
@@ -60,6 +64,16 @@ const photos = listed.length ? listed : fallback;
         <PhotoGrid photos={photos} name={title} lang={langue} />
       </div>
     </section>
+
+    {carte ? (
+      <section>
+        <div class="section-head" data-reveal data-groupe="globe">
+          <span>{langue === "en" ? "On the globe" : "Sur le globe"}</span>
+          <span>({carte.points.length})</span>
+        </div>
+        <CarteVoyage points={carte.points} pays={carte.pays} lang={langue} />
+      </section>
+    ) : null}
   </div>
 
   {password ? (

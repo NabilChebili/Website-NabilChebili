@@ -29,9 +29,14 @@ const centre = geoCentroid({ type: "MultiPoint", coordinates: coords });
 // Le zoom qui loge tout le trajet dans ~75 % du rayon : la distance angulaire
 // du point le plus eloigne du centre fixe l'echelle (1 = globe entier).
 const ecart = Math.max(...coords.map((c) => geoDistance(c, centre)), 0.004);
-const zoomVoyage = Math.min(70, Math.max(3, 0.75 / Math.sin(ecart)));
+// Un seul lieu (Dubrovnik, Londres) : rien a loger, la formule zoomerait sur
+// la ville. On montre le pays autour — un zoom fixe, ou celui qu'on passe.
+const unSeul = points.length === 1;
+const zoomVoyage = Astro.props.zoom ?? (unSeul ? 9 : Math.min(70, Math.max(3, 0.75 / Math.sin(ecart))));
 // En dessous de ce zoom on dessine le globe au 1/110e ; au-dessus, le detail.
-const seuil = Math.max(3, zoomVoyage / 3);
+// Pour un lieu seul le seuil monte : sinon la zone de detail couvrirait une
+// moitie d'Europe, fjords norvegiens compris.
+const seuil = Math.max(3, zoomVoyage / (unSeul ? 1.15 : 3));
 // Rayon (en degres) de ce que montre le globe au seuil : la zone de detail
 // doit le couvrir, un peu au-dela.
 const rayonDetail = (Math.asin(1 / seuil) * 180) / Math.PI + 1;
@@ -278,6 +283,16 @@ const c = T[lang] ?? T.fr;
     text-anchor: middle;
     dominant-baseline: central;
     pointer-events: none;
+  }
+  .globe :global(.g-seul) {
+    cursor: default;
+  }
+  .globe :global(.g-repere text.g-nom) {
+    fill: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-anchor: start;
   }
   .globe :global(.g-repere.actif rect) {
     transform: scale(1.25);
@@ -600,9 +615,13 @@ const c = T[lang] ?? T.fr;
       point: el("rect", { class: "g-point", width: 4, height: 4 }, svg),
     }));
     const reperes = points.map((p, i) => {
-      const g = el("g", { class: "g-repere", tabindex: "0", role: "button", "aria-label": p.lieu }, svg);
+      // Un lieu sans etapes (les pages galerie) n'ouvre rien : son repere
+      // n'est pas un bouton, et il porte son nom plutot qu'un numero.
+      const actif = (p.etapes ?? []).length > 0;
+      const g = el("g", actif ? { class: "g-repere", tabindex: "0", role: "button", "aria-label": p.lieu } : { class: "g-repere g-seul" }, svg);
       el("rect", { x: -11, y: -11, width: 22, height: 22 }, g);
-      el("text", {}, g).textContent = String(i + 1);
+      el("text", {}, g).textContent = actif ? String(i + 1) : "";
+      if (!actif) el("text", { class: "g-nom", x: 20, y: 1 }, g).textContent = p.lieu;
       el("title", {}, g).textContent = p.lieu;
       return g;
     });
@@ -811,6 +830,7 @@ const c = T[lang] ?? T.fr;
     };
     const activer = (i) => reperes.forEach((g, j) => g.classList.toggle("actif", j === i));
     reperes.forEach((g, i) => {
+      if (!(points[i].etapes ?? []).length) return;
       g.addEventListener("pointerenter", () => activer(i));
       g.addEventListener("pointerleave", () => activer(ouvert()));
       g.addEventListener("focus", () => activer(i));
