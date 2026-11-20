@@ -751,6 +751,9 @@ const c = T[lang] ?? T.fr;
         return { lambda: -c[0], phi: Math.max(-35, Math.min(35, -c[1])), zoom: 1 };
       },
       voyage: () => ({ lambda: -centre[0], phi: -centre[1], zoom: zoomVoyage }),
+      // Le globe entier, mais face au pays de la page : c'est la qu'arrive
+      // le lecteur, avant de plonger sur le trajet.
+      pays: () => ({ lambda: -centre[0], phi: Math.max(-35, Math.min(35, -centre[1])), zoom: 1 }),
     };
     // Des que le lecteur a choisi une vue, ou que le globe s'est range dans
     // son coin, l'animation d'arrivee n'a plus lieu d'etre.
@@ -973,7 +976,9 @@ const c = T[lang] ?? T.fr;
         if (!entrees.some((e) => e.isIntersecting)) return;
         obs.disconnect();
         if (arrivee) return;
-        allerVers(vues.monde(), 1300);
+        // L'arrivee se tourne vers le pays de la page, pas vers le milieu de
+        // tous les voyages : on arrive en Indonesie, on voit l'Indonesie.
+        allerVers(vues.pays(), 1300);
         const plongee = setTimeout(() => choisir("voyage", 1400), 1450);
         // Si le lecteur prend la main entre-temps, on ne lui reprend pas.
         const renoncer = () => clearTimeout(plongee);
