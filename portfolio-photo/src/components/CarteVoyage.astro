@@ -1,0 +1,1012 @@
+---
+// Le voyage sur un globe dessine — pas une carte routiere. Le globe tourne
+// jusqu'au pays, puis zoome dans le meme cercle sur le trajet : les etapes
+// numerotees, reliees par un pointille. A cote, la legende : un clic sur une
+// etape ouvre son accordeon plus bas.
+//
+// Vocabulaire du systeme : filets de 1px, encre et papier, aucun degrade,
+// aucune ombre — comme l'orbite des outils de /clouddevops.
+//
+// points = [{ lieu, lat, lng, etapes: [{ id, titre }] }] DANS L'ORDRE DU
+// VOYAGE ; pays = code ISO numerique du pays mis en avant (704 Vietnam,
+// 360 Indonesie).
+import { feature } from "topojson-client";
+import { geoCentroid, geoDistance } from "d3-geo";
+import monde110 from "world-atlas/land-110m.json";
+import pays110 from "world-atlas/countries-110m.json";
+import pays50 from "world-atlas/countries-50m.json";
+import pays10 from "world-atlas/countries-10m.json";
+import voyagesDuSite from "../data/voyages.json";
+import { cheminLocalise } from "../i18n/ui";
+
+const { points = [], pays = "", lang = "fr" } = Astro.props;
+
+// ------------------------------------------------------------- le cadrage
+// Calcule ici, a la construction, pour savoir quelle zone et quelle finesse
+// de contours embarquer — le client recoit le resultat.
+const coords = points.map((p) => [p.lng, p.lat]);
+const centre = geoCentroid({ type: "MultiPoint", coordinates: coords });
+// Le zoom qui loge tout le trajet dans ~75 % du rayon : la distance angulaire
+// du point le plus eloigne du centre fixe l'echelle (1 = globe entier).
+const ecart = Math.max(...coords.map((c) => geoDistance(c, centre)), 0.004);
+// Un seul lieu (Dubrovnik, Londres) : rien a loger, la formule zoomerait sur
+// la ville. On montre le pays autour — un zoom fixe, ou celui qu'on passe.
+const unSeul = points.length === 1;
+const zoomVoyage = Astro.props.zoom ?? (unSeul ? 9 : Math.min(70, Math.max(3, 0.75 / Math.sin(ecart))));
+// En dessous de ce zoom on dessine le globe au 1/110e ; au-dessus, le detail.
+// Pour un lieu seul le seuil monte : sinon la zone de detail couvrirait une
+// moitie d'Europe, fjords norvegiens compris.
+const seuil = Math.max(3, zoomVoyage / (unSeul ? 1.15 : 3));
+// Rayon (en degres) de ce que montre le globe au seuil : la zone de detail
+// doit le couvrir, un peu au-dela.
+const rayonDetail = (Math.asin(1 / seuil) * 180) / Math.PI + 1;
+
+// Contours nettoyes : coordonnees arrondies, puis sommets que l'arrondi a
+// rendus identiques retires — c'est la que le poids tombe.
+function nettoyer(geometrie, decimales, garder = () => true) {
+  const f = 10 ** decimales;
+  const polys = geometrie.type === "Polygon" ? [geometrie.coordinates] : geometrie.type === "MultiPolygon" ? geometrie.coordinates : [];
+  const net = polys
+    .filter((p) => garder(p[0]))
+    .map((poly) =>
+      poly
+        .map((anneau) => {
+          const r = [];
+          for (const [x, y] of anneau) {
+            const q = [Math.round(x * f) / f, Math.round(y * f) / f];
+            const d = r[r.length - 1];
+            if (!d || d[0] !== q[0] || d[1] !== q[1]) r.push(q);
+          }
+          return r;
+        })
+        .filter((anneau) => anneau.length >= 4)
+    )
+    .filter((poly) => poly.length);
+  return net.length ? { type: "MultiPolygon", coordinates: net } : null;
+}
+
+// Le globe entier : les terres au 1/110e, a 1 decimale (~10 km, moins d'un
+// pixel vu de loin), et le pays du voyage au meme trait.
+const terresGeo = feature(monde110, monde110.objects.land);
+const terresNettes = {
+  type: "FeatureCollection",
+  features: (terresGeo.features ?? [terresGeo]).map((f) => ({ type: "Feature", properties: {}, geometry: nettoyer(f.geometry, 1) })).filter((f) => f.geometry),
+};
+const pays110Geo = feature(pays110, pays110.objects.countries).features;
+const paysMondeBrut = pays110Geo.find((f) => String(f.id) === String(pays));
+const paysMonde = paysMondeBrut ? { type: "Feature", properties: {}, geometry: nettoyer(paysMondeBrut.geometry, 1) } : null;
+
+// Les autres voyages du site, sur le meme globe : leur pays grise, un repere
+// et leur nom, qui menent a leur page. Visibles dans la vue du monde.
+const autres = voyagesDuSite.voyages
+  .filter((v) => v.pays !== String(pays))
+  .map((v) => {
+    const f = pays110Geo.find((x) => String(x.id) === v.pays);
+    return {
+      nom: v.nom[lang] ?? v.nom.fr,
+      lat: v.lat,
+      lng: v.lng,
+      href: cheminLocalise(v.page, lang),
+      forme: f ? { type: "Feature", properties: {}, geometry: nettoyer(f.geometry, 1) } : null,
+    };
+  });
+// La vue du monde se centre au milieu de TOUS les voyages, pour qu'ils
+// tiennent ensemble sur la face visible du globe.
+const centreMonde = geoCentroid({
+  type: "MultiPoint",
+  coordinates: voyagesDuSite.voyages.map((v) => [v.lng, v.lat]),
+});
+
+// Le detail : 1/10e si le trajet tient dans un mouchoir (Bali et Lombok —
+// au 1/50e, Bali n'etait plus qu'une patate), 1/50e s'il traverse un pays
+// (le Vietnam). Et SEULEMENT les polygones qui touchent la zone : l'Indonesie
+// entiere au 1/10e pese plus d'un mega, Bali et Lombok quelques dizaines de Ko.
+const atlas = zoomVoyage >= 20 ? pays10 : pays50;
+const dLng = rayonDetail / Math.max(0.2, Math.cos((centre[1] * Math.PI) / 180));
+const zone = [centre[0] - dLng, centre[1] - rayonDetail, centre[0] + dLng, centre[1] + rayonDetail];
+const touche = (anneau) => {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y] of anneau) {
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+  return x1 >= zone[0] && x0 <= zone[2] && y1 >= zone[1] && y0 <= zone[3];
+};
+// Decoupe d'un anneau au rectangle de la zone (Sutherland-Hodgman, en
+// degres : la zone est petite, la courbure n'y change rien). Trier par boite
+// englobante ne suffisait pas — celle de l'Australie frole Bali, et ses
+// 140 Ko de cotes partaient avec la page sans qu'un trait soit visible.
+function decouper(anneau) {
+  const [x0, y0, x1, y1] = zone;
+  const bords = [
+    (p) => p[0] >= x0, (p) => p[0] <= x1, (p) => p[1] >= y0, (p) => p[1] <= y1,
+  ];
+  const couper = [
+    (a, b) => [x0, a[1] + ((b[1] - a[1]) * (x0 - a[0])) / (b[0] - a[0])],
+    (a, b) => [x1, a[1] + ((b[1] - a[1]) * (x1 - a[0])) / (b[0] - a[0])],
+    (a, b) => [a[0] + ((b[0] - a[0]) * (y0 - a[1])) / (b[1] - a[1]), y0],
+    (a, b) => [a[0] + ((b[0] - a[0]) * (y1 - a[1])) / (b[1] - a[1]), y1],
+  ];
+  let sortie = anneau.slice(0, -1);
+  for (let k = 0; k < 4 && sortie.length; k++) {
+    const entree = sortie;
+    sortie = [];
+    for (let i = 0; i < entree.length; i++) {
+      const a = entree[(i + entree.length - 1) % entree.length];
+      const b = entree[i];
+      const aDedans = bords[k](a);
+      const bDedans = bords[k](b);
+      if (bDedans) {
+        if (!aDedans) sortie.push(couper[k](a, b));
+        sortie.push(b);
+      } else if (aDedans) {
+        sortie.push(couper[k](a, b));
+      }
+    }
+  }
+  return sortie.length >= 3 ? [...sortie, sortie[0]] : null;
+}
+const region = {
+  type: "FeatureCollection",
+  features: feature(atlas, atlas.objects.countries)
+    .features.map((f) => {
+      const g0 = f.geometry;
+      if (!g0) return null;
+      const polys = g0.type === "Polygon" ? [g0.coordinates] : g0.type === "MultiPolygon" ? g0.coordinates : [];
+      const coupes = polys
+        .filter((p) => touche(p[0]))
+        .map((p) => p.map(decouper).filter(Boolean))
+        .filter((p) => p.length);
+      if (!coupes.length) return null;
+      const g = nettoyer({ type: "MultiPolygon", coordinates: coupes }, 2);
+      return g ? { type: "Feature", id: f.id, properties: {}, geometry: g } : null;
+    })
+    .filter(Boolean),
+};
+
+const donnees = {
+  points,
+  pays: String(pays),
+  centre,
+  zoomVoyage,
+  seuil,
+  rayonDetail,
+  terres: terresNettes,
+  paysMonde,
+  region,
+  autres,
+  centreMonde,
+};
+
+const T = {
+  fr: { region: "Globe des étapes du voyage", monde: "Le monde", voyage: "Le voyage", aide: "Faites tourner le globe du doigt ou à la souris.", retour: "Revenir au globe", fermer: "Ranger le globe" },
+  en: { region: "Globe of the stops along the way", monde: "The world", voyage: "The trip", aide: "Spin the globe with a finger or the mouse.", retour: "Back to the globe", fermer: "Put the globe away" },
+};
+const c = T[lang] ?? T.fr;
+---
+
+<div class="globe-voyage" data-reveal data-groupe="carte">
+  <figure class="globe-cadre">
+    <div class="globe-scene">
+      <svg class="globe" viewBox="0 0 600 600" role="img" aria-label={c.region}></svg>
+      <div class="globe-bulle" role="dialog" hidden></div>
+    </div>
+    <!-- Le globe en petit, colle dans un coin pendant qu'on regarde une
+         galerie ouverte depuis lui. Le <svg> y est deplace, pas copie. -->
+    <div class="globe-mini" hidden>
+      <button type="button" class="globe-mini-retour" aria-label={c.retour}></button>
+      <button type="button" class="globe-mini-fermer" aria-label={c.fermer}>×</button>
+    </div>
+    <script type="application/json" class="globe-donnees" set:html={JSON.stringify(donnees)} />
+    <figcaption class="globe-vues">
+      <button type="button" class="globe-vue" data-vue="monde">{c.monde}</button>
+      <button type="button" class="globe-vue" data-vue="voyage" aria-pressed="true">{c.voyage}</button>
+      <span class="globe-aide">{c.aide}</span>
+    </figcaption>
+  </figure>
+</div>
+
+<style>
+  /* Pas de legende a cote : la liste des etapes, juste en dessous, en tient
+     lieu — chaque etape porte le numero de son repere. */
+  .globe-voyage {
+    padding: var(--pas-6) var(--edge) var(--pas-3);
+  }
+
+  .globe-cadre {
+    margin: 0;
+    max-width: 560px;
+    width: 100%;
+    justify-self: center;
+  }
+  .globe {
+    display: block;
+    width: 100%;
+    height: auto;
+    cursor: grab;
+    /* Le defilement vertical passe au travers ; un glisser horizontal fait
+       tourner le globe. Sans cela, au doigt, le globe pieger la page. */
+    touch-action: pan-y;
+    user-select: none;
+  }
+  .globe.saisi {
+    cursor: grabbing;
+  }
+
+  /* Les traits. Tout est en filets ; la seule masse pleine est l'encre des
+     reperes. */
+  .globe :global(.g-sphere) {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .globe :global(.g-grille) {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 0.5;
+  }
+  .globe :global(.g-terre) {
+    fill: var(--block);
+    stroke: var(--ink-55);
+    stroke-width: 0.5;
+    stroke-linejoin: round;
+  }
+  .globe :global(.g-pays) {
+    fill: var(--rule);
+    stroke: var(--ink);
+    stroke-width: 0.75;
+  }
+  .globe :global(.g-trajet) {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.25;
+    stroke-dasharray: 4 5;
+  }
+  .globe :global(.g-repere) {
+    cursor: pointer;
+  }
+  .globe :global(.g-repere rect) {
+    fill: var(--ink);
+    stroke: var(--paper);
+    stroke-width: 1;
+    transition: transform var(--duree) var(--sortie);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .globe :global(.g-repere text) {
+    fill: var(--paper);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+  }
+  .globe :global(.g-seul) {
+    cursor: default;
+  }
+  .globe :global(.g-repere text.g-nom) {
+    fill: var(--ink);
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-anchor: start;
+  }
+  .globe :global(.g-repere.actif rect) {
+    transform: scale(1.25);
+  }
+  /* Le focus clavier : un second cadre a l'encre, pas l'anneau orange du
+     navigateur. */
+  .globe :global(.g-repere:focus) {
+    outline: none;
+  }
+  .globe :global(.g-repere:focus-visible rect) {
+    transform: scale(1.25);
+    stroke: var(--ink);
+    stroke-width: 2;
+    paint-order: stroke;
+  }
+  .globe :global(.g-fil) {
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .globe :global(.g-point) {
+    fill: var(--ink);
+  }
+  /* Les autres voyages du site, dans la vue du monde : le pays grise comme
+     celui de la page, un carre plus petit, et le nom — qui est un lien. */
+  .globe :global(.g-autres) {
+    fill: var(--rule);
+    stroke: var(--ink-55);
+    stroke-width: 0.5;
+  }
+  .globe :global(.g-autre) {
+    cursor: pointer;
+  }
+  .globe :global(.g-autre rect) {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    transition: fill var(--duree) var(--sortie);
+  }
+  .globe :global(.g-autre text) {
+    fill: var(--ink);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    dominant-baseline: central;
+  }
+  .globe :global(.g-autre:hover rect),
+  .globe :global(.g-autre:focus-visible rect) {
+    fill: var(--ink);
+  }
+  .globe :global(.g-autre:hover text),
+  .globe :global(.g-autre:focus-visible text) {
+    text-decoration: underline;
+  }
+  .globe :global(.g-autre:focus) {
+    outline: none;
+  }
+  /* Le point du pays, vu du monde entier : un seul carre, sans numero. */
+  .globe :global(.g-cible) {
+    fill: var(--ink);
+  }
+
+  /* Les deux vues, dans le registre de la nav : des crochets pour ce qui mene
+     ailleurs, rien pour la vue courante. */
+  .globe-vues {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 18px;
+    margin-top: 14px;
+  }
+  .globe-vue {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-55);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .globe-vue::before {
+    content: "[ ";
+  }
+  .globe-vue::after {
+    content: " ]";
+  }
+  .globe-vue[aria-pressed="true"] {
+    color: var(--ink);
+    cursor: default;
+  }
+  .globe-vue[aria-pressed="true"]::before,
+  .globe-vue[aria-pressed="true"]::after {
+    content: "";
+  }
+  .globe-aide {
+    font-size: 12px;
+    color: var(--ink-55);
+  }
+
+  /* La bulle d'un lieu a plusieurs etapes : posee au-dessus de son repere,
+     elle les liste toutes. Papier, filet a l'encre, ni rayon ni ombre. */
+  .globe-scene {
+    position: relative;
+    /* Carree d'office : quand le globe part dans son coin, sa place garde sa
+       hauteur — sinon la page remonterait d'un coup sous le lecteur. */
+    aspect-ratio: 1 / 1;
+  }
+  /* La place vide laissee par le globe parti : son cercle en pointille. */
+  .globe-scene.vide::before {
+    content: "";
+    position: absolute;
+    inset: 2.33%;
+    border: 1px dashed var(--rule);
+    border-radius: 50%;
+  }
+
+  /* ---------------------------------------------- le globe minimise */
+  .globe-mini {
+    position: fixed;
+    right: var(--edge);
+    bottom: 24px;
+    z-index: 900; /* sous la barre (1000) et sous la visionneuse (2000) */
+    width: 136px;
+    height: 136px;
+    transform-origin: top left;
+  }
+  .globe-mini[hidden] {
+    display: none;
+  }
+  .globe-mini svg {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  /* Toute la pastille est un bouton : un clic ramene au globe. */
+  .globe-mini-retour {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+  .globe-mini-retour:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .globe-mini:hover svg {
+    transform: scale(1.04);
+  }
+  .globe-mini svg {
+    transition: transform var(--duree) var(--sortie);
+  }
+  .globe-mini-fermer {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 22px;
+    cursor: pointer;
+  }
+  @media (max-width: 700px) {
+    .globe-mini {
+      width: 100px;
+      height: 100px;
+      right: 16px;
+      bottom: 16px;
+    }
+  }
+  .globe-bulle {
+    position: absolute;
+    z-index: 3;
+    min-width: 170px;
+    max-width: 240px;
+    padding: 12px 16px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    transform: translate(-50%, calc(-100% - 20px));
+  }
+  .globe-bulle.dessous {
+    transform: translate(-50%, 20px);
+  }
+  .globe-bulle[hidden] {
+    display: none;
+  }
+  .globe-bulle :global(.bulle-lieu) {
+    margin: 0 0 6px;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  .globe-bulle :global(ul) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .globe-bulle :global(li + li) {
+    border-top: 1px solid var(--rule);
+  }
+  .globe-bulle :global(button) {
+    display: block;
+    width: 100%;
+    padding: 7px 0;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .globe-bulle :global(button:hover),
+  .globe-bulle :global(button:focus-visible) {
+    text-decoration: underline;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .globe :global(.g-repere rect) {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { geoOrthographic, geoPath, geoGraticule10, geoDistance } from "d3-geo";
+
+  const SVG = "http://www.w3.org/2000/svg";
+  const TAILLE = 600;
+  const R = 286; // rayon du globe, dans un viewBox de 600
+
+  function ouvrirEtape(id) {
+    const d = document.getElementById(id);
+    if (!(d instanceof HTMLDetailsElement)) return;
+    d.open = true;
+    const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // La barre du haut est collante : on s'arrete dessous.
+    const barre = document.querySelector("header")?.getBoundingClientRect().height ?? 56;
+    const y = d.getBoundingClientRect().top + window.scrollY - barre - 16;
+    window.scrollTo({ top: y, behavior: reduit ? "instant" : "smooth" });
+  }
+
+  const el = (nom, attrs = {}, parent) => {
+    const n = document.createElementNS(SVG, nom);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+
+  // Sortie rapide puis posee, comme le reste du site.
+  const sortie = (t) => 1 - Math.pow(1 - t, 3);
+
+  document.querySelectorAll(".globe-voyage").forEach((bloc) => {
+    const svg = bloc.querySelector("svg.globe");
+    const brut = bloc.querySelector(".globe-donnees")?.textContent;
+    if (!svg || !brut) return;
+    // Cadrage calcule a la construction (voir l'en-tete du composant).
+    const { points, pays, centre, zoomVoyage, seuil, rayonDetail, terres, paysMonde, region, autres: autresVoyages = [], centreMonde } = JSON.parse(brut);
+    if (!points?.length) return;
+
+    const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coords = points.map((p) => [p.lng, p.lat]);
+    const trajet = { type: "LineString", coordinates: coords };
+
+    const projection = geoOrthographic().translate([TAILLE / 2, TAILLE / 2]).clipAngle(90).precision(0.3);
+    const chemin = geoPath(projection);
+
+    // Etat : rotation [lambda, phi] et zoom (1 = globe entier).
+    const etat = { lambda: -centre[0] + 70, phi: -centre[1] + 10, zoom: 1 };
+
+    // Le dessin. Un <clipPath> circulaire garde la carte ronde a tout zoom :
+    // quand l'echelle depasse le rayon, c'est ce cercle qui borne, pas le bord
+    // de la sphere.
+    const defs = el("defs", {}, svg);
+    const clipId = "globe-clip-" + Math.random().toString(36).slice(2, 8);
+    el("circle", { cx: TAILLE / 2, cy: TAILLE / 2, r: R }, el("clipPath", { id: clipId }, defs));
+    const scene = el("g", { "clip-path": `url(#${clipId})` }, svg);
+    const fond = el("path", { class: "g-sphere" }, scene);
+    const grille = el("path", { class: "g-grille" }, scene);
+    const terre = el("path", { class: "g-terre" }, scene);
+    const voisins = el("path", { class: "g-terre" }, scene);
+    const formesAutres = el("path", { class: "g-autres" }, scene);
+    const paysMis = el("path", { class: "g-pays" }, scene);
+    const ligne = el("path", { class: "g-trajet" }, scene);
+    const cible = el("rect", { class: "g-cible", width: 8, height: 8 }, scene);
+    // Le contour du cercle, par-dessus tout : c'est lui qui fait l'objet.
+    el("circle", { cx: TAILLE / 2, cy: TAILLE / 2, r: R, fill: "none", stroke: "currentColor", "stroke-width": 1 }, svg).style.color = "var(--ink)";
+
+    // Les autres voyages : de vrais liens (<a> SVG), donc navigables au
+    // clavier et ouvrables dans un nouvel onglet comme n'importe quel lien.
+    const collectionAutres = {
+      type: "FeatureCollection",
+      features: autresVoyages.map((a) => a.forme).filter(Boolean),
+    };
+    const liensAutres = autresVoyages.map((a) => {
+      const lien = el("a", { class: "g-autre", href: a.href }, svg);
+      el("rect", { x: -5, y: -5, width: 10, height: 10 }, lien);
+      el("text", { x: 11, y: 0 }, lien).textContent = a.nom;
+      el("title", {}, lien).textContent = a.nom;
+      return lien;
+    });
+
+    // Quand deux reperes se chevauchent, on les ecarte ; un filet relie alors
+    // chaque carre a un point qui marque l'endroit exact.
+    const attaches = points.map(() => ({
+      fil: el("line", { class: "g-fil" }, svg),
+      point: el("rect", { class: "g-point", width: 4, height: 4 }, svg),
+    }));
+    const reperes = points.map((p, i) => {
+      // Un lieu sans etapes (les pages galerie) n'ouvre rien : son repere
+      // n'est pas un bouton, et il porte son nom plutot qu'un numero.
+      const actif = (p.etapes ?? []).length > 0;
+      const g = el("g", actif ? { class: "g-repere", tabindex: "0", role: "button", "aria-label": p.lieu } : { class: "g-repere g-seul" }, svg);
+      el("rect", { x: -11, y: -11, width: 22, height: 22 }, g);
+      el("text", {}, g).textContent = actif ? String(i + 1) : "";
+      if (!actif) el("text", { class: "g-nom", x: 20, y: 1 }, g).textContent = p.lieu;
+      el("title", {}, g).textContent = p.lieu;
+      return g;
+    });
+
+    const paysFeature = region.features.find((f) => String(f.id) === pays);
+    const autres = { type: "FeatureCollection", features: region.features.filter((f) => f !== paysFeature) };
+    const grilleGeo = geoGraticule10();
+    // Positions des reperes au dernier dessin (coordonnees du viewBox), pour
+    // poser la bulle sur le bon.
+    let derniere = [];
+    const bulle = bloc.querySelector(".globe-bulle");
+    let bulleDe = -1;
+    const fermerBulle = () => {
+      if (bulle) bulle.hidden = true;
+      bulleDe = -1;
+    };
+
+    function dessiner() {
+      projection.scale(R * etat.zoom).rotate([etat.lambda, etat.phi]);
+      fond.setAttribute("d", chemin({ type: "Sphere" }));
+      grille.setAttribute("d", chemin(grilleGeo) || "");
+
+      // Passe le seuil, les terres au 1/110e deviennent grossieres : on passe
+      // au detail de la region, embarque juste assez large pour ce zoom.
+      const fin = etat.zoom > seuil;
+      terre.setAttribute("d", fin ? "" : chemin(terres) || "");
+      voisins.setAttribute("d", fin ? chemin(autres) || "" : "");
+      const paysTrait = fin ? paysFeature : paysMonde;
+      paysMis.setAttribute("d", paysTrait ? chemin(paysTrait) || "" : "");
+
+      // Le trajet et ses numeros n'ont de sens qu'une fois zoome ; vu du monde
+      // entier, le voyage n'est qu'un point.
+      const proche = etat.zoom > 2;
+      ligne.setAttribute("d", proche ? chemin(trajet) || "" : "");
+      ligne.style.opacity = proche ? Math.min(1, (etat.zoom - 2) / 2) : 0;
+
+      const rotation = projection.rotate();
+      const vueCentre = [-rotation[0], -rotation[1]];
+      const pc = projection(centre);
+      const centreVisible = geoDistance(centre, vueCentre) < Math.PI / 2;
+      cible.setAttribute("x", pc[0] - 4);
+      cible.setAttribute("y", pc[1] - 4);
+      cible.style.display = !proche && centreVisible ? "" : "none";
+
+      // Les autres voyages ne vivent que dans la vue du monde : une fois
+      // zoome sur le trajet, ils seraient hors cadre de toute facon.
+      formesAutres.setAttribute("d", !proche ? chemin(collectionAutres) || "" : "");
+      autresVoyages.forEach((a, i) => {
+        const lien = liensAutres[i];
+        const visible = !proche && geoDistance([a.lng, a.lat], vueCentre) < Math.PI / 2 - 0.08;
+        lien.style.display = visible ? "" : "none";
+        if (!visible) return;
+        const [x, y] = projection([a.lng, a.lat]);
+        // Pres du bord droit, le nom passerait hors du cercle : a gauche.
+        const aGauche = x > TAILLE / 2 + R * 0.45;
+        const texte = lien.querySelector("text");
+        texte.setAttribute("x", aGauche ? -11 : 11);
+        texte.setAttribute("text-anchor", aGauche ? "end" : "start");
+        lien.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      });
+
+      // Position exacte de chaque repere, puis ecartement : tant que deux
+      // carres se touchent, on les pousse l'un loin de l'autre. Quelques
+      // passes suffisent pour une dizaine de points.
+      const exact = points.map((p) => {
+        const visible = proche && geoDistance([p.lng, p.lat], vueCentre) < Math.PI / 2;
+        const [x, y] = projection([p.lng, p.lat]);
+        const dedans = Math.hypot(x - TAILLE / 2, y - TAILLE / 2) < R - 8;
+        return { x, y, montre: visible && dedans };
+      });
+      const pose = exact.map((e) => ({ ...e }));
+      const MIN = 27;
+      for (let passe = 0; passe < 40; passe++) {
+        let bouge = false;
+        for (let a = 0; a < pose.length; a++) {
+          for (let b = a + 1; b < pose.length; b++) {
+            if (!pose[a].montre || !pose[b].montre) continue;
+            let dx = pose[b].x - pose[a].x;
+            let dy = pose[b].y - pose[a].y;
+            let d = Math.hypot(dx, dy);
+            if (d >= MIN) continue;
+            if (d < 0.01) (dx = b - a), (dy = 1), (d = Math.hypot(dx, dy));
+            const pousse = (MIN - d) / 2;
+            pose[a].x -= (dx / d) * pousse;
+            pose[a].y -= (dy / d) * pousse;
+            pose[b].x += (dx / d) * pousse;
+            pose[b].y += (dy / d) * pousse;
+            bouge = true;
+          }
+        }
+        if (!bouge) break;
+      }
+      derniere = pose;
+      pose.forEach((p, i) => {
+        const g = reperes[i];
+        const { fil, point } = attaches[i];
+        g.style.display = p.montre ? "" : "none";
+        g.setAttribute("transform", `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+        const decale = Math.hypot(p.x - exact[i].x, p.y - exact[i].y) > 2;
+        const avecFil = p.montre && decale;
+        fil.style.display = point.style.display = avecFil ? "" : "none";
+        if (avecFil) {
+          fil.setAttribute("x1", exact[i].x.toFixed(1));
+          fil.setAttribute("y1", exact[i].y.toFixed(1));
+          fil.setAttribute("x2", p.x.toFixed(1));
+          fil.setAttribute("y2", p.y.toFixed(1));
+          point.setAttribute("x", (exact[i].x - 2).toFixed(1));
+          point.setAttribute("y", (exact[i].y - 2).toFixed(1));
+        }
+      });
+    }
+
+    // ------------------------------------------------------------- les vues
+    const boutons = bloc.querySelectorAll(".globe-vue");
+    let anim = null;
+    function allerVers(cibleEtat, duree) {
+      fermerBulle();
+      if (anim) cancelAnimationFrame(anim);
+      if (reduit || duree <= 0) {
+        Object.assign(etat, cibleEtat);
+        dessiner();
+        return;
+      }
+      const depart = { ...etat };
+      // Le plus court chemin en longitude, pas un tour complet a l'envers.
+      let dl = cibleEtat.lambda - depart.lambda;
+      dl = ((dl + 540) % 360) - 180;
+      const t0 = performance.now();
+      const pas = (t) => {
+        const p = Math.min(1, (t - t0) / duree);
+        const e = sortie(p);
+        etat.lambda = depart.lambda + dl * e;
+        etat.phi = depart.phi + (cibleEtat.phi - depart.phi) * e;
+        // Le zoom s'interpole en logarithme : sinon il traine au debut et
+        // bondit a la fin.
+        etat.zoom = Math.exp(Math.log(depart.zoom) + (Math.log(cibleEtat.zoom) - Math.log(depart.zoom)) * e);
+        dessiner();
+        anim = p < 1 ? requestAnimationFrame(pas) : null;
+      };
+      anim = requestAnimationFrame(pas);
+    }
+    const vues = {
+      // Centre au milieu de tous les voyages du site : on les voit ensemble.
+      monde: () => {
+        const c = centreMonde ?? centre;
+        return { lambda: -c[0], phi: Math.max(-35, Math.min(35, -c[1])), zoom: 1 };
+      },
+      voyage: () => ({ lambda: -centre[0], phi: -centre[1], zoom: zoomVoyage }),
+      // Le globe entier, mais face au pays de la page : c'est la qu'arrive
+      // le lecteur, avant de plonger sur le trajet.
+      pays: () => ({ lambda: -centre[0], phi: Math.max(-35, Math.min(35, -centre[1])), zoom: 1 }),
+    };
+    // Des que le lecteur a choisi une vue, ou que le globe s'est range dans
+    // son coin, l'animation d'arrivee n'a plus lieu d'etre.
+    let arrivee = false;
+    function choisir(vue, duree = 1100) {
+      arrivee = true;
+      boutons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.vue === vue)));
+      allerVers(vues[vue](), duree);
+    }
+    boutons.forEach((b) => b.addEventListener("click", () => choisir(b.dataset.vue)));
+
+    // ------------------------------------------------- tourner a la main
+    let saisie = null;
+    svg.addEventListener("pointerdown", (ev) => {
+      if (ev.target instanceof Element && ev.target.closest(".g-repere, .g-autre")) return;
+      if (anim) cancelAnimationFrame(anim), (anim = null);
+      fermerBulle();
+      saisie = { x: ev.clientX, y: ev.clientY, lambda: etat.lambda, phi: etat.phi, id: ev.pointerId };
+      svg.setPointerCapture(ev.pointerId);
+      svg.classList.add("saisi");
+    });
+    svg.addEventListener("pointermove", (ev) => {
+      if (!saisie || ev.pointerId !== saisie.id) return;
+      const echelle = svg.getBoundingClientRect().width / TAILLE;
+      // Un pixel de glisser = un pixel de surface parcourue, quel que soit le
+      // zoom : la rotation ralentit d'autant qu'on est pres.
+      const k = 180 / (Math.PI * R * etat.zoom * echelle);
+      etat.lambda = saisie.lambda + (ev.clientX - saisie.x) * k;
+      etat.phi = Math.max(-90, Math.min(90, saisie.phi - (ev.clientY - saisie.y) * k));
+      // Zoome, on ne sort pas de la zone dont on a le detail : au-dela, le
+      // globe serait vide. Le jeu permis est ce qui reste de la zone une fois
+      // retire ce que l'ecran montre deja.
+      if (etat.zoom > seuil) {
+        const vu = (Math.asin(Math.min(1, 1 / etat.zoom)) * 180) / Math.PI;
+        const jeu = Math.max(0, rayonDetail - vu);
+        const jeuLng = jeu / Math.max(0.2, Math.cos((centre[1] * Math.PI) / 180));
+        etat.lambda = Math.max(-centre[0] - jeuLng, Math.min(-centre[0] + jeuLng, etat.lambda));
+        etat.phi = Math.max(-centre[1] - jeu, Math.min(-centre[1] + jeu, etat.phi));
+      }
+      dessiner();
+    });
+    const lacher = () => {
+      saisie = null;
+      svg.classList.remove("saisi");
+    };
+    svg.addEventListener("pointerup", lacher);
+    svg.addEventListener("pointercancel", lacher);
+
+    // ------------------------------------------- reperes et etapes, lies
+    // Le repere de l'etape ouverte reste en avant ; le survol le prend le
+    // temps du survol.
+    const ouvert = () => {
+      const d = document.querySelector("details.etape[open]");
+      return d ? points.findIndex((p) => p.etapes.some((e) => e.id === d.id)) : -1;
+    };
+    const activer = (i) => reperes.forEach((g, j) => g.classList.toggle("actif", j === i));
+    reperes.forEach((g, i) => {
+      if (!(points[i].etapes ?? []).length) return;
+      g.addEventListener("pointerenter", () => activer(i));
+      g.addEventListener("pointerleave", () => activer(ouvert()));
+      g.addEventListener("focus", () => activer(i));
+      g.addEventListener("blur", () => activer(ouvert()));
+      // Une seule etape : le clic ouvre sa galerie (et referme l'autre, les
+      // etapes formant un groupe). Plusieurs (Saigon, Batur, Lombok sud) :
+      // une bulle les liste toutes, et c'est dans la bulle qu'on choisit.
+      const ouvrir = () => {
+        const etapes = points[i].etapes;
+        if (etapes.length === 1 || !bulle) {
+          fermerBulle();
+          ouvrirEtape(etapes[0].id);
+          history.replaceState(null, "", "#" + etapes[0].id);
+          minimiser();
+          return;
+        }
+        if (bulleDe === i) return fermerBulle();
+        bulle.replaceChildren();
+        const titre = document.createElement("p");
+        titre.className = "bulle-lieu";
+        titre.textContent = points[i].lieu;
+        const liste = document.createElement("ul");
+        etapes.forEach((e) => {
+          const li = document.createElement("li");
+          const b = document.createElement("button");
+          b.type = "button";
+          b.textContent = e.titre;
+          b.addEventListener("click", () => {
+            fermerBulle();
+            ouvrirEtape(e.id);
+            history.replaceState(null, "", "#" + e.id);
+            minimiser();
+          });
+          li.appendChild(b);
+          liste.appendChild(li);
+        });
+        bulle.append(titre, liste);
+        const p = derniere[i];
+        const echelle = svg.getBoundingClientRect().width / TAILLE;
+        bulle.style.left = `${p.x * echelle}px`;
+        bulle.style.top = `${p.y * echelle}px`;
+        // Pres du haut du globe, la bulle passerait hors cadre : dessous.
+        bulle.classList.toggle("dessous", p.y < 200);
+        bulle.hidden = false;
+        bulleDe = i;
+        bulle.querySelector("button")?.focus({ preventScroll: true });
+      };
+      g.addEventListener("click", ouvrir);
+      g.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          ouvrir();
+        }
+      });
+    });
+    // ------------------------------------------------ le globe minimise
+    // Ouvrir une galerie depuis le globe fait descendre la page : le globe
+    // sortirait de l'ecran. Il se retire donc dans un coin de la fenetre, en
+    // petit, son repere toujours allume. Un clic l'y rappelle ; il reprend
+    // aussi sa place tout seul quand on remonte jusqu'a lui.
+    const place = bloc.querySelector(".globe-scene");
+    const mini = bloc.querySelector(".globe-mini");
+    let enCoin = false;
+    let sorti = false; // la place du globe a-t-elle quitte l'ecran depuis ?
+
+    // FLIP : on pose l'element a sa place finale, puis on l'anime depuis
+    // l'ancienne. Une seule transformation, aucune mise en page par image.
+    function voler(element, avant, duree = 560) {
+      if (reduit) return;
+      const apres = element.getBoundingClientRect();
+      if (!apres.width) return;
+      const s = avant.width / apres.width;
+      element.animate(
+        [
+          { transform: `translate(${avant.left - apres.left}px, ${avant.top - apres.top}px) scale(${s})`, transformOrigin: "top left" },
+          { transform: "none", transformOrigin: "top left" },
+        ],
+        { duration: duree, easing: "cubic-bezier(0.2, 0, 0, 1)" }
+      );
+    }
+
+    function minimiser() {
+      if (enCoin || !place || !mini) return;
+      // En petit, le globe montre toujours le trajet, jamais le monde entier :
+      // c'est la qu'on situe l'etape ouverte.
+      if (!arrivee || etat.zoom < zoomVoyage * 0.9) choisir("voyage", 500);
+      const avant = svg.getBoundingClientRect();
+      mini.hidden = false;
+      mini.prepend(svg);
+      place.classList.add("vide");
+      enCoin = true;
+      sorti = false;
+      voler(mini, avant);
+    }
+
+    function restaurer({ animer = true } = {}) {
+      if (!enCoin || !place || !mini) return;
+      const avant = mini.getBoundingClientRect();
+      place.prepend(svg);
+      place.classList.remove("vide");
+      mini.hidden = true;
+      enCoin = false;
+      if (animer) voler(svg, avant);
+    }
+
+    mini?.querySelector(".globe-mini-retour")?.addEventListener("click", () => {
+      // On remonte jusqu'a la place du globe ; c'est en y arrivant qu'il
+      // quitte son coin et la rejoint.
+      const barre = document.querySelector("header")?.getBoundingClientRect().height ?? 56;
+      const y = place.getBoundingClientRect().top + window.scrollY - barre - 24;
+      window.scrollTo({ top: y, behavior: reduit ? "instant" : "smooth" });
+      if (reduit) restaurer({ animer: false });
+    });
+    mini?.querySelector(".globe-mini-fermer")?.addEventListener("click", () => {
+      const anim = reduit ? null : mini.animate([{ opacity: 1 }, { opacity: 0, transform: "scale(0.6)" }], { duration: 200, easing: "ease-in" });
+      const fin = () => restaurer({ animer: false });
+      anim ? (anim.onfinish = fin) : fin();
+    });
+
+    if (place && mini) {
+      new IntersectionObserver(
+        (entrees) => {
+          for (const e of entrees) {
+            if (!enCoin) continue;
+            // Il faut d'abord que la place soit sortie de l'ecran : juste
+            // apres le clic, elle y est encore, et le globe reviendrait aussitot.
+            if (e.intersectionRatio < 0.1) sorti = true;
+            else if (sorti && e.intersectionRatio >= 0.5) restaurer();
+          }
+        },
+        { threshold: [0, 0.1, 0.5] }
+      ).observe(place);
+    }
+
+    // La bulle se ferme a Echap ou d'un clic ailleurs.
+    document.addEventListener("keydown", (ev) => {
+      if (ev.key === "Escape" && bulleDe >= 0) {
+        reperes[bulleDe]?.focus();
+        fermerBulle();
+      }
+    });
+    document.addEventListener("pointerdown", (ev) => {
+      if (bulleDe < 0 || !(ev.target instanceof Element)) return;
+      if (ev.target.closest(".globe-bulle") || ev.target.closest(".g-repere")) return;
+      fermerBulle();
+    });
+    // Une etape ouverte depuis la liste allume aussi son repere.
+    document.querySelectorAll("details.etape").forEach((d) =>
+      d.addEventListener("toggle", () => activer(ouvert()))
+    );
+
+    // ------------------------------------------------------- l'arrivee
+    // Le globe part de loin, tourne jusqu'au pays, puis plonge sur le trajet
+    // — une seule fois, quand il entre a l'ecran. Mouvement reduit : on
+    // arrive directement sur le voyage.
+    if (reduit) {
+      choisir("voyage", 0);
+      return;
+    }
+    dessiner();
+    const obs = new IntersectionObserver(
+      (entrees) => {
+        if (!entrees.some((e) => e.isIntersecting)) return;
+        obs.disconnect();
+        if (arrivee) return;
+        // L'arrivee se tourne vers le pays de la page, pas vers le milieu de
+        // tous les voyages : on arrive en Indonesie, on voit l'Indonesie.
+        allerVers(vues.pays(), 1300);
+        const plongee = setTimeout(() => choisir("voyage", 1400), 1450);
+        // Si le lecteur prend la main entre-temps, on ne lui reprend pas.
+        const renoncer = () => clearTimeout(plongee);
+        svg.addEventListener("pointerdown", renoncer, { once: true });
+        boutons.forEach((b) => b.addEventListener("click", renoncer, { once: true }));
+      },
+      { threshold: 0.35 }
+    );
+    obs.observe(svg);
+  });
+</script>

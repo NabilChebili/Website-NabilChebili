@@ -1,4 +1,12 @@
 {
+  "carte": [
+    { "lieu": "Saigon", "lat": 10.7769, "lng": 106.7009, "etapes": ["saigon", "festival-saigon", "tet", "gaming"] },
+    { "lieu": "Nha Trang", "lat": 12.2388, "lng": 109.1967, "etapes": ["nha-trang"] },
+    { "lieu": "Phú Yên", "lat": 13.0955, "lng": 109.3209, "etapes": ["phu-yen"] },
+    { "lieu": "Quy Nhơn", "lat": 13.7765, "lng": 109.2237, "etapes": ["quy-nhon"] },
+    { "lieu": "Bà Nà", "lat": 15.9977, "lng": 107.988, "etapes": ["ba-na"] },
+    { "lieu": "Đà Nẵng", "lat": 16.0544, "lng": 108.2022, "etapes": ["da-nang"] }
+  ],
   "galleries": {
     "ba-na": "https://stnchvlqvproduction.blob.core.windows.net/photos/Vietnam/ba-na/",
     "da-nang": "https://stnchvlqvproduction.blob.core.windows.net/photos/Vietnam/da-nang/",

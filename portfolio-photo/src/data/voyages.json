@@ -1,0 +1,9 @@
+{
+  "_lisezmoi": "Les voyages qui ont une page sur le site, places sur le globe de /vietnam et /indonesie. pays = code ISO numerique (world-atlas) ; lat/lng = le point du repere sur le globe ; page = la route, sans prefixe de langue.",
+  "voyages": [
+    { "cle": "vietnam", "nom": { "fr": "Vietnam", "en": "Vietnam" }, "pays": "704", "lat": 13.5, "lng": 108.5, "page": "/vietnam" },
+    { "cle": "indonesie", "nom": { "fr": "Indonésie", "en": "Indonesia" }, "pays": "360", "lat": -8.45, "lng": 115.6, "page": "/indonesie" },
+    { "cle": "croatie", "nom": { "fr": "Croatie", "en": "Croatia" }, "pays": "191", "lat": 42.65, "lng": 18.09, "page": "/croatie" },
+    { "cle": "londres", "nom": { "fr": "Londres", "en": "London" }, "pays": "826", "lat": 51.51, "lng": -0.13, "page": "/londres" }
+  ]
+}

@@ -1,6 +1,7 @@
 ---
 import GalleryPage from "../../components/GalleryPage.astro";
 import galleries from "../../data/galleries.json";
+import voyages from "../../data/voyages.json";
 import { cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
 
 export function getStaticPaths() {
@@ -22,6 +23,10 @@ const T = {
   },
 };
 const c = T[langue];
+
+// Le globe : Londres, au point de la liste des voyages.
+const v = voyages.voyages.find((x) => x.cle === "londres");
+const carte = v ? { pays: v.pays, points: [{ lieu: c.titre, lat: v.lat, lng: v.lng, etapes: [] }] } : null;
 ---
 
 <GalleryPage
@@ -30,4 +35,5 @@ const c = T[langue];
   intro={c.intro}
   galleryUrl={galleries.londres}
   lang={langue}
+  carte={carte}
 />
