@@ -178,8 +178,23 @@ const parcoursEn = [
     resume: "The trip edited long-form for YouTube, then recut into fourteen vertical episodes for TikTok, from Sekumpul to Uluwatu." },
 ];
 
+// Les horizons sont ecrits en francais dans parcoursBase : on traduit le mois
+// (ou la saison) mot a mot. Sans cela la page anglaise affichait « févr. 2024 ».
+const MOIS_EN = {
+  "janv.": "Jan.", "févr.": "Feb.", "mars": "Mar.", "avr.": "Apr.", "mai": "May",
+  "juin": "June", "juil.": "July", "août": "Aug.", "sept.": "Sept.", "oct.": "Oct.",
+  "nov.": "Nov.", "déc.": "Dec.",
+  "printemps": "Spring", "été": "Summer", "automne": "Autumn", "hiver": "Winter",
+};
+const horizonDansLaLangue = (h) =>
+  langue === "en" ? h.split(" ").map((m) => MOIS_EN[m] ?? m).join(" ") : h;
+
 const redige = langue === "en" ? parcoursEn : parcoursFr;
-const parcours = parcoursBase.map((b, i) => ({ ...b, ...redige[i] }));
+const parcours = parcoursBase.map((b, i) => ({
+  ...b,
+  ...redige[i],
+  horizon: horizonDansLaLangue(b.horizon),
+}));
 
 // La suite : pas de dates, des themes. L'ordre des colonnes est l'ordre de
 // lecture, pas une priorite.
