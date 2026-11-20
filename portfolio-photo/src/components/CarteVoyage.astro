@@ -16,6 +16,8 @@ import monde110 from "world-atlas/land-110m.json";
 import pays110 from "world-atlas/countries-110m.json";
 import pays50 from "world-atlas/countries-50m.json";
 import pays10 from "world-atlas/countries-10m.json";
+import voyagesDuSite from "../data/voyages.json";
+import { cheminLocalise } from "../i18n/ui";
 
 const { points = [], pays = "", lang = "fr" } = Astro.props;
 
@@ -65,8 +67,30 @@ const terresNettes = {
   type: "FeatureCollection",
   features: (terresGeo.features ?? [terresGeo]).map((f) => ({ type: "Feature", properties: {}, geometry: nettoyer(f.geometry, 1) })).filter((f) => f.geometry),
 };
-const paysMondeBrut = feature(pays110, pays110.objects.countries).features.find((f) => String(f.id) === String(pays));
+const pays110Geo = feature(pays110, pays110.objects.countries).features;
+const paysMondeBrut = pays110Geo.find((f) => String(f.id) === String(pays));
 const paysMonde = paysMondeBrut ? { type: "Feature", properties: {}, geometry: nettoyer(paysMondeBrut.geometry, 1) } : null;
+
+// Les autres voyages du site, sur le meme globe : leur pays grise, un repere
+// et leur nom, qui menent a leur page. Visibles dans la vue du monde.
+const autres = voyagesDuSite.voyages
+  .filter((v) => v.pays !== String(pays))
+  .map((v) => {
+    const f = pays110Geo.find((x) => String(x.id) === v.pays);
+    return {
+      nom: v.nom[lang] ?? v.nom.fr,
+      lat: v.lat,
+      lng: v.lng,
+      href: cheminLocalise(v.page, lang),
+      forme: f ? { type: "Feature", properties: {}, geometry: nettoyer(f.geometry, 1) } : null,
+    };
+  });
+// La vue du monde se centre au milieu de TOUS les voyages, pour qu'ils
+// tiennent ensemble sur la face visible du globe.
+const centreMonde = geoCentroid({
+  type: "MultiPoint",
+  coordinates: voyagesDuSite.voyages.map((v) => [v.lng, v.lat]),
+});
 
 // Le detail : 1/10e si le trajet tient dans un mouchoir (Bali et Lombok —
 // au 1/50e, Bali n'etait plus qu'une patate), 1/50e s'il traverse un pays
@@ -147,6 +171,8 @@ const donnees = {
   terres: terresNettes,
   paysMonde,
   region,
+  autres,
+  centreMonde,
 };
 
 const T = {
@@ -273,6 +299,42 @@ const c = T[lang] ?? T.fr;
   }
   .globe :global(.g-point) {
     fill: var(--ink);
+  }
+  /* Les autres voyages du site, dans la vue du monde : le pays grise comme
+     celui de la page, un carre plus petit, et le nom — qui est un lien. */
+  .globe :global(.g-autres) {
+    fill: var(--rule);
+    stroke: var(--ink-55);
+    stroke-width: 0.5;
+  }
+  .globe :global(.g-autre) {
+    cursor: pointer;
+  }
+  .globe :global(.g-autre rect) {
+    fill: var(--paper);
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    transition: fill var(--duree) var(--sortie);
+  }
+  .globe :global(.g-autre text) {
+    fill: var(--ink);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    dominant-baseline: central;
+  }
+  .globe :global(.g-autre:hover rect),
+  .globe :global(.g-autre:focus-visible rect) {
+    fill: var(--ink);
+  }
+  .globe :global(.g-autre:hover text),
+  .globe :global(.g-autre:focus-visible text) {
+    text-decoration: underline;
+  }
+  .globe :global(.g-autre:focus) {
+    outline: none;
   }
   /* Le point du pays, vu du monde entier : un seul carre, sans numero. */
   .globe :global(.g-cible) {
@@ -486,7 +548,7 @@ const c = T[lang] ?? T.fr;
     const brut = bloc.querySelector(".globe-donnees")?.textContent;
     if (!svg || !brut) return;
     // Cadrage calcule a la construction (voir l'en-tete du composant).
-    const { points, pays, centre, zoomVoyage, seuil, rayonDetail, terres, paysMonde, region } = JSON.parse(brut);
+    const { points, pays, centre, zoomVoyage, seuil, rayonDetail, terres, paysMonde, region, autres: autresVoyages = [], centreMonde } = JSON.parse(brut);
     if (!points?.length) return;
 
     const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -510,11 +572,26 @@ const c = T[lang] ?? T.fr;
     const grille = el("path", { class: "g-grille" }, scene);
     const terre = el("path", { class: "g-terre" }, scene);
     const voisins = el("path", { class: "g-terre" }, scene);
+    const formesAutres = el("path", { class: "g-autres" }, scene);
     const paysMis = el("path", { class: "g-pays" }, scene);
     const ligne = el("path", { class: "g-trajet" }, scene);
     const cible = el("rect", { class: "g-cible", width: 8, height: 8 }, scene);
     // Le contour du cercle, par-dessus tout : c'est lui qui fait l'objet.
     el("circle", { cx: TAILLE / 2, cy: TAILLE / 2, r: R, fill: "none", stroke: "currentColor", "stroke-width": 1 }, svg).style.color = "var(--ink)";
+
+    // Les autres voyages : de vrais liens (<a> SVG), donc navigables au
+    // clavier et ouvrables dans un nouvel onglet comme n'importe quel lien.
+    const collectionAutres = {
+      type: "FeatureCollection",
+      features: autresVoyages.map((a) => a.forme).filter(Boolean),
+    };
+    const liensAutres = autresVoyages.map((a) => {
+      const lien = el("a", { class: "g-autre", href: a.href }, svg);
+      el("rect", { x: -5, y: -5, width: 10, height: 10 }, lien);
+      el("text", { x: 11, y: 0 }, lien).textContent = a.nom;
+      el("title", {}, lien).textContent = a.nom;
+      return lien;
+    });
 
     // Quand deux reperes se chevauchent, on les ecarte ; un filet relie alors
     // chaque carre a un point qui marque l'endroit exact.
@@ -569,6 +646,23 @@ const c = T[lang] ?? T.fr;
       cible.setAttribute("x", pc[0] - 4);
       cible.setAttribute("y", pc[1] - 4);
       cible.style.display = !proche && centreVisible ? "" : "none";
+
+      // Les autres voyages ne vivent que dans la vue du monde : une fois
+      // zoome sur le trajet, ils seraient hors cadre de toute facon.
+      formesAutres.setAttribute("d", !proche ? chemin(collectionAutres) || "" : "");
+      autresVoyages.forEach((a, i) => {
+        const lien = liensAutres[i];
+        const visible = !proche && geoDistance([a.lng, a.lat], vueCentre) < Math.PI / 2 - 0.08;
+        lien.style.display = visible ? "" : "none";
+        if (!visible) return;
+        const [x, y] = projection([a.lng, a.lat]);
+        // Pres du bord droit, le nom passerait hors du cercle : a gauche.
+        const aGauche = x > TAILLE / 2 + R * 0.45;
+        const texte = lien.querySelector("text");
+        texte.setAttribute("x", aGauche ? -11 : 11);
+        texte.setAttribute("text-anchor", aGauche ? "end" : "start");
+        lien.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+      });
 
       // Position exacte de chaque repere, puis ecartement : tant que deux
       // carres se touchent, on les pousse l'un loin de l'autre. Quelques
@@ -651,7 +745,11 @@ const c = T[lang] ?? T.fr;
       anim = requestAnimationFrame(pas);
     }
     const vues = {
-      monde: () => ({ lambda: -centre[0], phi: Math.max(-35, Math.min(35, -centre[1])), zoom: 1 }),
+      // Centre au milieu de tous les voyages du site : on les voit ensemble.
+      monde: () => {
+        const c = centreMonde ?? centre;
+        return { lambda: -c[0], phi: Math.max(-35, Math.min(35, -c[1])), zoom: 1 };
+      },
       voyage: () => ({ lambda: -centre[0], phi: -centre[1], zoom: zoomVoyage }),
     };
     // Des que le lecteur a choisi une vue, ou que le globe s'est range dans
@@ -667,7 +765,7 @@ const c = T[lang] ?? T.fr;
     // ------------------------------------------------- tourner a la main
     let saisie = null;
     svg.addEventListener("pointerdown", (ev) => {
-      if (ev.target instanceof Element && ev.target.closest(".g-repere")) return;
+      if (ev.target instanceof Element && ev.target.closest(".g-repere, .g-autre")) return;
       if (anim) cancelAnimationFrame(anim), (anim = null);
       fermerBulle();
       saisie = { x: ev.clientX, y: ev.clientY, lambda: etat.lambda, phi: etat.phi, id: ev.pointerId };
