@@ -33,6 +33,7 @@ const parcoursBase = [
   { horizon: "2025" },
   { horizon: "janv. 2026" },
   { horizon: "juin 2026" },
+  { horizon: "août 2026" },
   { horizon: "été 2026" },
   { horizon: "oct. 2026" },
   { horizon: "oct. 2026" },
@@ -52,6 +53,8 @@ const parcoursFr = [
     resume: "Un portfolio à moi, écrit à la main, déployé en continu." },
   { titre: "Arrivée chez I-Shane",
     resume: "Consultant Cloud & DevOps. Dans le mois, un meetup Databricks dont j'ai fait les images." },
+  { titre: "Un bot musical pour Discord",
+    resume: "Écrit en deux jours, hébergé dans le cloud pour le prix d'un café par mois, et redéployé à chaque changement." },
   { titre: "Accompagnement d'architecture Cloud",
     resume: "Passer de la construction à la conception : cadrer les socles, poser les standards, et accompagner les équipes sur les choix qui engagent." },
   { titre: "Claude Certified Architect — Foundations",
@@ -75,6 +78,8 @@ const parcoursEn = [
     resume: "A portfolio of my own, hand-written, continuously deployed." },
   { titre: "Joining I-Shane",
     resume: "Cloud & DevOps consultant. Within the month, a Databricks meetup I shot the pictures for." },
+  { titre: "A music bot for Discord",
+    resume: "Written in two days, hosted in the cloud for the price of a coffee a month, and redeployed on every change." },
   { titre: "Cloud architecture work",
     resume: "From building to designing: framing the foundations, setting the standards, and guiding teams through the choices that commit them." },
   { titre: "Claude Certified Architect — Foundations",
@@ -100,7 +105,7 @@ const suiteFr = [
   { theme: "Publications",
     items: ["Reprendre les articles de fond", "Écrire plus souvent", "Parler en public une fois"] },
   { theme: "I-Shane",
-    items: ["Transmettre ce qui marche", "Le prochain I-Share"] },
+    items: ["Transmettre ce qui marche", "Rendre visible ce que l'équipe publie", "Le séminaire d'Oslo", "Le prochain I-Share"] },
 ];
 
 const suiteEn = [
@@ -113,7 +118,7 @@ const suiteEn = [
   { theme: "Writing",
     items: ["Back to long-form articles", "Write more often", "Speak in public once"] },
   { theme: "I-Shane",
-    items: ["Pass on what works", "The next I-Share"] },
+    items: ["Pass on what works", "Make what the team publishes visible", "The Oslo offsite", "The next I-Share"] },
 ];
 
 const suite = langue === "en" ? suiteEn : suiteFr;
