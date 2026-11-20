@@ -20,8 +20,8 @@ const {
   fallback = ["/photos/A7401177.jpg", "/photos/A7401113.jpg", "/photos/A7401167.jpg", "/photos/A7401181.jpg"],
   password = null,
   lang = "fr",
-  // Facultatif : { pays, points } pour poser la galerie sur le globe, apres
-  // les photos. Seules les galeries de voyage en ont un.
+  // Facultatif : { pays, points } pour poser la galerie sur le globe, en tete
+  // de page. Seules les galeries de voyage en ont un.
   carte = null,
 } = Astro.props;
 
@@ -55,16 +55,9 @@ const photos = listed.length ? listed : fallback;
       ) : null}
     </section>
 
-    <section>
-      <div class="section-head" data-reveal data-groupe="galerie">
-        <span>{t("galerie.photographies")}</span>
-        <span>({photos.length})</span>
-      </div>
-      <div class="galerie">
-        <PhotoGrid photos={photos} name={title} lang={langue} />
-      </div>
-    </section>
-
+    {/* Sans trajet a suivre, le globe situe le voyage d'entree, en tete de
+        page ; les pages a etapes (/vietnam, /indonesie) le gardent avec leurs
+        etapes. */}
     {carte ? (
       <section>
         <div class="section-head" data-reveal data-groupe="globe">
@@ -74,6 +67,16 @@ const photos = listed.length ? listed : fallback;
         <CarteVoyage points={carte.points} pays={carte.pays} lang={langue} />
       </section>
     ) : null}
+
+    <section>
+      <div class="section-head" data-reveal data-groupe="galerie">
+        <span>{t("galerie.photographies")}</span>
+        <span>({photos.length})</span>
+      </div>
+      <div class="galerie">
+        <PhotoGrid photos={photos} name={title} lang={langue} />
+      </div>
+    </section>
   </div>
 
   {password ? (
