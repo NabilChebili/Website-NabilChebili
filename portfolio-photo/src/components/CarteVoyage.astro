@@ -150,8 +150,8 @@ const donnees = {
 };
 
 const T = {
-  fr: { region: "Globe des étapes du voyage", monde: "Le monde", voyage: "Le voyage", aide: "Faites tourner le globe du doigt ou à la souris." },
-  en: { region: "Globe of the stops along the way", monde: "The world", voyage: "The trip", aide: "Spin the globe with a finger or the mouse." },
+  fr: { region: "Globe des étapes du voyage", monde: "Le monde", voyage: "Le voyage", aide: "Faites tourner le globe du doigt ou à la souris.", retour: "Revenir au globe", fermer: "Ranger le globe" },
+  en: { region: "Globe of the stops along the way", monde: "The world", voyage: "The trip", aide: "Spin the globe with a finger or the mouse.", retour: "Back to the globe", fermer: "Put the globe away" },
 };
 const c = T[lang] ?? T.fr;
 ---
@@ -161,6 +161,12 @@ const c = T[lang] ?? T.fr;
     <div class="globe-scene">
       <svg class="globe" viewBox="0 0 600 600" role="img" aria-label={c.region}></svg>
       <div class="globe-bulle" role="dialog" hidden></div>
+    </div>
+    <!-- Le globe en petit, colle dans un coin pendant qu'on regarde une
+         galerie ouverte depuis lui. Le <svg> y est deplace, pas copie. -->
+    <div class="globe-mini" hidden>
+      <button type="button" class="globe-mini-retour" aria-label={c.retour}></button>
+      <button type="button" class="globe-mini-fermer" aria-label={c.fermer}>×</button>
     </div>
     <script type="application/json" class="globe-donnees" set:html={JSON.stringify(donnees)} />
     <figcaption class="globe-vues">
@@ -317,6 +323,79 @@ const c = T[lang] ?? T.fr;
      elle les liste toutes. Papier, filet a l'encre, ni rayon ni ombre. */
   .globe-scene {
     position: relative;
+    /* Carree d'office : quand le globe part dans son coin, sa place garde sa
+       hauteur — sinon la page remonterait d'un coup sous le lecteur. */
+    aspect-ratio: 1 / 1;
+  }
+  /* La place vide laissee par le globe parti : son cercle en pointille. */
+  .globe-scene.vide::before {
+    content: "";
+    position: absolute;
+    inset: 2.33%;
+    border: 1px dashed var(--rule);
+    border-radius: 50%;
+  }
+
+  /* ---------------------------------------------- le globe minimise */
+  .globe-mini {
+    position: fixed;
+    right: var(--edge);
+    bottom: 24px;
+    z-index: 900; /* sous la barre (1000) et sous la visionneuse (2000) */
+    width: 136px;
+    height: 136px;
+    transform-origin: top left;
+  }
+  .globe-mini[hidden] {
+    display: none;
+  }
+  .globe-mini svg {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  /* Toute la pastille est un bouton : un clic ramene au globe. */
+  .globe-mini-retour {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+  .globe-mini-retour:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .globe-mini:hover svg {
+    transform: scale(1.04);
+  }
+  .globe-mini svg {
+    transition: transform var(--duree) var(--sortie);
+  }
+  .globe-mini-fermer {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 22px;
+    cursor: pointer;
+  }
+  @media (max-width: 700px) {
+    .globe-mini {
+      width: 100px;
+      height: 100px;
+      right: 16px;
+      bottom: 16px;
+    }
   }
   .globe-bulle {
     position: absolute;
@@ -575,7 +654,11 @@ const c = T[lang] ?? T.fr;
       monde: () => ({ lambda: -centre[0], phi: Math.max(-35, Math.min(35, -centre[1])), zoom: 1 }),
       voyage: () => ({ lambda: -centre[0], phi: -centre[1], zoom: zoomVoyage }),
     };
+    // Des que le lecteur a choisi une vue, ou que le globe s'est range dans
+    // son coin, l'animation d'arrivee n'a plus lieu d'etre.
+    let arrivee = false;
     function choisir(vue, duree = 1100) {
+      arrivee = true;
       boutons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.vue === vue)));
       allerVers(vues[vue](), duree);
     }
@@ -640,6 +723,7 @@ const c = T[lang] ?? T.fr;
           fermerBulle();
           ouvrirEtape(etapes[0].id);
           history.replaceState(null, "", "#" + etapes[0].id);
+          minimiser();
           return;
         }
         if (bulleDe === i) return fermerBulle();
@@ -657,6 +741,7 @@ const c = T[lang] ?? T.fr;
             fermerBulle();
             ouvrirEtape(e.id);
             history.replaceState(null, "", "#" + e.id);
+            minimiser();
           });
           li.appendChild(b);
           liste.appendChild(li);
@@ -680,6 +765,85 @@ const c = T[lang] ?? T.fr;
         }
       });
     });
+    // ------------------------------------------------ le globe minimise
+    // Ouvrir une galerie depuis le globe fait descendre la page : le globe
+    // sortirait de l'ecran. Il se retire donc dans un coin de la fenetre, en
+    // petit, son repere toujours allume. Un clic l'y rappelle ; il reprend
+    // aussi sa place tout seul quand on remonte jusqu'a lui.
+    const place = bloc.querySelector(".globe-scene");
+    const mini = bloc.querySelector(".globe-mini");
+    let enCoin = false;
+    let sorti = false; // la place du globe a-t-elle quitte l'ecran depuis ?
+
+    // FLIP : on pose l'element a sa place finale, puis on l'anime depuis
+    // l'ancienne. Une seule transformation, aucune mise en page par image.
+    function voler(element, avant, duree = 560) {
+      if (reduit) return;
+      const apres = element.getBoundingClientRect();
+      if (!apres.width) return;
+      const s = avant.width / apres.width;
+      element.animate(
+        [
+          { transform: `translate(${avant.left - apres.left}px, ${avant.top - apres.top}px) scale(${s})`, transformOrigin: "top left" },
+          { transform: "none", transformOrigin: "top left" },
+        ],
+        { duration: duree, easing: "cubic-bezier(0.2, 0, 0, 1)" }
+      );
+    }
+
+    function minimiser() {
+      if (enCoin || !place || !mini) return;
+      // En petit, le globe montre toujours le trajet, jamais le monde entier :
+      // c'est la qu'on situe l'etape ouverte.
+      if (!arrivee || etat.zoom < zoomVoyage * 0.9) choisir("voyage", 500);
+      const avant = svg.getBoundingClientRect();
+      mini.hidden = false;
+      mini.prepend(svg);
+      place.classList.add("vide");
+      enCoin = true;
+      sorti = false;
+      voler(mini, avant);
+    }
+
+    function restaurer({ animer = true } = {}) {
+      if (!enCoin || !place || !mini) return;
+      const avant = mini.getBoundingClientRect();
+      place.prepend(svg);
+      place.classList.remove("vide");
+      mini.hidden = true;
+      enCoin = false;
+      if (animer) voler(svg, avant);
+    }
+
+    mini?.querySelector(".globe-mini-retour")?.addEventListener("click", () => {
+      // On remonte jusqu'a la place du globe ; c'est en y arrivant qu'il
+      // quitte son coin et la rejoint.
+      const barre = document.querySelector("header")?.getBoundingClientRect().height ?? 56;
+      const y = place.getBoundingClientRect().top + window.scrollY - barre - 24;
+      window.scrollTo({ top: y, behavior: reduit ? "instant" : "smooth" });
+      if (reduit) restaurer({ animer: false });
+    });
+    mini?.querySelector(".globe-mini-fermer")?.addEventListener("click", () => {
+      const anim = reduit ? null : mini.animate([{ opacity: 1 }, { opacity: 0, transform: "scale(0.6)" }], { duration: 200, easing: "ease-in" });
+      const fin = () => restaurer({ animer: false });
+      anim ? (anim.onfinish = fin) : fin();
+    });
+
+    if (place && mini) {
+      new IntersectionObserver(
+        (entrees) => {
+          for (const e of entrees) {
+            if (!enCoin) continue;
+            // Il faut d'abord que la place soit sortie de l'ecran : juste
+            // apres le clic, elle y est encore, et le globe reviendrait aussitot.
+            if (e.intersectionRatio < 0.1) sorti = true;
+            else if (sorti && e.intersectionRatio >= 0.5) restaurer();
+          }
+        },
+        { threshold: [0, 0.1, 0.5] }
+      ).observe(place);
+    }
+
     // La bulle se ferme a Echap ou d'un clic ailleurs.
     document.addEventListener("keydown", (ev) => {
       if (ev.key === "Escape" && bulleDe >= 0) {
@@ -710,6 +874,7 @@ const c = T[lang] ?? T.fr;
       (entrees) => {
         if (!entrees.some((e) => e.isIntersecting)) return;
         obs.disconnect();
+        if (arrivee) return;
         allerVers(vues.monde(), 1300);
         const plongee = setTimeout(() => choisir("voyage", 1400), 1450);
         // Si le lecteur prend la main entre-temps, on ne lui reprend pas.
