@@ -67,3 +67,12 @@ resource "azurerm_storage_container" "photos" {
   storage_account_id    = azurerm_storage_account.photos.id
   container_access_type = var.photos_container_access_type
 }
+
+# Conteneur PRIVE (aucun acces anonyme) : photos deja envoyees mais pas encore
+# publiees. La Chine y attend la sortie du teaser (10/12), puis une copie cote
+# serveur la passe dans « photos » (voir le LISEZMOI du projet Chine).
+resource "azurerm_storage_container" "attente" {
+  name                  = "attente"
+  storage_account_id    = azurerm_storage_account.photos.id
+  container_access_type = "private"
+}
