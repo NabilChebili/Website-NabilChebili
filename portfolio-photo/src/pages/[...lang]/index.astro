@@ -55,7 +55,7 @@ const T = {
       },
       {
         titre: "Musique",
-        note: "Petites avancées dans le monde la guitare (autodidacte)",
+        note: "Petites avancées dans le monde de la guitare (autodidacte)",
         alt: "Musique",
       },
       { titre: "Gaming", note: "Twitch, streaming et jeux vidéo.", alt: "Gaming" },
@@ -251,7 +251,7 @@ const univers = c.univers.map((u, i) => ({
     </div>
     <div class="activites">
       {
-        univers.map((u) => (
+        univers.map((u, i) => (
           <a class="activite" href={u.href} data-reveal data-groupe="cartes">
             <span class="activite-visuel">
               <Image
@@ -263,7 +263,10 @@ const univers = c.univers.map((u, i) => ({
                 decoding="async"
               />
             </span>
-            <span class="activite-titre">{u.titre}</span>
+            <span class="activite-titre">
+              <span class="activite-numero" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+              {u.titre}
+            </span>
             <span class="activite-note">{u.note}</span>
             <span class="activite-lien">
               <span>{c.voir}</span>
