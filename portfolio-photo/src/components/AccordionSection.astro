@@ -5,7 +5,11 @@ import PhotoGrid from "./PhotoGrid.astro";
 // referme l'autre (attribut name des <details>, natif dans les navigateurs).
 // numero : le numero du repere de cette etape sur le globe, s'il y en a un.
 const { id = "section", title = "", photos = [], lang = "fr", groupe, numero } = Astro.props;
-const previewPhotos = photos.slice(0, 4);
+// Une photo est une URL, ou un objet { url, caption?, serie? } (rafale rassemblee,
+// voir PhotoGrid) : l'apercu ne garde que l'URL, le compte inclut toute la serie.
+const urlDe = (p) => (typeof p === "string" ? p : p.url);
+const previewPhotos = photos.slice(0, 4).map(urlDe);
+const nbPhotos = photos.reduce((n, p) => n + 1 + (typeof p === "string" ? 0 : (p.serie?.length ?? 0)), 0);
 ---
 
 <details class="etape" id={id} name={groupe} data-numero={numero}>
@@ -14,7 +18,7 @@ const previewPhotos = photos.slice(0, 4);
       <span class="etape-signe" aria-hidden="true"></span>
       {numero ? <span class="etape-numero">{String(numero).padStart(2, "0")}</span> : null}
       <span class="etape-titre">{title}</span>
-      <span class="etape-compte">{photos.length} photos</span>
+      <span class="etape-compte">{nbPhotos} photos</span>
     </span>
     <span class="etape-apercu" aria-hidden="true">
       {previewPhotos.map((p) => <img src={p} alt="" loading="lazy" decoding="async" />)}

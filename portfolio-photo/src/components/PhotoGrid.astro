@@ -26,11 +26,24 @@ const mots = {
     <button class="download-all-btn" type="button" aria-label={`${t("grille.toutesLesPhotos")} ${name}`}>{t("grille.toutTelecharger")}</button>
   </div>
   <div class="photo-grid-cards">
+    {/* Rafale rassemblee ({ url, serie: [urls] }) : une seule case, marquee
+        « +N », suivie de cases cachees que la visionneuse fait defiler juste
+        apres la photo montree. Rien n'est retire de la galerie. */}
     {items.map((p, i) => (
-      <figure class="photo-card" style={`--i:${i % 6}`}>
-        <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
-        {p.caption ? <figcaption>{p.caption}</figcaption> : null}
-      </figure>
+      <>
+        <figure class={p.serie?.length ? "photo-card serie" : "photo-card"} style={`--i:${i % 6}`}>
+          <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
+          {p.serie?.length ? (
+            <span class="serie-compte" aria-label={`${p.serie.length + 1} ${t("grille.prises")}`}>+{p.serie.length}</span>
+          ) : null}
+          {p.caption ? <figcaption>{p.caption}</figcaption> : null}
+        </figure>
+        {(p.serie ?? []).map((u) => (
+          <figure class="photo-card dans-serie" aria-hidden="true">
+            <img src={u} alt="" loading="lazy" tabindex="-1" />
+          </figure>
+        ))}
+      </>
     ))}
   </div>
 
@@ -101,6 +114,13 @@ const mots = {
       //  Visionneuse
       // ===================================================================
       const images = cards.map((card) => card.querySelector("img")).filter(Boolean);
+      // Les prises cachees d'une rafale n'ont pas de case a l'ecran : la
+      // visionneuse se referme sur la case qui porte la serie.
+      const vignette = (i) => {
+        let k = i;
+        while (k > 0 && cards[k] && cards[k].classList.contains("dans-serie")) k--;
+        return images[k];
+      };
       const lightbox = grid.querySelector(".lightbox");
       const track = lightbox.querySelector(".lb-piste");
       let views = Array.from(lightbox.querySelectorAll(".lb-vue"));
@@ -364,7 +384,7 @@ const mots = {
         veil(1);
         placeTrack(0, false);
         try {
-          const thumb = images[index];
+          const thumb = vignette(index);
           if (thumb && typeof thumb.focus === "function") thumb.focus({ preventScroll: true });
         } catch (e) {
           /* ignore */
@@ -373,7 +393,7 @@ const mots = {
 
       // La photo ne disparait pas : elle retourne dans sa case.
       function closeToThumb() {
-        const thumb = images[index];
+        const thumb = vignette(index);
         const img = currentImg();
         if (reducedMotion.matches || !thumb || !img || !img.getAttribute("src")) {
           closeNow();
@@ -860,6 +880,41 @@ const mots = {
       transform: none;
       transition: none;
     }
+  }
+
+  /* Rafale rassemblee : les prises suivantes ne prennent pas de case. La case
+     montree porte un cartouche « +N » a l'encre, comme ceux du viseur, et un
+     second filet decale qui dit « il y en a d'autres dessous » — un trait de
+     1px, pas une ombre. */
+  .photo-card.dans-serie {
+    display: none;
+  }
+  .photo-card.serie {
+    position: relative;
+  }
+  .photo-card.serie::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    left: 5px;
+    aspect-ratio: 4 / 5;
+    border-top: 1px solid var(--ink);
+    border-right: 1px solid var(--ink);
+    pointer-events: none;
+  }
+  .serie-compte {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 7px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    pointer-events: none;
   }
 
   .photo-card img {

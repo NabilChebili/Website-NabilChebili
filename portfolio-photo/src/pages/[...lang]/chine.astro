@@ -27,8 +27,15 @@ const recit = chine.post.map((p) => ({
   caption: langue === "en" ? (p.captionEn || p.caption) : p.caption,
 }));
 
+// Une entree est un id, ou une rafale { id, serie } : une case qui porte « +N »
+// et dont la visionneuse fait defiler les autres prises (voir PhotoGrid).
 const photosByKey = Object.fromEntries(
-  Object.entries(chine.etapes).map(([cle, ids]) => [cle, ids.map((id) => url(cle, id))])
+  Object.entries(chine.etapes).map(([cle, items]) => [
+    cle,
+    items.map((x) =>
+      typeof x === "string" ? url(cle, x) : { url: url(cle, x.id), serie: x.serie.map((id) => url(cle, id)) }
+    ),
+  ])
 );
 
 const labels = {
