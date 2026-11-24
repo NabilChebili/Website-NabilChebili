@@ -66,7 +66,15 @@ const titres = {
 const chineBase = process.env.CHINE_PHOTOS_LOCAL ? "/_apercu-chine/" : chine.base;
 
 const couvertures = [
-  { slug: "chine", cover: chine.post[0] ? `${chineBase}recit/${chine.post[0].id}.jpg` : fallbackCover },
+  // Vignette choisie par Nabil (chine.json → couverture), sinon la 1re du recit.
+  {
+    slug: "chine",
+    cover: chine.couverture
+      ? `${chineBase}${chine.couverture}.jpg`
+      : chine.post[0]
+        ? `${chineBase}recit/${chine.post[0].id}.jpg`
+        : fallbackCover,
+  },
   { slug: "indonesie", cover: indonesie.post[0]?.url },
   { slug: "vietnam", cover: vietnam.post[0]?.url },
   { slug: "supersonic", cover: await firstPhoto(galleries.superSonic) },
