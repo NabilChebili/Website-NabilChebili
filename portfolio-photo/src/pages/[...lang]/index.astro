@@ -16,6 +16,7 @@ import visuelPhoto from "../../assets/A7401833.jpg";
 import visuelMusique from "../../assets/image.png";
 import visuelGaming from "../../assets/twitch.png";
 import Colophon from "../../components/Colophon.astro";
+import nouveautesData from "../../data/nouveautes.json";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
 
 export function getStaticPaths() {
@@ -39,6 +40,7 @@ const T = {
       "Je suis quelqu’un de curieux, attiré par les choses que l’on construit et que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à ce que tout fasse sens.",
     portraitAlt: "Portrait de Nabil Chebili",
     explorer: "Explorer",
+    nouveautes: "Nouveautés",
     voir: "Voir",
     univers: [
       {
@@ -73,6 +75,7 @@ const T = {
       "I’m a curious sort, drawn to things that get built and understood over time. I’ve always liked making, taking apart and putting back together — Lego first, now ideas, systems and images. What interests me as much as the result is the road to it: watching, testing, adjusting, simplifying, until the whole thing makes sense.",
     portraitAlt: "Portrait of Nabil Chebili",
     explorer: "Explore",
+    nouveautes: "What's new",
     voir: "View",
     univers: [
       {
@@ -98,6 +101,19 @@ const c = T[langue];
 
 // Les quatre activites de la page d'origine : memes images, memes
 // destinations ; seuls les libelles changent de langue.
+// Nouveautes : les quatre plus recentes de nouveautes.json, datees au mois.
+const nouveautes = nouveautesData.nouveautes.slice(0, 4).map((n) => ({
+  date: new Date(n.date + "T12:00:00Z").toLocaleDateString(langue === "en" ? "en-GB" : "fr-FR", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }),
+  iso: n.date,
+  titre: n.titre[langue],
+  texte: n.texte[langue],
+  href: cheminLocalise(n.href, langue),
+}));
+
 const visuels = [visuelCloud, visuelPhoto, visuelMusique, visuelGaming];
 const routes = ["/clouddevops", "/photo", "/musique", "/gaming"];
 const univers = c.univers.map((u, i) => ({
@@ -147,6 +163,32 @@ const univers = c.univers.map((u, i) => ({
       <p>{c.chapo}</p>
       <a class="jump" href="#explorer">{c.explorerLien} &#8595;</a>
     </div>
+  </section>
+
+  {/* Nouveautes : un journal, pas des cartes. Une ligne par nouveaute, des
+      filets de 1px, la date en chasse fixe a gauche, la fleche qui avance au
+      survol comme dans le bloc de contact. */}
+  <section class="nouveautes" id="nouveautes">
+    <div class="section-head" data-reveal data-groupe="nouveautes">
+      <span>{c.nouveautes}</span>
+      <span>({nouveautes.length})</span>
+    </div>
+    <ol class="nouveautes-liste">
+      {
+        nouveautes.map((n) => (
+          <li data-reveal data-groupe="nouveautes">
+            <a class="nouveaute" href={n.href}>
+              <time class="nouveaute-date" datetime={n.iso}>{n.date}</time>
+              <span class="nouveaute-corps">
+                <span class="nouveaute-titre">{n.titre}</span>
+                <span class="nouveaute-texte">{n.texte}</span>
+              </span>
+              <i aria-hidden="true">&#8594;</i>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
   </section>
 
   <section class="about">
@@ -308,6 +350,77 @@ const univers = c.univers.map((u, i) => ({
   :global(main.page.home) {
     --edge: 64px;
     padding-top: 112px;
+  }
+
+  /* ----------------------------------------------------------- nouveautes ---
+     Meme grammaire que les etapes et le bloc de contact : des lignes entre
+     filets gris, aucune carte, aucun fond. */
+  .nouveautes {
+    padding-top: var(--pas-8);
+  }
+  .nouveautes-liste {
+    margin: 0;
+    padding: 0 var(--edge);
+    list-style: none;
+  }
+  .nouveautes-liste li + li {
+    border-top: 1px solid var(--rule);
+  }
+  .nouveaute {
+    display: grid;
+    grid-template-columns: 9em 1fr auto;
+    align-items: baseline;
+    gap: var(--pas-3);
+    padding: 18px 0;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nouveaute-date {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .nouveaute-corps {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  /* Memes familles que les cartes « Explorer » juste en dessous. */
+  .nouveaute-titre {
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: clamp(19px, 1.7vw, 24px);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .nouveaute-texte {
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-55);
+    max-width: 70ch;
+  }
+  .nouveaute i {
+    font-style: normal;
+    transition: transform var(--duree) var(--sortie);
+  }
+  .nouveaute:hover i {
+    transform: translateX(6px);
+  }
+  .nouveaute:hover .nouveaute-titre {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  @media (max-width: 700px) {
+    .nouveaute {
+      grid-template-columns: 1fr auto;
+      gap: 6px 16px;
+    }
+    .nouveaute-date {
+      grid-column: 1 / -1;
+    }
   }
 
   /* Les filets s'arretent AU cadre au lieu de le traverser.
