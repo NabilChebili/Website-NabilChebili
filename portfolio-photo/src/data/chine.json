@@ -1,0 +1,336 @@
+{
+ "_lisezmoi": "Page /chine. base = dossier du stockage Azure (container photos, prefixe Chine/). Les fichiers sont listes ici (pas de listing au build) : <base><etape>/<id>.jpg et <base>recit/<id>.jpg. Genere depuis F:/Videos voyages/outils/site/preparer_chine.js. video.id = identifiant YouTube du film, null tant qu il n est pas publie (la section ne s affiche pas).",
+ "base": "https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/",
+ "video": {
+  "id": null,
+  "titre": "CHINA - 2026"
+ },
+ "carte": [
+  {
+   "lieu": "Pékin",
+   "lieuEn": "Beijing",
+   "lat": 39.9042,
+   "lng": 116.4074,
+   "etapes": [
+    "pekin",
+    "cite-interdite",
+    "temple-du-ciel"
+   ]
+  },
+  {
+   "lieu": "Mutianyu",
+   "lat": 40.4319,
+   "lng": 116.5704,
+   "etapes": [
+    "muraille"
+   ]
+  },
+  {
+   "lieu": "Nankin",
+   "lieuEn": "Nanjing",
+   "lat": 32.0603,
+   "lng": 118.7969,
+   "etapes": [
+    "nankin"
+   ]
+  },
+  {
+   "lieu": "Hangzhou",
+   "lat": 30.2741,
+   "lng": 120.1551,
+   "etapes": [
+    "hangzhou"
+   ]
+  },
+  {
+   "lieu": "Shaoxing",
+   "lat": 29.9958,
+   "lng": 120.5861,
+   "etapes": [
+    "shaoxing"
+   ]
+  },
+  {
+   "lieu": "Shanghai",
+   "lat": 31.2304,
+   "lng": 121.4737,
+   "etapes": [
+    "shanghai"
+   ]
+  },
+  {
+   "lieu": "Suzhou",
+   "lat": 31.2989,
+   "lng": 120.5853,
+   "etapes": [
+    "suzhou"
+   ]
+  }
+ ],
+ "etapes": {
+  "pekin": [
+   "10161101_p0029",
+   "10161101_p0035",
+   "10161101_p0043",
+   "10161101_p0045",
+   "10161101_p0054",
+   "10161101_p0070",
+   "10161101_p0074",
+   "10161101_p0075",
+   "10161101_p0076",
+   "10161101_p0079",
+   "10161101_p0080",
+   "10161101_p0082",
+   "10161101_p0088",
+   "10161101_p0089",
+   "10161101_p0094",
+   "10261102_p0004",
+   "10261102_p0011",
+   "10261102_p0017",
+   "10261102_p0021",
+   "10261102_p0023",
+   "10261102_p0027",
+   "10261102_p0028",
+   "10261102_p0029",
+   "10261102_p0037",
+   "10261102_p0040",
+   "10261102_p0047",
+   "10261102_p0048",
+   "10261102_p0053",
+   "10261102_p0054",
+   "10261102_p0055",
+   "10261102_p0056",
+   "10261102_p0082",
+   "10261102_p0102",
+   "10261102_p0122",
+   "10261102_p0137",
+   "10261102_p0140",
+   "10261102_p0151",
+   "10261102_p0167",
+   "10261102_p0184",
+   "10261102_p0189",
+   "10261102_p0235"
+  ],
+  "muraille": [
+   "10361103_p0003",
+   "10361103_p0012",
+   "10361103_p0021",
+   "10361103_p0027",
+   "10361103_p0052",
+   "10361103_p0060",
+   "10361103_p0072",
+   "10361103_p0094",
+   "10361103_p0104",
+   "10361103_p0121",
+   "10361103_p0155",
+   "10361103_p0169"
+  ],
+  "cite-interdite": [
+   "10461104_p0014",
+   "10461104_p0031",
+   "10461104_p0054",
+   "10461104_p0064",
+   "10461104_p0081",
+   "10461104_p0112",
+   "10461104_p0119",
+   "10461104_p0121",
+   "10461104_p0124",
+   "10461104_p0142",
+   "10461104_p0155",
+   "10461104_p0159",
+   "10461104_p0174",
+   "10461104_p0186",
+   "10461104_p0190",
+   "10461104_p0209",
+   "10461104_p0218",
+   "10461104_p0224",
+   "10461104_p0229",
+   "10461104_p0240",
+   "10461104_p0249",
+   "10461104_p0256",
+   "10461104_p0271",
+   "10461104_p0311",
+   "10461104_p0320",
+   "10461104_p0353",
+   "10461104_p0363",
+   "10461104_p0368",
+   "10461104_p0381"
+  ],
+  "temple-du-ciel": [
+   "10561105_p0001",
+   "10561105_p0024",
+   "10561105_p0029",
+   "10561105_p0040",
+   "10561105_p0052",
+   "10561105_p0057",
+   "10561105_p0087",
+   "10561105_p0094",
+   "10561105_p0153",
+   "10561105_p0180",
+   "10561105_p0202",
+   "10561105_p0208",
+   "10561105_p0230",
+   "10561105_p0231",
+   "10561105_p0236",
+   "10561105_p0260",
+   "10561105_p0271"
+  ],
+  "nankin": [
+   "10661106_p0003",
+   "10661106_p0021",
+   "10661106_p0036",
+   "10661106_p0055",
+   "10661106_p0072",
+   "10661106_p0102",
+   "10661106_p0108",
+   "10761107_p0012",
+   "10761107_p0034",
+   "10761107_p0038",
+   "10761107_p0045",
+   "10761107_p0056",
+   "10761107_p0093",
+   "10761107_p0104",
+   "10761107_p0113",
+   "10861108_p0008"
+  ],
+  "hangzhou": [
+   "10861108_p0049",
+   "10861108_p0051",
+   "10861108_p0061",
+   "10861108_p0072",
+   "10861108_p0091",
+   "10961109_p0009",
+   "10961109_p0048",
+   "10961109_p0057",
+   "10961109_p0092",
+   "10961109_p0129",
+   "10961109_p0172",
+   "10961109_p0197",
+   "11061110_p0001",
+   "11061110_p0197",
+   "11061110_p0210",
+   "11061110_p0213"
+  ],
+  "shaoxing": [
+   "11061110_p0004",
+   "11061110_p0010",
+   "11061110_p0019",
+   "11061110_p0028",
+   "11061110_p0036",
+   "11061110_p0043",
+   "11061110_p0057",
+   "11061110_p0086",
+   "11061110_p0097",
+   "11061110_p0108",
+   "11061110_p0121",
+   "11061110_p0133",
+   "11061110_p0137",
+   "11061110_p0143",
+   "11061110_p0178"
+  ],
+  "shanghai": [
+   "11161111_p0005",
+   "11161111_p0020",
+   "11161111_p0036",
+   "11161111_p0043",
+   "11161111_p0055",
+   "11161111_p0103",
+   "11161111_p0116",
+   "11161111_p0161",
+   "11261112_p0019",
+   "11261112_p0028",
+   "11261112_p0046",
+   "11261112_p0060",
+   "11261112_p0068",
+   "11261112_p0118",
+   "11461114_p0009",
+   "11461114_p0020"
+  ],
+  "suzhou": [
+   "11361113_p0002",
+   "11361113_p0017",
+   "11361113_p0025",
+   "11361113_p0035",
+   "11361113_p0041",
+   "11361113_p0051",
+   "11361113_p0061",
+   "11361113_p0065",
+   "11361113_p0071",
+   "11361113_p0078",
+   "11361113_p0085",
+   "11361113_p0093"
+  ]
+ },
+ "post": [
+  {
+   "id": "10461104_p0224",
+   "caption": "Les ginkgos jaunissent au-dessus des toits de la Cité interdite.",
+   "captionEn": "Ginkgo trees turning yellow above the roofs of the Forbidden City."
+  },
+  {
+   "id": "10461104_p0190",
+   "caption": "Un grand sourire, avec la Cité interdite dans le dos.",
+   "captionEn": "A big smile, with the Forbidden City behind her."
+  },
+  {
+   "id": "10461104_p0381",
+   "caption": "Un soir à Pékin, un dragon de fleurs tout illuminé.",
+   "captionEn": "One evening in Beijing, a dragon made of flowers, all lit up."
+  },
+  {
+   "id": "10561105_p0052",
+   "caption": "Un dragon moulé dans une tuile vernissée verte.",
+   "captionEn": "A dragon moulded into a green glazed roof tile."
+  },
+  {
+   "id": "10561105_p0202",
+   "caption": "Au Palais d'été, la tour de l'Encens bouddhique en plein soleil.",
+   "captionEn": "The Tower of Buddhist Incense at the Summer Palace, in full sun."
+  },
+  {
+   "id": "10561105_p0236",
+   "caption": "Fin d'après-midi sur le lac du Palais d'été, les bateaux sont à quai.",
+   "captionEn": "Late afternoon on the Summer Palace lake, the boats tied up."
+  },
+  {
+   "id": "10661106_p0055",
+   "caption": "À Nankin, tout s'allume au bord de l'eau à la nuit tombée.",
+   "captionEn": "In Nanjing, everything lights up along the water after dark."
+  },
+  {
+   "id": "10961109_p0129",
+   "caption": "Une ombrelle en papier huilé au bord d'un bassin, à Hangzhou.",
+   "captionEn": "An oil-paper parasol by a pond in Hangzhou."
+  },
+  {
+   "id": "10961109_p0172",
+   "caption": "Le vent lève des vagues sur le lac de l'Ouest, la pagode Leifeng au fond.",
+   "captionEn": "Wind whipping up waves on West Lake, Leifeng Pagoda in the distance."
+  },
+  {
+   "id": "11061110_p0001",
+   "caption": "Un train à grande vitesse à quai, entre Hangzhou et Shaoxing.",
+   "captionEn": "A high-speed train at the platform, between Hangzhou and Shaoxing."
+  },
+  {
+   "id": "11061110_p0010",
+   "caption": "Le Sanwei Shuwu, la petite école de Lu Xun enfant, à Shaoxing.",
+   "captionEn": "Sanwei Shuwu in Shaoxing, the little school Lu Xun went to as a boy."
+  },
+  {
+   "id": "11061110_p0137",
+   "caption": "Un batelier pousse sa perche depuis un ponton flottant, sur un canal de Shaoxing.",
+   "captionEn": "A boatman pushing on his pole from a floating dock on a Shaoxing canal."
+  },
+  {
+   "id": "11161111_p0005",
+   "caption": "À Shanghai, une danseuse en parure d'argent fait cercle autour d'elle.",
+   "captionEn": "In Shanghai, a dancer in silver jewellery draws a crowd around her."
+  },
+  {
+   "id": "11161111_p0161",
+   "caption": "Pudong s'allume de l'autre côté du fleuve, derrière le pont Waibaidu.",
+   "captionEn": "Pudong lit up across the river, behind the Waibaidu Bridge."
+  }
+ ]
+}
