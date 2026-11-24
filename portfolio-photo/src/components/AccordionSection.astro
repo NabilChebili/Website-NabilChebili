@@ -146,6 +146,12 @@ const nbPhotos = photos.reduce((n, p) => n + 1 + (typeof p === "string" ? 0 : (p
     .etape-titre {
       font-size: 20px;
     }
+    /* Titre long + compte : sur 375px la ligne depassait de 24px. Le compte
+       passe a la ligne au lieu de pousser la page. */
+    .etape-gauche {
+      flex-wrap: wrap;
+      row-gap: 4px;
+    }
     .etape-apercu img:nth-child(n + 3) {
       display: none;
     }

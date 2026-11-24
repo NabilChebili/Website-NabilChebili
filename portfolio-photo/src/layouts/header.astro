@@ -124,8 +124,8 @@ const schemaWebsite = {
 		<meta name="twitter:description" content={metaDescription} />
 		<meta name="twitter:image" content={ogImageUrl} />
 
-		<script type="application/ld+json">{JSON.stringify(schemaPerson)}</script>
-		<script type="application/ld+json">{JSON.stringify(schemaWebsite)}</script>
+		<script type="application/ld+json" set:html={JSON.stringify(schemaPerson)} />
+		<script type="application/ld+json" set:html={JSON.stringify(schemaWebsite)} />
 		<script is:inline>
 			// Pose avant le rendu : les elements a reveler ne sont masques que si le
 			// script tourne. Sans JavaScript, rien n'est cache.
