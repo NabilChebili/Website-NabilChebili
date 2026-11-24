@@ -89,8 +89,10 @@ const couvertures = [
   { slug: "croatie", cover: await firstPhoto(galleries.croatie) },
 ];
 
-// Avant la sortie du teaser, la Chine n'a pas de carte ici (aucune photo publiee).
-const destinations = couvertures.filter((d) => chineOuverte || d.slug !== "chine").map((d) => ({
+// Avant la sortie du teaser, la carte Chine est verrouillee : image tres floutee
+// (public/chine-verrou.webp, rien de reconnaissable) et cadenas ; elle mene au
+// compte a rebours de /chine (Nabil, 24/11).
+const destinations = couvertures.map((d) => (d.slug === "chine" && !chineOuverte ? { ...d, cover: "/chine-verrou.webp", verrou: true } : d)).map((d) => ({
   ...d,
   title: titres[langue][d.slug],
   href: cheminLocalise(`/${d.slug}`, langue),
@@ -113,6 +115,7 @@ const T = {
     intro:
       "Un aperçu de voyages, de moments et d’instants précieux — appareil en main.",
     voir: "Voir les galeries",
+    verrou: "Le 10 décembre",
     chapitre: "Galeries",
     apport:
       "À travers le design et la recherche d’esthétique dans les détails, la photographie s’est rapidement imposée comme un moyen d’expression naturel. Avec le temps, l’envie de capturer le réel m’a poussé à acheter mon premier appareil photo et à voyager, appareil en main. Chaque déplacement est devenu une occasion de raconter une histoire, de figer une ambiance, un regard, un instant.",
@@ -125,6 +128,7 @@ const T = {
     accroche: "Travels, cities and snapshots",
     intro: "A look at journeys, moments and small things worth keeping — camera in hand.",
     voir: "See the galleries",
+    verrou: "10 December",
     chapitre: "Galleries",
     apport:
       "Coming from design, and from a habit of looking for beauty in the details, photography quickly became a natural way to say things. Over time the urge to capture what was actually in front of me led to a first camera, and to travelling with it in hand. Every trip turned into a chance to tell a story — to hold on to a mood, a look, a moment.",
@@ -174,9 +178,19 @@ const c = T[langue];
     <div class="vignettes">
       {
         destinations.map((d) => (
-          <a class="vignette" href={d.href} data-reveal data-groupe="vignettes">
+          <a class={d.verrou ? "vignette verrou" : "vignette"} href={d.href} data-reveal data-groupe="vignettes">
             <span class="vignette-visuel">
               <img src={d.cover} alt="" loading="lazy" decoding="async" />
+              {d.verrou && (
+                <span class="verrou-signe">
+                  <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+                    <rect x="5" y="10.5" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="currentColor" stroke-width="1.5" />
+                    <path d="M12 14.5v2.5" stroke="currentColor" stroke-width="1.5" />
+                  </svg>
+                  <span>{c.verrou}</span>
+                </span>
+              )}
             </span>
             <span class="vignette-titre">{d.title}</span>
           </a>
@@ -222,6 +236,26 @@ const c = T[langue];
     line-height: 1.5;
     color: var(--ink-55);
     font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Carte Chine verrouillee : cadenas et date au centre, en blanc sur l'image
+     floutee ; aucun rayon, aucune ombre (DESIGN.md). */
+  .vignette-visuel {
+    position: relative;
+  }
+  .verrou-signe {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 10px;
+    color: #fff;
+    background: rgb(0 0 0 / 0.18);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
   }
 
   .apport {

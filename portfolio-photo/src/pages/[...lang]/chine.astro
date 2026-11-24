@@ -4,6 +4,7 @@ import Layout from "../../layouts/header.astro";
 import PhotoGrid from "../../components/PhotoGrid.astro";
 import AccordionSection from "../../components/AccordionSection.astro";
 import BlocVideo from "../../components/BlocVideo.astro";
+import CompteRebours from "../../components/CompteRebours.astro";
 import CarteVoyage from "../../components/CarteVoyage.astro";
 import chine from "../../data/chine.json";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
@@ -120,7 +121,9 @@ const points = chine.carte.map((p) => ({
     </div>
   </section>
 
-  {(chine.video.id || chine.video.sortie) && (
+  {!chineOuverte && <CompteRebours sortie={chine.video.sortie} lang={langue} />}
+
+  {chineOuverte && (chine.video.id || chine.video.sortie) && (
     <BlocVideo
       id={chine.video.id}
       titre={chine.video.titre}

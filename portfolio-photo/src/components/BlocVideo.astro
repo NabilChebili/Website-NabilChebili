@@ -157,7 +157,9 @@ const jourSortie = dateSortie?.toLocaleDateString(lang === "en" ? "en-GB" : "fr-
   }
 
   .zone-video {
-    padding: var(--pas-3) var(--edge) 0;
+    /* marge basse : quand le bloc est la derniere section, ses liens
+       collaient au pied de page (Nabil, 24/11) */
+    padding: var(--pas-3) var(--edge) var(--pas-3);
   }
   .zone-video iframe {
     display: block;
