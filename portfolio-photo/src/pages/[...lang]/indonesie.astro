@@ -3,6 +3,7 @@ import "../../styles/global.css";
 import Layout from "../../layouts/header.astro";
 import PhotoGrid from "../../components/PhotoGrid.astro";
 import AccordionSection from "../../components/AccordionSection.astro";
+import BlocVideo from "../../components/BlocVideo.astro";
 import CarteVoyage from "../../components/CarteVoyage.astro";
 import indonesie from "../../data/indonesie.json";
 import { listGalleries } from "../../lib/blobList.js";
@@ -108,6 +109,8 @@ const points = indonesie.carte.map((p) => ({
     </div>
   </section>
 
+  <BlocVideo id="_cPEUTOqEoI" titre="BALI / LOMBOK - 2026" lang={langue} />
+
   <section>
     <div class="section-head" data-reveal data-groupe="recit">
       <span>{c.recit}</span>
@@ -115,23 +118,6 @@ const points = indonesie.carte.map((p) => ({
     </div>
     <div class="galerie">
       <PhotoGrid photos={recit} name="Indonesie" lang={langue} />
-    </div>
-  </section>
-
-  <section>
-    <div class="section-head" data-reveal data-groupe="video">
-      <span>{c.video}</span>
-      <span>(1)</span>
-    </div>
-    <div class="zone-video" data-reveal data-groupe="video">
-      <iframe
-        src="https://www.youtube-nocookie.com/embed/_cPEUTOqEoI"
-        title="BALI / LOMBOK - 2026"
-        loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen
-      />
     </div>
   </section>
 
@@ -165,16 +151,5 @@ const points = indonesie.carte.map((p) => ({
   }
   .etapes {
     padding-top: var(--pas-3);
-  }
-  .zone-video {
-    padding: var(--pas-3) var(--edge) 0;
-  }
-  .zone-video iframe {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    height: auto;
-    border: 0;
-    background: var(--block);
   }
 </style>

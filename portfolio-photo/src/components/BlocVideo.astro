@@ -1,0 +1,106 @@
+---
+// Le film d'un voyage, place en tete de page (avant le recit photo), suivi de
+// deux liens sobres : la chaine, et une prise de contact pour un projet.
+// Pas de bouton « S'abonner » criard : le site reste une vitrine pro
+// (Nabil, 24/11 : « ça doit rester pro »). Meme vocabulaire que les liens
+// des cartes Explorer : capitales espacees, fleche, filet au survol.
+const { id, titre = "", lang = "fr" } = Astro.props;
+
+const T = {
+  fr: {
+    section: "Le film",
+    chaine: "Voir la chaîne YouTube",
+    projet: "Un projet photo ou vidéo ? Me contacter",
+  },
+  en: {
+    section: "The film",
+    chaine: "See the YouTube channel",
+    projet: "A photo or video project? Get in touch",
+  },
+};
+const c = T[lang] ?? T.fr;
+---
+
+<section>
+  <div class="section-head" data-reveal data-groupe="video">
+    <span>{c.section}</span>
+    <span>(1)</span>
+  </div>
+  <div class="zone-video" data-reveal data-groupe="video">
+    <iframe
+      src={`https://www.youtube-nocookie.com/embed/${id}`}
+      title={titre}
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+    ></iframe>
+    <div class="video-liens">
+      <a href="https://www.youtube.com/@Nabs-world" target="_blank" rel="noopener">
+        <span>{c.chaine}</span><i aria-hidden="true">&#8599;</i>
+      </a>
+      <a href="mailto:nabilchebili1999@gmail.com">
+        <span>{c.projet}</span><i aria-hidden="true">&#8594;</i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .zone-video {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+  .zone-video iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border: 0;
+    background: var(--block);
+  }
+  .video-liens {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px 32px;
+    padding-top: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .video-liens a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+    padding-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size var(--duree-longue) var(--sortie);
+  }
+  .video-liens a:hover,
+  .video-liens a:focus-visible {
+    background-size: 100% 1px;
+  }
+  .video-liens i {
+    font-style: normal;
+    font-weight: 500;
+    transition: transform var(--duree) var(--sortie);
+  }
+  .video-liens a:hover i,
+  .video-liens a:focus-visible i {
+    transform: translateX(4px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .video-liens a,
+    .video-liens i {
+      transition: none;
+    }
+  }
+</style>
