@@ -260,19 +260,69 @@
  },
  "post": [
   {
-   "id": "10461104_p0224",
-   "caption": "Les ginkgos jaunissent au-dessus des toits de la Cité interdite.",
-   "captionEn": "Ginkgo trees turning yellow above the roofs of the Forbidden City."
+   "id": "10161101_p0076",
+   "caption": "Premier soir à Pékin, un toit à étages éclairé par en dessous.",
+   "captionEn": "First evening in Beijing, a tiered roof lit from below."
   },
   {
-   "id": "10461104_p0190",
-   "caption": "Un grand sourire, avec la Cité interdite dans le dos.",
-   "captionEn": "A big smile, with the Forbidden City behind her."
+   "id": "10161101_p0079",
+   "caption": "Sous ce pavillon, de petites scènes sont peintes sur chaque poutre.",
+   "captionEn": "Under this pavilion, small scenes painted on every beam."
   },
   {
-   "id": "10461104_p0381",
-   "caption": "Un soir à Pékin, un dragon de fleurs tout illuminé.",
-   "captionEn": "One evening in Beijing, a dragon made of flowers, all lit up."
+   "id": "10261102_p0004",
+   "caption": "Une fresque pleine de couleurs couvre une façade entière, à Pékin.",
+   "captionEn": "A mural full of colour covers an entire wall in Beijing."
+  },
+  {
+   "id": "10261102_p0021",
+   "caption": "À 798, les cheminées de l'ancienne usine sont restées debout.",
+   "captionEn": "At 798, the old factory chimneys are still standing."
+  },
+  {
+   "id": "10261102_p0040",
+   "caption": "Une passante s'étire contre la rambarde, le téléphone à la main.",
+   "captionEn": "A woman stretching against the railing, phone in hand."
+  },
+  {
+   "id": "10261102_p0053",
+   "caption": "Une soupe qui mijote encore dans son pot en terre.",
+   "captionEn": "Soup still simmering in its clay pot."
+  },
+  {
+   "id": "10261102_p0055",
+   "caption": "Les raviolis arrivent dans leur panier vapeur en bambou.",
+   "captionEn": "Dumplings arriving in their bamboo steamer."
+  },
+  {
+   "id": "10261102_p0151",
+   "caption": "Dashilan le soir, sous les lanternes rouges d'un marchand de pieds de porc.",
+   "captionEn": "Dashilan in the evening, under the red lanterns of a pig's trotter shop."
+  },
+  {
+   "id": "10461104_p0142",
+   "caption": "Des statuettes alignées au bout des toits jaunes de la Cité interdite.",
+   "captionEn": "A line of small figures on the edge of the Forbidden City's yellow roofs."
+  },
+  {
+   "id": "10461104_p0159",
+   "caption": "Deux étages de toits sous le ciel gris de Pékin.",
+   "captionEn": "Two tiers of roofs under a grey Beijing sky."
+  },
+  {
+   "id": "10461104_p0229",
+   "caption": "Un arbre d'automne au-dessus d'un pavillon perché sur les rochers.",
+   "captionEn": "An autumn tree over a pavilion perched on the rocks."
+  },
+  {
+   "id": "10461104_p0240",
+   "caption": "Au centre d'un plafond à caissons, un dragon sculpté.",
+   "captionEn": "A carved dragon at the centre of a coffered ceiling."
+  },
+  {
+   "id": "10561105_p0029",
+   "caption": "Le temple du Ciel, rouge et bleu, sur un ciel sans nuage.",
+   "captionEn": "The Temple of Heaven, red and blue against a cloudless sky."
   },
   {
    "id": "10561105_p0052",
@@ -280,14 +330,9 @@
    "captionEn": "A dragon moulded into a green glazed roof tile."
   },
   {
-   "id": "10561105_p0202",
-   "caption": "Au Palais d'été, la tour de l'Encens bouddhique en plein soleil.",
-   "captionEn": "The Tower of Buddhist Incense at the Summer Palace, in full sun."
-  },
-  {
-   "id": "10561105_p0236",
-   "caption": "Fin d'après-midi sur le lac du Palais d'été, les bateaux sont à quai.",
-   "captionEn": "Late afternoon on the Summer Palace lake, the boats tied up."
+   "id": "10561105_p0231",
+   "caption": "Le bateau de marbre du Palais d'été, dans la lumière du soir.",
+   "captionEn": "The Summer Palace marble boat in the evening light."
   },
   {
    "id": "10661106_p0055",
@@ -295,19 +340,19 @@
    "captionEn": "In Nanjing, everything lights up along the water after dark."
   },
   {
+   "id": "10761107_p0104",
+   "caption": "Sous le dôme du mont Niushou, à Nankin, un bouddha couché éclairé en doré.",
+   "captionEn": "Under the dome on Niushou Mountain, Nanjing, a reclining Buddha lit in gold."
+  },
+  {
+   "id": "10861108_p0049",
+   "caption": "Hangzhou après la pluie, un pavillon en bois au bord de l'eau.",
+   "captionEn": "Hangzhou after the rain, a wooden pavilion by the water."
+  },
+  {
    "id": "10961109_p0129",
    "caption": "Une ombrelle en papier huilé au bord d'un bassin, à Hangzhou.",
    "captionEn": "An oil-paper parasol by a pond in Hangzhou."
-  },
-  {
-   "id": "10961109_p0172",
-   "caption": "Le vent lève des vagues sur le lac de l'Ouest, la pagode Leifeng au fond.",
-   "captionEn": "Wind whipping up waves on West Lake, Leifeng Pagoda in the distance."
-  },
-  {
-   "id": "11061110_p0001",
-   "caption": "Un train à grande vitesse à quai, entre Hangzhou et Shaoxing.",
-   "captionEn": "A high-speed train at the platform, between Hangzhou and Shaoxing."
   },
   {
    "id": "11061110_p0010",
@@ -315,9 +360,19 @@
    "captionEn": "Sanwei Shuwu in Shaoxing, the little school Lu Xun went to as a boy."
   },
   {
-   "id": "11061110_p0137",
-   "caption": "Un batelier pousse sa perche depuis un ponton flottant, sur un canal de Shaoxing.",
-   "captionEn": "A boatman pushing on his pole from a floating dock on a Shaoxing canal."
+   "id": "11061110_p0121",
+   "caption": "À Shaoxing, les maisons du canal se reflètent dans l'eau immobile.",
+   "captionEn": "In Shaoxing, the canal houses reflected in still water."
+  },
+  {
+   "id": "11061110_p0197",
+   "caption": "Hangzhou de nuit, les tours alignées de l'autre côté du fleuve.",
+   "captionEn": "Hangzhou at night, towers lined up across the river."
+  },
+  {
+   "id": "11061110_p0210",
+   "caption": "Des faisceaux lumineux balaient le ciel au-dessus des tours jumelles.",
+   "captionEn": "Searchlights sweeping the sky above the twin towers."
   },
   {
    "id": "11161111_p0005",
