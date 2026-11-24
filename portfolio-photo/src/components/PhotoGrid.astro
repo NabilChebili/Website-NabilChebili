@@ -32,10 +32,19 @@ const mots = {
     {items.map((p, i) => (
       <>
         <figure class={p.serie?.length ? "photo-card serie" : "photo-card"} style={`--i:${i % 6}`}>
-          <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
           {p.serie?.length ? (
-            <span class="serie-compte" aria-label={`${p.serie.length + 1} ${t("grille.prises")}`}>+{p.serie.length}</span>
-          ) : null}
+            // La pile : la photo montree devant (1re <img> de la carte, celle que
+            // la visionneuse ouvre), la prise suivante reellement glissee dessous.
+            <span class="serie-pile">
+              <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
+              <span class="serie-dessous" aria-hidden="true">
+                <img src={p.serie[0]} alt="" loading="lazy" decoding="async" />
+              </span>
+              <span class="serie-compte" aria-label={`${p.serie.length + 1} ${t("grille.prises")}`}>+{p.serie.length}</span>
+            </span>
+          ) : (
+            <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
+          )}
           {p.caption ? <figcaption>{p.caption}</figcaption> : null}
         </figure>
         {(p.serie ?? []).map((u) => (
@@ -883,27 +892,88 @@ const mots = {
   }
 
   /* Rafale rassemblee : les prises suivantes ne prennent pas de case. La case
-     montree porte un cartouche « +N » a l'encre, comme ceux du viseur, et un
-     second filet decale qui dit « il y en a d'autres dessous » — un trait de
-     1px, pas une ombre. */
+     montree est une PILE (demande de Nabil, 24/11 : « montre bien que c'est
+     deux images, avec un effet au survol, et sur telephone aussi ») : la prise
+     suivante est vraiment glissee dessous et depasse en haut a droite.
+     - souris : au survol, les deux tirages s'ecartent en eventail ;
+     - telephone (pas de survol) : la pile depasse en permanence, l'eventail
+       s'ouvre et se referme une fois quand la case arrive a l'ecran, et a
+       chaque appui ;
+     - mouvement reduit : la pile reste, sans aucune animation.
+     Un liseré papier de 2px detache le tirage du dessus : un trait, pas une
+     ombre. */
   .photo-card.dans-serie {
     display: none;
   }
-  .photo-card.serie {
+  .serie-pile {
     position: relative;
+    display: block;
+    /* Ce qui depasse (12px, 24px en eventail) mord sur la goutiere de 20px de
+       la grille : la case garde la meme largeur que ses voisines. */
   }
-  .photo-card.serie::before {
-    content: "";
+  .serie-pile > img {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid var(--paper);
+    transition: transform 320ms var(--sortie);
+  }
+  .serie-dessous {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    left: 5px;
-    aspect-ratio: 4 / 5;
-    border-top: 1px solid var(--ink);
-    border-right: 1px solid var(--ink);
+    inset: 0;
+    z-index: 0;
+    transform: translate(12px, -12px) rotate(3deg);
+    transition: transform 320ms var(--sortie);
     pointer-events: none;
   }
+  .serie-dessous img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-fit: cover;
+    filter: saturate(0.85) brightness(0.92);
+    cursor: default;
+  }
+  @media (hover: hover) {
+    .photo-card.serie:hover .serie-pile > img,
+    .photo-card.serie:focus-within .serie-pile > img {
+      transform: translate(-6px, 4px) rotate(-3deg);
+    }
+    .photo-card.serie:hover .serie-dessous,
+    .photo-card.serie:focus-within .serie-dessous {
+      transform: translate(24px, -16px) rotate(6deg);
+    }
+  }
+  @media (hover: none) {
+    .photo-card.serie.is-visible .serie-pile > img {
+      animation: pile-dessus 1100ms var(--sortie) 350ms 1;
+    }
+    .photo-card.serie.is-visible .serie-dessous {
+      animation: pile-dessous 1100ms var(--sortie) 350ms 1;
+    }
+    .photo-card.serie:active .serie-pile > img {
+      transform: translate(-6px, 4px) rotate(-3deg);
+    }
+    .photo-card.serie:active .serie-dessous {
+      transform: translate(24px, -16px) rotate(6deg);
+    }
+  }
+  @keyframes pile-dessus {
+    0%, 100% { transform: none; }
+    40%, 60% { transform: translate(-6px, 4px) rotate(-3deg); }
+  }
+  @keyframes pile-dessous {
+    0%, 100% { transform: translate(12px, -12px) rotate(3deg); }
+    40%, 60% { transform: translate(24px, -16px) rotate(6deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .serie-pile > img,
+    .serie-dessous {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
   .serie-compte {
+    z-index: 2;
     position: absolute;
     top: 8px;
     right: 8px;
