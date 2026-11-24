@@ -73,6 +73,7 @@ const quand = date.toLocaleString(lang === "en" ? "en-GB" : "fr-FR", {
 
     // Un chiffre qui change monte et sort par le haut, le nouveau arrive du bas.
     const poser = (case_: HTMLElement, texte: string) => {
+      while (case_.children.length > 1) case_.firstElementChild!.remove();
       const actuel = case_.lastElementChild as HTMLElement;
       if (actuel.textContent === texte) return;
       if (!doux || actuel.textContent === "--") {
@@ -162,18 +163,20 @@ const quand = date.toLocaleString(lang === "en" ? "en-GB" : "fr-FR", {
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
   }
-  .compte-nombre span {
+  /* :global : les chiffres sont crees par le script, sans l'attribut de style
+     d'Astro ; sans lui, le nouveau se posait a cote de l'ancien (bug du 24/11). */
+  .compte-nombre :global(span) {
     display: block;
   }
-  .compte-nombre .sort,
-  .compte-nombre .entre {
+  .compte-nombre :global(.sort),
+  .compte-nombre :global(.entre) {
     position: absolute;
     inset: 0 auto auto 0;
   }
-  .compte-nombre .sort {
+  .compte-nombre :global(.sort) {
     animation: compte-sort 0.45s var(--sortie, cubic-bezier(0.2, 0.7, 0.2, 1)) forwards;
   }
-  .compte-nombre .entre {
+  .compte-nombre :global(.entre) {
     animation: compte-entre 0.45s var(--sortie, cubic-bezier(0.2, 0.7, 0.2, 1)) both;
   }
   @keyframes compte-sort {
