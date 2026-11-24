@@ -96,7 +96,7 @@ const points = vietnam.carte.map((p) => ({
 }));
 ---
 
-<Layout title="Vietnam" description={c.description} mainClass="page editorial" lang={langue}>
+<Layout title="Vietnam" description={c.description} mainClass="page editorial" lang={langue} image={recit[0]?.url}>
   <section class="tete-page">
     <a class="retour" href={cheminLocalise("/photo", langue)}>{t("retour.galeries")}</a>
     <h1 class="titre-page" data-reveal data-groupe="tete">Vietnam</h1>

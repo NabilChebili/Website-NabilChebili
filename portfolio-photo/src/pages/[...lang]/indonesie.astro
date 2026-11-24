@@ -99,7 +99,7 @@ const points = indonesie.carte.map((p) => ({
 }));
 ---
 
-<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue}>
+<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue} image={recit[0]?.url}>
   <section class="tete-page">
     <a class="retour" href={cheminLocalise("/photo", langue)}>{t("retour.galeries")}</a>
     <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
