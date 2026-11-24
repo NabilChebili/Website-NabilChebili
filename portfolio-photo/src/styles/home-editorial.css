@@ -402,3 +402,203 @@
   background-size: 100% 1px;
 }
 
+
+/* ================================================= cartes Explorer, v2 ===
+   Le motif de la page, repris en petit : au survol, quatre equerres de viseur
+   se referment sur l'image, comme une mise au point. Pas de zoom, pas
+   d'ombre : l'image ne bouge pas, c'est le cadre qui vient a elle. */
+.activite-visuel {
+  position: relative;
+}
+.activite-visuel::after {
+  --c: var(--paper);
+  --l: 22px;
+  --e: 2px;
+  content: "";
+  position: absolute;
+  inset: 22px;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / var(--l) var(--e),
+    linear-gradient(var(--c), var(--c)) 0 0 / var(--e) var(--l),
+    linear-gradient(var(--c), var(--c)) 100% 0 / var(--l) var(--e),
+    linear-gradient(var(--c), var(--c)) 100% 0 / var(--e) var(--l),
+    linear-gradient(var(--c), var(--c)) 0 100% / var(--l) var(--e),
+    linear-gradient(var(--c), var(--c)) 0 100% / var(--e) var(--l),
+    linear-gradient(var(--c), var(--c)) 100% 100% / var(--l) var(--e),
+    linear-gradient(var(--c), var(--c)) 100% 100% / var(--e) var(--l);
+  background-repeat: no-repeat;
+  transition:
+    inset var(--duree-longue) var(--sortie),
+    opacity var(--duree) var(--sortie);
+}
+.activite:hover .activite-visuel::after,
+.activite:focus-visible .activite-visuel::after,
+.activite:active .activite-visuel::after {
+  inset: 10px;
+  opacity: 1;
+}
+
+/* Le numero : le meme cartouche a l'encre que les etapes de /chine. */
+.activite-titre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.activite-numero {
+  flex: 0 0 auto;
+  padding: 3px 5px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* Le lien tient toute la largeur, fleche au bout, sous un filet : la carte se
+   ferme comme une ligne du sommaire, et toutes finissent a la meme hauteur. */
+.activite-lien {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 8px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink);
+}
+
+@media (max-width: 700px) {
+  /* Sur telephone, quatre images pleine largeur faisaient defiler un ecran
+     entier par entree. Image a gauche, texte a droite : les quatre tiennent
+     a peu pres dans un ecran. */
+  .activites {
+    gap: 18px;
+  }
+  .activite {
+    display: grid;
+    grid-template-columns: 38% 1fr;
+    grid-template-rows: auto 1fr auto;
+    column-gap: 14px;
+  }
+  .activite-visuel {
+    grid-row: 1 / 4;
+    aspect-ratio: 1 / 1;
+    max-height: none;
+  }
+  .activite-visuel::after {
+    --l: 14px;
+    inset: 14px;
+  }
+  .activite:active .activite-visuel::after {
+    inset: 6px;
+  }
+  .activite-titre {
+    margin-top: 0;
+    font-size: 19px;
+  }
+  .activite-note {
+    margin: 6px 0 8px;
+    font-size: 12.5px;
+  }
+  .activite-lien {
+    padding: 8px 0 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activite-visuel::after {
+    transition: none;
+  }
+}
+
+/* ======================================== Explorer : deux metiers, v3 ===
+   Deux cartes a egalite (Cloud, DevOps & IA / Photo & video), plus grandes
+   que les quatre d'avant ; Musique et Gaming passent en une ligne « A cote ». */
+.activites {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  padding-bottom: var(--pas-3);
+}
+.activite-visuel {
+  max-height: 460px;
+}
+.activite-titre {
+  font-size: clamp(22px, 2.2vw, 32px);
+}
+.activite-note {
+  font-size: 14px;
+  max-width: 52ch;
+}
+
+.a-cote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 36px;
+  margin: 0 var(--edge) var(--pas-10);
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+}
+.a-cote-titre {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+.a-cote a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+}
+.a-cote a b {
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.a-cote a span {
+  color: var(--ink-55);
+}
+.a-cote a i {
+  font-style: normal;
+  transition: transform var(--duree) var(--sortie);
+}
+.a-cote a:hover i,
+.a-cote a:focus-visible i {
+  transform: translateX(5px);
+}
+.a-cote a:hover b,
+.a-cote a:focus-visible b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+@media (max-width: 700px) {
+  .activites {
+    grid-template-columns: 1fr;
+  }
+  .activite-titre {
+    font-size: 19px;
+  }
+  .activite-note {
+    font-size: 12.5px;
+  }
+  .a-cote {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .a-cote a i {
+    transition: none;
+  }
+}

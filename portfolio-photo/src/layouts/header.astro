@@ -15,7 +15,9 @@ import {
 const {
 	title = "Nabil Chebili",
 	description,
-	image = "/LogoRond.svg",
+	// Image de partage. En PNG par defaut : LinkedIn, Facebook, X et WhatsApp
+	// n'affichent pas un og:image en SVG — le lien partage sortait sans vignette.
+	image = "/LogoRond.png",
 	ogType = "website",
 	// Les deux familles du systeme editorial. Chargees partout depuis que le
 	// style couvre l'ensemble du site : la pile systeme ne ferait plus le
@@ -67,7 +69,11 @@ const schemaPerson = {
 	url: siteUrl?.href,
 	image: ogImageUrl,
 	jobTitle: "Ingénieur Cloud / DevOps",
-	sameAs: ["https://www.linkedin.com/in/chebili-nabil/"],
+	sameAs: [
+		"https://www.linkedin.com/in/chebili-nabil/",
+		"https://www.youtube.com/@Nabs-world",
+		"https://www.tiktok.com/@nabsland",
+	],
 };
 
 const schemaWebsite = {
@@ -111,13 +117,15 @@ const schemaWebsite = {
 		<meta property="og:type" content={ogType} />
 		<meta property="og:image" content={ogImageUrl} />
 
-		<meta name="twitter:card" content="summary" />
+		{/* Une page qui passe une vraie photo (les recits de voyage) merite la
+		    grande vignette ; le logo carre reste en petite carte. */}
+		<meta name="twitter:card" content={image === "/LogoRond.png" ? "summary" : "summary_large_image"} />
 		<meta name="twitter:title" content={fullTitle} />
 		<meta name="twitter:description" content={metaDescription} />
 		<meta name="twitter:image" content={ogImageUrl} />
 
-		<script type="application/ld+json">{JSON.stringify(schemaPerson)}</script>
-		<script type="application/ld+json">{JSON.stringify(schemaWebsite)}</script>
+		<script type="application/ld+json" set:html={JSON.stringify(schemaPerson)} />
+		<script type="application/ld+json" set:html={JSON.stringify(schemaWebsite)} />
 		<script is:inline>
 			// Pose avant le rendu : les elements a reveler ne sont masques que si le
 			// script tourne. Sans JavaScript, rien n'est cache.

@@ -1,0 +1,215 @@
+---
+// Le film d'un voyage, place en tete de page (avant le recit photo), suivi de
+// deux liens sobres : la chaine, et une prise de contact pour un projet.
+// Pas de bouton « S'abonner » criard : le site reste une vitrine pro
+// (Nabil, 24/11 : « ça doit rester pro »). Meme vocabulaire que les liens
+// des cartes Explorer : capitales espacees, fleche, filet au survol.
+// Sans id mais avec une date de sortie (sortie, ISO avec fuseau) : un compte a
+// rebours tient la place du film, sur la photo de couverture (fond).
+const { id, titre = "", lang = "fr", sortie, fond } = Astro.props;
+const dateSortie = sortie ? new Date(sortie) : null;
+
+const T = {
+  fr: {
+    section: "Le film",
+    chaine: "Voir la chaîne YouTube",
+    projet: "Un projet photo ou vidéo ? Me contacter",
+    annonce: "Le teaser sort le",
+    unites: ["jours", "heures", "min", "s"],
+    sorti: "Le teaser est en ligne",
+  },
+  en: {
+    section: "The film",
+    chaine: "See the YouTube channel",
+    projet: "A photo or video project? Get in touch",
+    annonce: "The teaser comes out on",
+    unites: ["days", "hours", "min", "s"],
+    sorti: "The teaser is out",
+  },
+};
+const c = T[lang] ?? T.fr;
+const jourSortie = dateSortie?.toLocaleDateString(lang === "en" ? "en-GB" : "fr-FR", {
+  weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Paris",
+});
+---
+
+<section>
+  <div class="section-head" data-reveal data-groupe="video">
+    <span>{c.section}</span>
+    <span>(1)</span>
+  </div>
+  <div class="zone-video" data-reveal data-groupe="video">
+    {id ? (
+      <iframe
+        src={`https://www.youtube-nocookie.com/embed/${id}`}
+        title={titre}
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    ) : (
+      <div class="rebours" data-sortie={dateSortie?.toISOString()} data-sorti={c.sorti}>
+        {fond && <img src={fond} alt="" loading="lazy" decoding="async" />}
+        <div class="rebours-texte">
+          <p class="rebours-titre">{titre}</p>
+          <p class="rebours-date">{c.annonce} {jourSortie}</p>
+          <p class="rebours-compte" aria-live="off">
+            {c.unites.map((u) => (
+              <span><b>--</b>{u}</span>
+            ))}
+          </p>
+        </div>
+      </div>
+    )}
+    <div class="video-liens">
+      <a href="https://www.youtube.com/@Nabs-world" target="_blank" rel="noopener">
+        <span>{c.chaine}</span><i aria-hidden="true">&#8599;</i>
+      </a>
+      <a href="mailto:nabilchebili1999@gmail.com">
+        <span>{c.projet}</span><i aria-hidden="true">&#8594;</i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Compte a rebours : jours, heures, minutes, secondes jusqu'a la sortie.
+  // Une fois la date passee (film pas encore relie), une ligne sobre le dit.
+  for (const el of document.querySelectorAll(".rebours[data-sortie]")) {
+    const fin = Date.parse(el.dataset.sortie);
+    const cases = [...el.querySelectorAll(".rebours-compte b")];
+    const pas = () => {
+      let r = Math.max(0, Math.floor((fin - Date.now()) / 1000));
+      if (!r) {
+        el.querySelector(".rebours-compte").textContent = el.dataset.sorti;
+        clearInterval(minuteur);
+        return;
+      }
+      const v = [Math.floor(r / 86400), Math.floor(r / 3600) % 24, Math.floor(r / 60) % 60, r % 60];
+      v.forEach((n, i) => (cases[i].textContent = String(n).padStart(2, "0")));
+    };
+    const minuteur = setInterval(pas, 1000);
+    pas();
+  }
+</script>
+
+<style>
+  /* Meme place et meme format que le film qui la remplacera : 16:9. */
+  .rebours {
+    position: relative;
+    display: grid;
+    place-items: end start;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .rebours img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.55;
+  }
+  .rebours-texte {
+    position: relative;
+    padding: clamp(18px, 4vw, 48px);
+  }
+  .rebours-titre {
+    margin: 0;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: clamp(30px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 0.95;
+    text-transform: uppercase;
+  }
+  .rebours-date {
+    margin: 10px 0 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .rebours-compte {
+    display: flex;
+    gap: clamp(14px, 3vw, 36px);
+    margin: clamp(14px, 3vw, 28px) 0 0;
+    padding-top: 12px;
+    border-top: 1px solid currentColor;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .rebours-compte span {
+    display: grid;
+    gap: 4px;
+  }
+  .rebours-compte b {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: clamp(24px, 4.5vw, 52px);
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zone-video {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+  .zone-video iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border: 0;
+    background: var(--block);
+  }
+  .video-liens {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px 32px;
+    padding-top: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .video-liens a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+    padding-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0% 1px;
+    transition: background-size var(--duree-longue) var(--sortie);
+  }
+  .video-liens a:hover,
+  .video-liens a:focus-visible {
+    background-size: 100% 1px;
+  }
+  .video-liens i {
+    font-style: normal;
+    font-weight: 500;
+    transition: transform var(--duree) var(--sortie);
+  }
+  .video-liens a:hover i,
+  .video-liens a:focus-visible i {
+    transform: translateX(4px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .video-liens a,
+    .video-liens i {
+      transition: none;
+    }
+  }
+</style>

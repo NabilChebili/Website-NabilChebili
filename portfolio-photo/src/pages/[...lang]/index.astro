@@ -12,10 +12,10 @@ import { Image } from "astro:assets";
 // en WebP a la construction. En public/ ils partaient bruts — 2,4 / 2,0 / 2,7 Mo
 // pour des vignettes affichees en 322px de large.
 import visuelCloud from "../../assets/nabil-ishane.jpg";
-import visuelPhoto from "../../assets/A7401833.jpg";
-import visuelMusique from "../../assets/image.png";
-import visuelGaming from "../../assets/twitch.png";
+import visuelPhotoVideo from "../../assets/avant-apres/suzhou-apres.jpg";
 import Colophon from "../../components/Colophon.astro";
+import nouveautesData from "../../data/nouveautes.json";
+import { chineOuverte } from "../../lib/chineOuverte.js";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
 
 export function getStaticPaths() {
@@ -27,70 +27,70 @@ const langue = langueDepuisParam(Astro.params.lang);
 const T = {
   fr: {
     description:
-      "Site personnel de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
+      "Nabil Chebili, ingénieur Cloud, DevOps & IA, photographe et vidéaste : projets cloud, mariages, événements et films de voyage.",
     photographies: "photographies",
     galeries: "galeries",
-    metier: "Ingénieur Cloud & DevOps",
+    metier: "Ingénieur Cloud, DevOps & IA",
     anciennete: "ans",
-    chapo: "Cloud & DevOps, photographie et musique — projets, galeries et inspirations.",
+    chapo: "Ingénieur Cloud, DevOps & IA. Photographe et vidéaste.",
     explorerLien: "Explorer",
     aproposTitre: "Vous vous demandez sûrement qui je suis ?",
     aproposTexte:
       "Je suis quelqu’un de curieux, attiré par les choses que l’on construit et que l’on comprend avec le temps. J’ai toujours aimé créer, démonter et reconstruire, d’abord avec des Lego, aujourd’hui avec des idées, des systèmes ou des images. Ce qui m’intéresse autant que le résultat, c’est le chemin pour y arriver : observer, tester, ajuster, simplifier, jusqu’à ce que tout fasse sens.",
     portraitAlt: "Portrait de Nabil Chebili",
     explorer: "Explorer",
+    nouveautes: "Nouveautés",
     voir: "Voir",
+    aCote: "À côté",
     univers: [
       {
-        titre: "Cloud & DevOps",
-        note: "Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.",
+        titre: "Cloud, DevOps & IA",
+        note: "Mon métier d’ingénieur : architectures Azure, automatisation, data et IA. Missions, projets et certifications.",
         alt: "Nabil Chebili chez I-Shane",
       },
       {
-        titre: "Photographie",
-        note: "Galeries & séries photographiques : voyages, portraits et instantanés.",
-        alt: "Photographie",
+        titre: "Photo & vidéo",
+        note: "Mariages, événements d’entreprise et films de voyage : prise de vue, retouche et montage.",
+        alt: "Canal de Suzhou, photo retouchée",
       },
-      {
-        titre: "Musique",
-        note: "Petites avancées dans le monde la guitare (autodidacte)",
-        alt: "Musique",
-      },
-      { titre: "Gaming", note: "Twitch, streaming et jeux vidéo.", alt: "Gaming" },
+    ],
+    cotes: [
+      { titre: "Musique", note: "la guitare, en autodidacte" },
+      { titre: "Gaming", note: "Twitch et streaming" },
     ],
   },
   en: {
     description:
-      "Nabil Chebili’s personal site: Cloud & DevOps (Azure), photography and music. Projects, field notes and galleries.",
+      "Nabil Chebili, Cloud, DevOps & AI engineer, photographer and filmmaker: cloud projects, weddings, events and travel films.",
     photographies: "photographs",
     galeries: "galleries",
-    metier: "Cloud & DevOps engineer",
+    metier: "Cloud, DevOps & AI engineer",
     anciennete: "years",
-    chapo: "Cloud & DevOps, photography and music — projects, galleries and things that stick.",
+    chapo: "Cloud, DevOps & AI engineer. Photographer and filmmaker.",
     explorerLien: "Explore",
     aproposTitre: "Wondering who I am?",
     aproposTexte:
       "I’m a curious sort, drawn to things that get built and understood over time. I’ve always liked making, taking apart and putting back together — Lego first, now ideas, systems and images. What interests me as much as the result is the road to it: watching, testing, adjusting, simplifying, until the whole thing makes sense.",
     portraitAlt: "Portrait of Nabil Chebili",
     explorer: "Explore",
+    nouveautes: "What's new",
     voir: "View",
+    aCote: "On the side",
     univers: [
       {
-        titre: "Cloud & DevOps",
-        note: "Projects, automation and experiments around cloud and infrastructure.",
+        titre: "Cloud, DevOps & AI",
+        note: "My engineering work: Azure architecture, automation, data and AI. Assignments, projects and certifications.",
         alt: "Nabil Chebili at I-Shane",
       },
       {
-        titre: "Photography",
-        note: "Galleries and photo series: travels, portraits and snapshots.",
-        alt: "Photography",
+        titre: "Photo & video",
+        note: "Weddings, corporate events and travel films: shooting, retouching and editing.",
+        alt: "Suzhou canal, retouched photo",
       },
-      {
-        titre: "Music",
-        note: "Small steps into the guitar, self-taught.",
-        alt: "Music",
-      },
-      { titre: "Gaming", note: "Twitch, streaming and video games.", alt: "Gaming" },
+    ],
+    cotes: [
+      { titre: "Music", note: "guitar, self-taught" },
+      { titre: "Gaming", note: "Twitch and streaming" },
     ],
   },
 };
@@ -98,13 +98,39 @@ const c = T[langue];
 
 // Les quatre activites de la page d'origine : memes images, memes
 // destinations ; seuls les libelles changent de langue.
-const visuels = [visuelCloud, visuelPhoto, visuelMusique, visuelGaming];
-const routes = ["/clouddevops", "/photo", "/musique", "/gaming"];
+// Nouveautes : les quatre plus recentes de nouveautes.json, datees au mois.
+// Avant la sortie, une entree peut porter « avant » : texte et icone a la place
+// de la photo (la Chine : pas de photo publiee avant le teaser).
+const nouveautes = nouveautesData.nouveautes.slice(0, 4).map((n) => (n.avant && !chineOuverte ? { ...n, ...n.avant, image: undefined } : n)).map((n) => ({
+  date: new Date(n.date + "T12:00:00Z").toLocaleDateString(langue === "en" ? "en-GB" : "fr-FR", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }),
+  iso: n.date,
+  // Les photos Chine ne sont pas encore sur le stockage : en local
+  // (CHINE_PHOTOS_LOCAL), elles viennent de l'apercu, comme sur /chine.
+  image:
+    n.image && process.env.CHINE_PHOTOS_LOCAL
+      ? n.image.replace("https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/", "/_apercu-chine/")
+      : n.image,
+  icone: n.icone,
+  titre: n.titre[langue],
+  texte: n.texte[langue],
+  href: cheminLocalise(n.href, langue),
+}));
+
+// Deux metiers a egalite (Nabil, 24/11 : la photo/video pro, et le Cloud,
+// le DevOps et l'IA « prennent aussi de l'espace ») ; Musique et Gaming
+// restent, en une ligne « A cote » sous les deux cartes.
+const visuels = [visuelCloud, visuelPhotoVideo];
+const routes = ["/clouddevops", "/photo-video"];
 const univers = c.univers.map((u, i) => ({
   ...u,
   img: visuels[i],
   href: cheminLocalise(routes[i], langue),
 }));
+const cotes = c.cotes.map((u, i) => ({ ...u, href: cheminLocalise(["/musique", "/gaming"][i], langue) }));
 ---
 
 <Layout
@@ -129,7 +155,7 @@ const univers = c.univers.map((u, i) => ({
 
   <section class="opening">
     <div class="meta-row" data-reveal data-groupe="manchette">
-      <span><b>958</b> {c.photographies} &middot; <b>11</b> {c.galeries}</span>
+      <span><b>{chineOuverte ? 1565 : 958}</b> {c.photographies} &middot; <b>{chineOuverte ? 12 : 11}</b> {c.galeries}</span>
       <span>{c.metier} &middot; <b>+4</b> {c.anciennete}</span>
     </div>
 
@@ -147,6 +173,60 @@ const univers = c.univers.map((u, i) => ({
       <p>{c.chapo}</p>
       <a class="jump" href="#explorer">{c.explorerLien} &#8595;</a>
     </div>
+  </section>
+
+  {/* Nouveautes : un journal, pas des cartes. Une ligne par nouveaute, des
+      filets de 1px, la date en chasse fixe a gauche, la fleche qui avance au
+      survol comme dans le bloc de contact. */}
+  <section class="nouveautes" id="nouveautes">
+    <div class="section-head" data-reveal data-groupe="nouveautes">
+      <span>{c.nouveautes}</span>
+      <span>({nouveautes.length})</span>
+    </div>
+    <ol class="nouveautes-liste">
+      {
+        nouveautes.map((n) => (
+          <li data-reveal data-groupe="nouveautes">
+            <a class="nouveaute" href={n.href}>
+              <time class="nouveaute-date" datetime={n.iso}>{n.date}</time>
+              <span class="nouveaute-corps">
+                <span class="nouveaute-titre">{n.titre}</span>
+                <span class="nouveaute-texte">{n.texte}</span>
+              </span>
+              {/* La vignette : une photo, ou un dessin au trait de 1px dans le
+                  vocabulaire du globe et de l'orbite — aucun remplissage. */}
+              <span class="nouveaute-vignette" aria-hidden="true">
+                {n.image ? (
+                  <img src={n.image} alt="" loading="lazy" decoding="async" />
+                ) : n.icone === "globe" ? (
+                  <svg viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="15" />
+                    <ellipse cx="24" cy="24" rx="6.5" ry="15" />
+                    <path d="M9 24h30M11.5 16h25M11.5 32h25" />
+                    <rect x="27" y="19" width="4" height="4" class="plein" />
+                  </svg>
+                ) : n.icone === "roadmap" ? (
+                  <svg viewBox="0 0 48 48">
+                    <path d="M17 10v28" />
+                    <rect x="15" y="12" width="4" height="4" class="plein" />
+                    <rect x="15" y="22" width="4" height="4" class="plein" />
+                    <rect x="15" y="32" width="4" height="4" />
+                    <path d="M24 14h10M24 24h12M24 34h7" />
+                  </svg>
+                ) : n.icone === "langues" ? (
+                  <svg viewBox="0 0 48 48">
+                    <text x="24" y="21" class="mots">FR</text>
+                    <path d="M15 25.5h18" />
+                    <text x="24" y="36" class="mots">EN</text>
+                  </svg>
+                ) : null}
+              </span>
+              <i aria-hidden="true">&#8594;</i>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
   </section>
 
   <section class="about">
@@ -174,19 +254,22 @@ const univers = c.univers.map((u, i) => ({
     </div>
     <div class="activites">
       {
-        univers.map((u) => (
+        univers.map((u, i) => (
           <a class="activite" href={u.href} data-reveal data-groupe="cartes">
             <span class="activite-visuel">
               <Image
                 src={u.img}
                 alt={u.alt}
-                widths={[400, 800]}
-                sizes="(max-width: 700px) 100vw, 25vw"
+                widths={[600, 1200]}
+                sizes="(max-width: 700px) 40vw, 50vw"
                 loading="lazy"
                 decoding="async"
               />
             </span>
-            <span class="activite-titre">{u.titre}</span>
+            <span class="activite-titre">
+              <span class="activite-numero" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+              {u.titre}
+            </span>
             <span class="activite-note">{u.note}</span>
             <span class="activite-lien">
               <span>{c.voir}</span>
@@ -196,6 +279,16 @@ const univers = c.univers.map((u, i) => ({
         ))
       }
     </div>
+    <p class="a-cote" data-reveal data-groupe="cartes">
+      <span class="a-cote-titre">{c.aCote}</span>
+      {
+        cotes.map((u) => (
+          <a href={u.href}>
+            <b>{u.titre}</b> <span>{u.note}</span> <i aria-hidden="true">&#8594;</i>
+          </a>
+        ))
+      }
+    </p>
   </section>
 
   {/* Le bloc de contact etait recopie ici a l'identique du composant que les
@@ -308,6 +401,124 @@ const univers = c.univers.map((u, i) => ({
   :global(main.page.home) {
     --edge: 64px;
     padding-top: 112px;
+  }
+
+  /* ----------------------------------------------------------- nouveautes ---
+     Meme grammaire que les etapes et le bloc de contact : des lignes entre
+     filets gris, aucune carte, aucun fond. */
+  .nouveautes {
+    padding-top: var(--pas-8);
+  }
+  .nouveautes-liste {
+    margin: 0;
+    padding: 0 var(--edge);
+    list-style: none;
+  }
+  .nouveautes-liste li + li {
+    border-top: 1px solid var(--rule);
+  }
+  .nouveaute {
+    display: grid;
+    grid-template-columns: 9em 1fr 56px auto;
+    align-items: baseline;
+    gap: var(--pas-3);
+    padding: 18px 0;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .nouveaute-date {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  /* Vignette carree de 56px, filet de 1px : la photo y est rognee au carre,
+     les dessins s'y posent au trait. */
+  .nouveaute-vignette {
+    align-self: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    overflow: hidden;
+    transition: border-color var(--duree) var(--sortie);
+  }
+  .nouveaute-vignette img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .nouveaute-vignette svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .nouveaute-vignette .plein {
+    fill: var(--ink);
+    stroke: none;
+  }
+  .nouveaute-vignette .mots {
+    fill: var(--ink);
+    stroke: none;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-anchor: middle;
+  }
+  .nouveaute:hover .nouveaute-vignette {
+    border-color: var(--ink);
+  }
+  .nouveaute-corps {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  /* Memes familles que les cartes « Explorer » juste en dessous. */
+  .nouveaute-titre {
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-size: clamp(19px, 1.7vw, 24px);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .nouveaute-texte {
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-55);
+    max-width: 70ch;
+  }
+  .nouveaute i {
+    align-self: center;
+    font-style: normal;
+    transition: transform var(--duree) var(--sortie);
+  }
+  .nouveaute:hover i {
+    transform: translateX(6px);
+  }
+  .nouveaute:hover .nouveaute-titre {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  @media (max-width: 700px) {
+    .nouveaute {
+      grid-template-columns: 1fr 48px auto;
+      gap: 6px 14px;
+    }
+    .nouveaute-vignette {
+      width: 48px;
+      height: 48px;
+    }
+    .nouveaute-date {
+      grid-column: 1 / -1;
+    }
   }
 
   /* Les filets s'arretent AU cadre au lieu de le traverser.

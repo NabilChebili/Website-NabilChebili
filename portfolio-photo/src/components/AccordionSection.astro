@@ -1,11 +1,18 @@
 ---
 import PhotoGrid from "./PhotoGrid.astro";
+import { chargerVignettesDuStockage, vignetteDe } from "../lib/blobList.js";
+
+await chargerVignettesDuStockage();
 
 // groupe : les etapes qui partagent un groupe s'excluent — en ouvrir une
 // referme l'autre (attribut name des <details>, natif dans les navigateurs).
 // numero : le numero du repere de cette etape sur le globe, s'il y en a un.
 const { id = "section", title = "", photos = [], lang = "fr", groupe, numero } = Astro.props;
-const previewPhotos = photos.slice(0, 4);
+// Une photo est une URL, ou un objet { url, caption?, serie? } (rafale rassemblee,
+// voir PhotoGrid) : l'apercu ne garde que l'URL, le compte inclut toute la serie.
+const urlDe = (p) => (typeof p === "string" ? p : p.url);
+const previewPhotos = photos.slice(0, 4).map(urlDe).map((u) => vignetteDe(u) ?? u);
+const nbPhotos = photos.reduce((n, p) => n + 1 + (typeof p === "string" ? 0 : (p.serie?.length ?? 0)), 0);
 ---
 
 <details class="etape" id={id} name={groupe} data-numero={numero}>
@@ -14,16 +21,29 @@ const previewPhotos = photos.slice(0, 4);
       <span class="etape-signe" aria-hidden="true"></span>
       {numero ? <span class="etape-numero">{String(numero).padStart(2, "0")}</span> : null}
       <span class="etape-titre">{title}</span>
-      <span class="etape-compte">{photos.length} photos</span>
+      <span class="etape-compte">{nbPhotos} photos</span>
     </span>
     <span class="etape-apercu" aria-hidden="true">
       {previewPhotos.map((p) => <img src={p} alt="" loading="lazy" decoding="async" />)}
     </span>
   </summary>
   <div class="etape-corps">
-    <PhotoGrid photos={photos} name={title} lang={lang} />
+    <PhotoGrid photos={photos} name={title} lang={lang} differer />
   </div>
 </details>
+
+<script>
+  // Les images d'une etape ne se chargent qu'a son ouverture (voir PhotoGrid, differer).
+  for (const etape of document.querySelectorAll("details.etape")) {
+    etape.addEventListener("toggle", () => {
+      if (!etape.open) return;
+      for (const img of etape.querySelectorAll("img[data-src]")) {
+        img.src = img.dataset.src;
+        img.removeAttribute("data-src");
+      }
+    });
+  }
+</script>
 
 <style>
   /* Une etape est une ligne de sommaire, pas une carte : un filet, aucun fond,
@@ -141,6 +161,12 @@ const previewPhotos = photos.slice(0, 4);
   @media (max-width: 700px) {
     .etape-titre {
       font-size: 20px;
+    }
+    /* Titre long + compte : sur 375px la ligne depassait de 24px. Le compte
+       passe a la ligne au lieu de pousser la page. */
+    .etape-gauche {
+      flex-wrap: wrap;
+      row-gap: 4px;
     }
     .etape-apercu img:nth-child(n + 3) {
       display: none;

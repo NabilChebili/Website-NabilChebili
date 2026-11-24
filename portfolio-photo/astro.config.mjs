@@ -6,6 +6,9 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   output: 'static',   // important pour Azure Static Web Apps
   site: 'https://www.nabilchebili.fr', // facultatif, utile pour le SEO
+	// Photos du stockage optimisees a la construction (WebP, tailles) la ou une
+	// page passe par <Image> : /photo-video pour commencer.
+	image: { domains: ['stnchvlqvproduction.blob.core.windows.net'] },
 	// Le routage bilingue est porte par les segments [...lang] des pages, pas
 	// par la config i18n d'Astro : les deux se chevaucheraient. Le sitemap, lui,
 	// a besoin de connaitre les langues pour emettre les alternates hreflang.

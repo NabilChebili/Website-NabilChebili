@@ -1,0 +1,1198 @@
+{
+ "_lisezmoi": "Page /chine. base = dossier du stockage Azure (container photos, prefixe Chine/). Les fichiers sont listes ici (pas de listing au build) : <base><etape>/<id>.jpg et <base>recit/<id>.jpg. Genere depuis F:/Videos voyages/outils/site/preparer_chine.js. video.id = identifiant YouTube du film, null tant qu il n est pas publie (la section ne s affiche pas). couverture = la vignette de la carte Chine sur /photo (chemin sous base, sans .jpg).",
+ "base": "https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/",
+ "video": {
+  "id": null,
+  "titre": "CHINA - 2026",
+  "sortie": "2026-12-10T18:00:00+01:00"
+ },
+ "couverture": "recit/10461104_p0079",
+ "carte": [
+  {
+   "lieu": "Pékin",
+   "lieuEn": "Beijing",
+   "lat": 39.9042,
+   "lng": 116.4074,
+   "etapes": [
+    "pekin",
+    "cite-interdite",
+    "temple-du-ciel"
+   ]
+  },
+  {
+   "lieu": "Mutianyu",
+   "lat": 40.4319,
+   "lng": 116.5704,
+   "etapes": [
+    "muraille"
+   ]
+  },
+  {
+   "lieu": "Nankin",
+   "lieuEn": "Nanjing",
+   "lat": 32.0603,
+   "lng": 118.7969,
+   "etapes": [
+    "nankin"
+   ]
+  },
+  {
+   "lieu": "Hangzhou",
+   "lat": 30.2741,
+   "lng": 120.1551,
+   "etapes": [
+    "hangzhou"
+   ]
+  },
+  {
+   "lieu": "Shaoxing",
+   "lat": 29.9958,
+   "lng": 120.5861,
+   "etapes": [
+    "shaoxing"
+   ]
+  },
+  {
+   "lieu": "Shanghai",
+   "lat": 31.2304,
+   "lng": 121.4737,
+   "etapes": [
+    "shanghai"
+   ]
+  },
+  {
+   "lieu": "Suzhou",
+   "lat": 31.2989,
+   "lng": 120.5853,
+   "etapes": [
+    "suzhou"
+   ]
+  }
+ ],
+ "etapes": {
+  "pekin": [
+   "10161101_p0004",
+   "10161101_p0006",
+   {
+    "id": "10161101_p0014",
+    "serie": [
+     "10161101_p0007"
+    ]
+   },
+   "10161101_p0029",
+   "10161101_p0032",
+   "10161101_p0035",
+   "10161101_p0043",
+   "10161101_p0045",
+   "10161101_p0054",
+   "10161101_p0061",
+   {
+    "id": "10161101_p0070",
+    "serie": [
+     "10161101_p0066"
+    ]
+   },
+   {
+    "id": "10161101_p0074",
+    "serie": [
+     "10161101_p0075"
+    ]
+   },
+   "10161101_p0076",
+   "10161101_p0079",
+   "10161101_p0080",
+   "10161101_p0082",
+   "10161101_p0088",
+   "10161101_p0089",
+   "10161101_p0094",
+   "10261102_p0004",
+   "10261102_p0006",
+   "10261102_p0007",
+   "10261102_p0008",
+   "10261102_p0010",
+   "10261102_p0011",
+   "10261102_p0017",
+   "10261102_p0021",
+   "10261102_p0023",
+   "10261102_p0027",
+   "10261102_p0028",
+   "10261102_p0029",
+   {
+    "id": "10261102_p0037",
+    "serie": [
+     "10261102_p0032"
+    ]
+   },
+   "10261102_p0036",
+   "10261102_p0040",
+   "10261102_p0043",
+   "10261102_p0047",
+   {
+    "id": "10261102_p0048",
+    "serie": [
+     "10261102_p0050"
+    ]
+   },
+   "10261102_p0053",
+   "10261102_p0054",
+   "10261102_p0055",
+   "10261102_p0056",
+   "10261102_p0058",
+   "10261102_p0062",
+   {
+    "id": "10261102_p0065",
+    "serie": [
+     "10261102_p0067"
+    ]
+   },
+   "10261102_p0069",
+   {
+    "id": "10261102_p0082",
+    "serie": [
+     "10261102_p0084"
+    ]
+   },
+   "10261102_p0087",
+   "10261102_p0092",
+   "10261102_p0093",
+   "10261102_p0095",
+   "10261102_p0099",
+   "10261102_p0101",
+   "10261102_p0102",
+   "10261102_p0103",
+   "10261102_p0104",
+   "10261102_p0108",
+   "10261102_p0110",
+   "10261102_p0114",
+   "10261102_p0117",
+   "10261102_p0121",
+   "10261102_p0122",
+   "10261102_p0123",
+   "10261102_p0124",
+   "10261102_p0128",
+   "10261102_p0131",
+   "10261102_p0133",
+   "10261102_p0137",
+   "10261102_p0140",
+   "10261102_p0148",
+   "10261102_p0151",
+   "10261102_p0152",
+   {
+    "id": "10261102_p0154",
+    "serie": [
+     "10261102_p0156"
+    ]
+   },
+   "10261102_p0158",
+   "10261102_p0160",
+   "10261102_p0163",
+   "10261102_p0166",
+   "10261102_p0167",
+   "10261102_p0170",
+   "10261102_p0180",
+   "10261102_p0183",
+   "10261102_p0184",
+   "10261102_p0187",
+   "10261102_p0188",
+   "10261102_p0189",
+   "10261102_p0191",
+   "10261102_p0193",
+   "10261102_p0199",
+   "10261102_p0201",
+   "10261102_p0203",
+   "10261102_p0209",
+   "10261102_p0221",
+   "10261102_p0231",
+   "10261102_p0235",
+   "10261102_p0242",
+   "10261102_p0243",
+   "10261102_p0251",
+   "10261102_p0253",
+   "10261102_p0261"
+  ],
+  "muraille": [
+   "10361103_p0003",
+   {
+    "id": "10361103_p0012",
+    "serie": [
+     "10361103_p0021"
+    ]
+   },
+   "10361103_p0020",
+   "10361103_p0026",
+   {
+    "id": "10361103_p0027",
+    "serie": [
+     "10361103_p0031"
+    ]
+   },
+   {
+    "id": "10361103_p0034",
+    "serie": [
+     "10361103_p0035",
+     "10361103_p0037"
+    ]
+   },
+   "10361103_p0045",
+   "10361103_p0064",
+   {
+    "id": "10361103_p0072",
+    "serie": [
+     "10361103_p0081",
+     "10361103_p0084"
+    ]
+   },
+   "10361103_p0076",
+   "10361103_p0094",
+   "10361103_p0100",
+   "10361103_p0104",
+   "10361103_p0105",
+   {
+    "id": "10361103_p0118",
+    "serie": [
+     "10361103_p0106"
+    ]
+   },
+   "10361103_p0107",
+   {
+    "id": "10361103_p0115",
+    "serie": [
+     "10361103_p0127"
+    ]
+   },
+   "10361103_p0121",
+   "10361103_p0131",
+   "10361103_p0135",
+   "10361103_p0139",
+   "10361103_p0141",
+   "10361103_p0144",
+   "10361103_p0152",
+   "10361103_p0154",
+   "10361103_p0155",
+   "10361103_p0157",
+   "10361103_p0159",
+   "10361103_p0162",
+   "10361103_p0169"
+  ],
+  "cite-interdite": [
+   {
+    "id": "10461104_p0001",
+    "serie": [
+     "10461104_p0002"
+    ]
+   },
+   "10461104_p0009",
+   "10461104_p0012",
+   "10461104_p0014",
+   "10461104_p0017",
+   {
+    "id": "10461104_p0021",
+    "serie": [
+     "10461104_p0023"
+    ]
+   },
+   "10461104_p0025",
+   "10461104_p0026",
+   "10461104_p0031",
+   "10461104_p0034",
+   "10461104_p0035",
+   {
+    "id": "10461104_p0044",
+    "serie": [
+     "10461104_p0049"
+    ]
+   },
+   "10461104_p0050",
+   "10461104_p0051",
+   "10461104_p0053",
+   {
+    "id": "10461104_p0054",
+    "serie": [
+     "10461104_p0055"
+    ]
+   },
+   "10461104_p0057",
+   "10461104_p0059",
+   "10461104_p0064",
+   "10461104_p0071",
+   {
+    "id": "10461104_p0074",
+    "serie": [
+     "10461104_p0076"
+    ]
+   },
+   "10461104_p0075",
+   "10461104_p0079",
+   "10461104_p0081",
+   {
+    "id": "10461104_p0088",
+    "serie": [
+     "10461104_p0089"
+    ]
+   },
+   "10461104_p0096",
+   "10461104_p0103",
+   {
+    "id": "10461104_p0107",
+    "serie": [
+     "10461104_p0111"
+    ]
+   },
+   "10461104_p0119",
+   "10461104_p0121",
+   {
+    "id": "10461104_p0128",
+    "serie": [
+     "10461104_p0140"
+    ]
+   },
+   "10461104_p0129",
+   "10461104_p0137",
+   "10461104_p0142",
+   "10461104_p0144",
+   "10461104_p0153",
+   "10461104_p0155",
+   {
+    "id": "10461104_p0159",
+    "serie": [
+     "10461104_p0158"
+    ]
+   },
+   "10461104_p0167",
+   {
+    "id": "10461104_p0174",
+    "serie": [
+     "10461104_p0178"
+    ]
+   },
+   "10461104_p0182",
+   "10461104_p0186",
+   {
+    "id": "10461104_p0195",
+    "serie": [
+     "10461104_p0204"
+    ]
+   },
+   "10461104_p0199",
+   "10461104_p0203",
+   {
+    "id": "10461104_p0209",
+    "serie": [
+     "10461104_p0210"
+    ]
+   },
+   {
+    "id": "10461104_p0212",
+    "serie": [
+     "10461104_p0211"
+    ]
+   },
+   "10461104_p0218",
+   "10461104_p0221",
+   "10461104_p0224",
+   "10461104_p0228",
+   "10461104_p0229",
+   "10461104_p0236",
+   "10461104_p0240",
+   "10461104_p0246",
+   {
+    "id": "10461104_p0249",
+    "serie": [
+     "10461104_p0261"
+    ]
+   },
+   {
+    "id": "10461104_p0256",
+    "serie": [
+     "10461104_p0251"
+    ]
+   },
+   "10461104_p0271",
+   {
+    "id": "10461104_p0275",
+    "serie": [
+     "10461104_p0276",
+     "10461104_p0277",
+     "10461104_p0278"
+    ]
+   },
+   {
+    "id": "10461104_p0283",
+    "serie": [
+     "10461104_p0288"
+    ]
+   },
+   "10461104_p0291",
+   {
+    "id": "10461104_p0298",
+    "serie": [
+     "10461104_p0310",
+     "10461104_p0311"
+    ]
+   },
+   "10461104_p0299",
+   "10461104_p0313",
+   "10461104_p0316",
+   "10461104_p0318",
+   "10461104_p0320",
+   "10461104_p0333",
+   "10461104_p0348",
+   "10461104_p0353",
+   "10461104_p0363",
+   "10461104_p0366",
+   "10461104_p0368",
+   "10461104_p0374",
+   "10461104_p0381",
+   "10461104_p0383",
+   "10461104_p0385"
+  ],
+  "temple-du-ciel": [
+   "10561105_p0001",
+   "10561105_p0006",
+   "10561105_p0008",
+   {
+    "id": "10561105_p0024",
+    "serie": [
+     "10561105_p0029",
+     "10561105_p0034"
+    ]
+   },
+   "10561105_p0032",
+   "10561105_p0040",
+   "10561105_p0042",
+   "10561105_p0045",
+   "10561105_p0047",
+   "10561105_p0052",
+   "10561105_p0055",
+   "10561105_p0057",
+   "10561105_p0061",
+   "10561105_p0071",
+   "10561105_p0074",
+   "10561105_p0080",
+   "10561105_p0085",
+   "10561105_p0087",
+   "10561105_p0092",
+   "10561105_p0094",
+   "10561105_p0106",
+   {
+    "id": "10561105_p0116",
+    "serie": [
+     "10561105_p0118"
+    ]
+   },
+   {
+    "id": "10561105_p0126",
+    "serie": [
+     "10561105_p0132"
+    ]
+   },
+   "10561105_p0134",
+   {
+    "id": "10561105_p0136",
+    "serie": [
+     "10561105_p0138"
+    ]
+   },
+   "10561105_p0142",
+   "10561105_p0146",
+   "10561105_p0149",
+   {
+    "id": "10561105_p0153",
+    "serie": [
+     "10561105_p0155"
+    ]
+   },
+   "10561105_p0160",
+   "10561105_p0163",
+   "10561105_p0168",
+   "10561105_p0175",
+   {
+    "id": "10561105_p0180",
+    "serie": [
+     "10561105_p0182"
+    ]
+   },
+   "10561105_p0199",
+   {
+    "id": "10561105_p0202",
+    "serie": [
+     "10561105_p0208"
+    ]
+   },
+   "10561105_p0204",
+   "10561105_p0212",
+   "10561105_p0217",
+   {
+    "id": "10561105_p0220",
+    "serie": [
+     "10561105_p0223"
+    ]
+   },
+   "10561105_p0229",
+   "10561105_p0230",
+   "10561105_p0231",
+   "10561105_p0233",
+   "10561105_p0236",
+   "10561105_p0242",
+   "10561105_p0244",
+   "10561105_p0251",
+   "10561105_p0257",
+   "10561105_p0258",
+   "10561105_p0260",
+   "10561105_p0264",
+   {
+    "id": "10561105_p0265",
+    "serie": [
+     "10561105_p0267"
+    ]
+   },
+   "10561105_p0266",
+   "10561105_p0271"
+  ],
+  "nankin": [
+   "10661106_p0003",
+   "10661106_p0011",
+   "10661106_p0021",
+   "10661106_p0026",
+   "10661106_p0031",
+   "10661106_p0033",
+   "10661106_p0036",
+   "10661106_p0038",
+   "10661106_p0040",
+   {
+    "id": "10661106_p0045",
+    "serie": [
+     "10661106_p0047"
+    ]
+   },
+   {
+    "id": "10661106_p0055",
+    "serie": [
+     "10661106_p0053"
+    ]
+   },
+   "10661106_p0057",
+   "10661106_p0064",
+   "10661106_p0067",
+   "10661106_p0071",
+   "10661106_p0072",
+   "10661106_p0086",
+   "10661106_p0102",
+   {
+    "id": "10661106_p0108",
+    "serie": [
+     "10661106_p0110"
+    ]
+   },
+   "10661106_p0113",
+   "10661106_p0118",
+   "10661106_p0122",
+   "10661106_p0124",
+   "10761107_p0001",
+   "10761107_p0004",
+   {
+    "id": "10761107_p0007",
+    "serie": [
+     "10761107_p0012"
+    ]
+   },
+   "10761107_p0014",
+   {
+    "id": "10761107_p0020",
+    "serie": [
+     "10761107_p0019"
+    ]
+   },
+   "10761107_p0026",
+   "10761107_p0032",
+   "10761107_p0034",
+   "10761107_p0036",
+   "10761107_p0038",
+   "10761107_p0039",
+   {
+    "id": "10761107_p0044",
+    "serie": [
+     "10761107_p0047"
+    ]
+   },
+   "10761107_p0045",
+   "10761107_p0055",
+   {
+    "id": "10761107_p0056",
+    "serie": [
+     "10761107_p0057"
+    ]
+   },
+   "10761107_p0061",
+   {
+    "id": "10761107_p0064",
+    "serie": [
+     "10761107_p0063"
+    ]
+   },
+   "10761107_p0065",
+   "10761107_p0069",
+   "10761107_p0071",
+   "10761107_p0075",
+   "10761107_p0076",
+   {
+    "id": "10761107_p0080",
+    "serie": [
+     "10761107_p0081"
+    ]
+   },
+   "10761107_p0082",
+   "10761107_p0085",
+   "10761107_p0087",
+   "10761107_p0088",
+   {
+    "id": "10761107_p0092",
+    "serie": [
+     "10761107_p0093"
+    ]
+   },
+   "10761107_p0098",
+   "10761107_p0100",
+   "10761107_p0101",
+   {
+    "id": "10761107_p0104",
+    "serie": [
+     "10761107_p0107",
+     "10761107_p0111"
+    ]
+   },
+   "10761107_p0113",
+   "10761107_p0119",
+   {
+    "id": "10761107_p0123",
+    "serie": [
+     "10761107_p0122"
+    ]
+   },
+   "10761107_p0124",
+   "10761107_p0126",
+   "10761107_p0128",
+   "10761107_p0134",
+   "10761107_p0135",
+   "10761107_p0139",
+   "10761107_p0142",
+   "10761107_p0151",
+   "10761107_p0157",
+   "10761107_p0164",
+   "10761107_p0175",
+   {
+    "id": "10861108_p0004",
+    "serie": [
+     "10861108_p0008"
+    ]
+   },
+   "10861108_p0029",
+   "10861108_p0032",
+   "10861108_p0040"
+  ],
+  "hangzhou": [
+   "10861108_p0043",
+   "10861108_p0049",
+   "10861108_p0051",
+   "10861108_p0053",
+   "10861108_p0061",
+   "10861108_p0063",
+   "10861108_p0072",
+   "10861108_p0077",
+   "10861108_p0083",
+   "10861108_p0088",
+   {
+    "id": "10861108_p0091",
+    "serie": [
+     "10861108_p0095"
+    ]
+   },
+   "10861108_p0101",
+   "10861108_p0111",
+   "10861108_p0124",
+   "10961109_p0001",
+   "10961109_p0009",
+   "10961109_p0016",
+   "10961109_p0020",
+   {
+    "id": "10961109_p0034",
+    "serie": [
+     "10961109_p0023",
+     "10961109_p0032"
+    ]
+   },
+   "10961109_p0026",
+   "10961109_p0027",
+   "10961109_p0038",
+   "10961109_p0044",
+   "10961109_p0048",
+   "10961109_p0050",
+   "10961109_p0057",
+   "10961109_p0072",
+   "10961109_p0079",
+   "10961109_p0094",
+   "10961109_p0101",
+   {
+    "id": "10961109_p0104",
+    "serie": [
+     "10961109_p0109"
+    ]
+   },
+   "10961109_p0113",
+   "10961109_p0119",
+   "10961109_p0122",
+   "10961109_p0124",
+   {
+    "id": "10961109_p0125",
+    "serie": [
+     "10961109_p0130"
+    ]
+   },
+   "10961109_p0129",
+   "10961109_p0133",
+   "10961109_p0138",
+   "10961109_p0141",
+   "10961109_p0142",
+   "10961109_p0144",
+   "10961109_p0150",
+   "10961109_p0152",
+   "10961109_p0156",
+   "10961109_p0159",
+   {
+    "id": "10961109_p0172",
+    "serie": [
+     "10961109_p0164",
+     "10961109_p0166",
+     "10961109_p0168"
+    ]
+   },
+   "10961109_p0178",
+   "10961109_p0183",
+   "10961109_p0189",
+   "10961109_p0197",
+   "11061110_p0001",
+   "11061110_p0197",
+   "11061110_p0201",
+   "11061110_p0203",
+   "11061110_p0205",
+   {
+    "id": "11061110_p0206",
+    "serie": [
+     "11061110_p0213"
+    ]
+   },
+   "11061110_p0210"
+  ],
+  "shaoxing": [
+   "11061110_p0003",
+   "11061110_p0004",
+   "11061110_p0007",
+   "11061110_p0009",
+   "11061110_p0010",
+   "11061110_p0015",
+   "11061110_p0019",
+   {
+    "id": "11061110_p0026",
+    "serie": [
+     "11061110_p0025"
+    ]
+   },
+   "11061110_p0028",
+   "11061110_p0036",
+   "11061110_p0043",
+   "11061110_p0047",
+   "11061110_p0049",
+   "11061110_p0052",
+   "11061110_p0055",
+   "11061110_p0057",
+   "11061110_p0066",
+   "11061110_p0069",
+   "11061110_p0070",
+   "11061110_p0072",
+   "11061110_p0073",
+   "11061110_p0074",
+   "11061110_p0079",
+   "11061110_p0080",
+   "11061110_p0085",
+   {
+    "id": "11061110_p0089",
+    "serie": [
+     "11061110_p0086"
+    ]
+   },
+   "11061110_p0090",
+   "11061110_p0092",
+   "11061110_p0094",
+   "11061110_p0096",
+   "11061110_p0097",
+   "11061110_p0100",
+   {
+    "id": "11061110_p0110",
+    "serie": [
+     "11061110_p0108"
+    ]
+   },
+   {
+    "id": "11061110_p0117",
+    "serie": [
+     "11061110_p0121"
+    ]
+   },
+   "11061110_p0127",
+   "11061110_p0129",
+   "11061110_p0132",
+   "11061110_p0133",
+   "11061110_p0135",
+   "11061110_p0137",
+   "11061110_p0143",
+   "11061110_p0146",
+   "11061110_p0153",
+   "11061110_p0155",
+   "11061110_p0157",
+   "11061110_p0159",
+   "11061110_p0162",
+   "11061110_p0165",
+   "11061110_p0167",
+   "11061110_p0170",
+   "11061110_p0178",
+   "11061110_p0180",
+   "11061110_p0183",
+   "11061110_p0186",
+   "11061110_p0190",
+   "11061110_p0193",
+   "11061110_p0194"
+  ],
+  "shanghai": [
+   "11161111_p0001",
+   "11161111_p0005",
+   "11161111_p0007",
+   {
+    "id": "11161111_p0015",
+    "serie": [
+     "11161111_p0010"
+    ]
+   },
+   "11161111_p0012",
+   "11161111_p0020",
+   "11161111_p0025",
+   {
+    "id": "11161111_p0036",
+    "serie": [
+     "11161111_p0031",
+     "11161111_p0039",
+     "11161111_p0043"
+    ]
+   },
+   {
+    "id": "11161111_p0051",
+    "serie": [
+     "11161111_p0055",
+     "11161111_p0063",
+     "11161111_p0065"
+    ]
+   },
+   {
+    "id": "11161111_p0069",
+    "serie": [
+     "11161111_p0071"
+    ]
+   },
+   "11161111_p0081",
+   {
+    "id": "11161111_p0094",
+    "serie": [
+     "11161111_p0082"
+    ]
+   },
+   "11161111_p0116",
+   "11161111_p0124",
+   "11161111_p0148",
+   {
+    "id": "11161111_p0161",
+    "serie": [
+     "11161111_p0164"
+    ]
+   },
+   "11261112_p0002",
+   "11261112_p0006",
+   {
+    "id": "11261112_p0007",
+    "serie": [
+     "11261112_p0019"
+    ]
+   },
+   "11261112_p0015",
+   "11261112_p0024",
+   "11261112_p0028",
+   "11261112_p0046",
+   "11261112_p0050",
+   "11261112_p0060",
+   "11261112_p0068",
+   "11261112_p0069",
+   "11261112_p0079",
+   "11261112_p0082",
+   "11261112_p0085",
+   "11261112_p0089",
+   "11261112_p0093",
+   "11261112_p0096",
+   "11261112_p0106",
+   "11261112_p0108",
+   "11261112_p0112",
+   {
+    "id": "11261112_p0118",
+    "serie": [
+     "11261112_p0116"
+    ]
+   },
+   "11261112_p0123",
+   "11261112_p0128",
+   "11461114_p0001",
+   "11461114_p0003",
+   "11461114_p0005",
+   "11461114_p0009",
+   "11461114_p0010",
+   "11461114_p0012",
+   "11461114_p0014",
+   "11461114_p0019",
+   "11461114_p0020",
+   "11461114_p0058"
+  ],
+  "suzhou": [
+   "11361113_p0002",
+   "11361113_p0012",
+   "11361113_p0017",
+   "11361113_p0019",
+   "11361113_p0025",
+   "11361113_p0029",
+   "11361113_p0035",
+   "11361113_p0036",
+   "11361113_p0037",
+   "11361113_p0041",
+   "11361113_p0049",
+   "11361113_p0051",
+   "11361113_p0055",
+   "11361113_p0061",
+   "11361113_p0062",
+   {
+    "id": "11361113_p0065",
+    "serie": [
+     "11361113_p0069"
+    ]
+   },
+   "11361113_p0071",
+   "11361113_p0073",
+   "11361113_p0078",
+   "11361113_p0080",
+   "11361113_p0088",
+   "11361113_p0093",
+   "11361113_p0101"
+  ]
+ },
+ "post": [
+  {
+   "id": "10161101_p0076",
+   "caption": "Premier soir à Pékin, un toit à étages éclairé par en dessous.",
+   "captionEn": "First evening in Beijing, a tiered roof lit from below."
+  },
+  {
+   "id": "10461104_p0079",
+   "caption": "Une porte rouge cloutée d'or, sous une plaque bleue.",
+   "captionEn": "A red door studded with gold, beneath a blue plaque."
+  },
+  {
+   "id": "11261112_p0050",
+   "caption": "L'atrium de la tour Jin Mao, étage après étage en spirale.",
+   "captionEn": "The Jin Mao Tower atrium, floor after floor in a spiral."
+  },
+  {
+   "id": "10261102_p0151",
+   "caption": "Dashilan le soir, sous les lanternes rouges d'un marchand de pieds de porc.",
+   "captionEn": "Dashilan in the evening, under the red lanterns of a pig's trotter shop."
+  },
+  {
+   "id": "10461104_p0081",
+   "caption": "Une pose devant les portes rouges à croisillons.",
+   "captionEn": "Posing in front of the red lattice doors."
+  },
+  {
+   "id": "10461104_p0142",
+   "caption": "Des statuettes alignées au bout des toits jaunes de la Cité interdite.",
+   "captionEn": "A line of small figures on the edge of the Forbidden City's yellow roofs."
+  },
+  {
+   "id": "10461104_p0209",
+   "caption": "Séance photo en costume impérial devant un mur rouge.",
+   "captionEn": "A photo shoot in imperial costume against a red wall."
+  },
+  {
+   "id": "10761107_p0071",
+   "caption": "Au mont Niushou, même les balcons intérieurs sont dorés.",
+   "captionEn": "At Niushou Mountain, even the inner balconies are gilded."
+  },
+  {
+   "id": "10661106_p0045",
+   "caption": "À Nankin, les terrasses descendent par étages jusqu'à l'eau.",
+   "captionEn": "In Nanjing, terraces stepping down to the water."
+  },
+  {
+   "id": "10461104_p0229",
+   "caption": "Un arbre d'automne au-dessus d'un pavillon perché sur les rochers.",
+   "captionEn": "An autumn tree over a pavilion perched on the rocks."
+  },
+  {
+   "id": "10161101_p0079",
+   "caption": "Sous ce pavillon, de petites scènes sont peintes sur chaque poutre.",
+   "captionEn": "Under this pavilion, small scenes painted on every beam."
+  },
+  {
+   "id": "10861108_p0111",
+   "caption": "Une pagode éclairée entre les feuilles, un soir à Hangzhou.",
+   "captionEn": "A lit pagoda through the leaves, one evening in Hangzhou."
+  },
+  {
+   "id": "10261102_p0053",
+   "caption": "Une soupe qui mijote encore dans son pot en terre.",
+   "captionEn": "Soup still simmering in its clay pot."
+  },
+  {
+   "id": "10661106_p0055",
+   "caption": "À Nankin, tout s'allume au bord de l'eau à la nuit tombée.",
+   "captionEn": "In Nanjing, everything lights up along the water after dark."
+  },
+  {
+   "id": "11061110_p0010",
+   "caption": "Le Sanwei Shuwu, la petite école de Lu Xun enfant, à Shaoxing.",
+   "captionEn": "Sanwei Shuwu in Shaoxing, the little school Lu Xun went to as a boy."
+  },
+  {
+   "id": "10661106_p0108",
+   "caption": "Un pavillon éclairé se détache sur le ciel noir de Nankin.",
+   "captionEn": "A lit pavilion standing out against the black Nanjing sky."
+  },
+  {
+   "id": "11161111_p0094",
+   "caption": "Pudong de nuit vu du Bund, derrière le pont Waibaidu.",
+   "captionEn": "Pudong at night from the Bund, behind the Waibaidu Bridge."
+  },
+  {
+   "id": "10261102_p0055",
+   "caption": "Les raviolis arrivent dans leur panier vapeur en bambou.",
+   "captionEn": "Dumplings arriving in their bamboo steamer."
+  },
+  {
+   "id": "10461104_p0240",
+   "caption": "Au centre d'un plafond à caissons, un dragon sculpté.",
+   "captionEn": "A carved dragon at the centre of a coffered ceiling."
+  },
+  {
+   "id": "10861108_p0049",
+   "caption": "Hangzhou après la pluie, un pavillon en bois au bord de l'eau.",
+   "captionEn": "Hangzhou after the rain, a wooden pavilion by the water."
+  },
+  {
+   "id": "11361113_p0101",
+   "caption": "Suzhou, des barques amarrées le long d'un canal tranquille.",
+   "captionEn": "Suzhou, boats moored along a quiet canal."
+  },
+  {
+   "id": "11061110_p0210",
+   "caption": "Des faisceaux lumineux balaient le ciel au-dessus des tours jumelles.",
+   "captionEn": "Searchlights sweeping the sky above the twin towers."
+  },
+  {
+   "id": "11061110_p0197",
+   "caption": "Hangzhou de nuit, les tours alignées de l'autre côté du fleuve.",
+   "captionEn": "Hangzhou at night, towers lined up across the river."
+  },
+  {
+   "id": "10761107_p0104",
+   "caption": "Sous le dôme du mont Niushou, à Nankin, un bouddha couché éclairé en doré.",
+   "captionEn": "Under the dome on Niushou Mountain, Nanjing, a reclining Buddha lit in gold."
+  },
+  {
+   "id": "10561105_p0047",
+   "caption": "Des tuiles bleues partout, jusqu'aux petits animaux posés sur les arêtes.",
+   "captionEn": "Blue tiles everywhere, right down to the little animals on the ridges."
+  },
+  {
+   "id": "10561105_p0029",
+   "caption": "Le temple du Ciel, rouge et bleu, sur un ciel sans nuage.",
+   "captionEn": "The Temple of Heaven, red and blue against a cloudless sky."
+  },
+  {
+   "id": "10261102_p0021",
+   "caption": "À 798, les cheminées de l'ancienne usine sont restées debout.",
+   "captionEn": "At 798, the old factory chimneys are still standing."
+  },
+  {
+   "id": "10261102_p0040",
+   "caption": "Une passante s'étire contre la rambarde, le téléphone à la main.",
+   "captionEn": "A woman stretching against the railing, phone in hand."
+  },
+  {
+   "id": "11061110_p0089",
+   "caption": "Shaoxing écrit en grand sur un mur, entre les fleurs.",
+   "captionEn": "Shaoxing written large on a wall, among the flowers."
+  },
+  {
+   "id": "11461114_p0009",
+   "caption": "Sur le parvis mouillé, une sculpture en métal poli renvoie le ciel.",
+   "captionEn": "On the wet forecourt, a polished metal sculpture mirrors the sky."
+  },
+  {
+   "id": "11161111_p0036",
+   "caption": "À Shanghai, des toits relevés en pointe sous un ciel rose.",
+   "captionEn": "In Shanghai, upturned eaves under a pink sky."
+  },
+  {
+   "id": "11461114_p0019",
+   "caption": "Le musée d'astronomie de Shanghai, tout en courbes sous un ciel gris.",
+   "captionEn": "The Shanghai Astronomy Museum, all curves under a grey sky."
+  },
+  {
+   "id": "10461104_p0271",
+   "caption": "La tour d'angle de la Cité interdite et son double dans les douves.",
+   "captionEn": "The Forbidden City corner tower and its double in the moat."
+  },
+  {
+   "id": "10461104_p0159",
+   "caption": "Deux étages de toits sous le ciel gris de Pékin.",
+   "captionEn": "Two tiers of roofs under a grey Beijing sky."
+  },
+  {
+   "id": "10761107_p0126",
+   "caption": "Une grande résille d'acier recouvre le dôme doré de Niushou.",
+   "captionEn": "A huge steel lattice arching over Niushou's golden dome."
+  },
+  {
+   "id": "10461104_p0212",
+   "caption": "Un passant presse le pas sous les avant-toits colorés.",
+   "captionEn": "Someone hurrying past under the painted eaves."
+  },
+  {
+   "id": "10261102_p0004",
+   "caption": "Une fresque pleine de couleurs couvre une façade entière, à Pékin.",
+   "captionEn": "A mural full of colour covers an entire wall in Beijing."
+  },
+  {
+   "id": "11061110_p0028",
+   "caption": "Un homme longe les murs blancs d'une vieille maison de Shaoxing.",
+   "captionEn": "A man walking along the white walls of an old Shaoxing house."
+  },
+  {
+   "id": "11061110_p0121",
+   "caption": "À Shaoxing, les maisons du canal se reflètent dans l'eau immobile.",
+   "captionEn": "In Shaoxing, the canal houses reflected in still water."
+  },
+  {
+   "id": "10561105_p0052",
+   "caption": "Un dragon moulé dans une tuile vernissée verte.",
+   "captionEn": "A dragon moulded into a green glazed roof tile."
+  },
+  {
+   "id": "10961109_p0129",
+   "caption": "Une ombrelle en papier huilé au bord d'un bassin, à Hangzhou.",
+   "captionEn": "An oil-paper parasol by a pond in Hangzhou."
+  }
+ ]
+}

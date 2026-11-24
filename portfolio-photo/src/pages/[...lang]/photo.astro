@@ -4,6 +4,8 @@ import Layout from "../../layouts/header.astro";
 import galleries from "../../data/galleries.json";
 import vietnam from "../../data/vietnam.json";
 import indonesie from "../../data/indonesie.json";
+import chine from "../../data/chine.json";
+import { chineOuverte } from "../../lib/chineOuverte.js";
 import { listBlobsFromPublicContainer } from "../../lib/blobList.js";
 import Colophon from "../../components/Colophon.astro";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
@@ -31,6 +33,7 @@ const eventDatabricksCover = `${galleries.eventDatabricks}A7405096.jpg`;
 // annoncer le titre de la page qu'elle ouvre.
 const titres = {
   fr: {
+    chine: "Chine",
     indonesie: "Indonésie",
     vietnam: "Vietnam",
     supersonic: "SuperSonic",
@@ -44,6 +47,7 @@ const titres = {
     croatie: "Croatie",
   },
   en: {
+    chine: "China",
     indonesie: "Indonesia",
     vietnam: "Vietnam",
     supersonic: "SuperSonic",
@@ -58,7 +62,20 @@ const titres = {
   },
 };
 
+// Chine : les fichiers sont listes dans chine.json (voir /chine), la
+// couverture se construit donc ici, sans passer par le stockage.
+const chineBase = process.env.CHINE_PHOTOS_LOCAL ? "/_apercu-chine/" : chine.base;
+
 const couvertures = [
+  // Vignette choisie par Nabil (chine.json → couverture), sinon la 1re du recit.
+  {
+    slug: "chine",
+    cover: chine.couverture
+      ? `${chineBase}${chine.couverture}.jpg`
+      : chine.post[0]
+        ? `${chineBase}recit/${chine.post[0].id}.jpg`
+        : fallbackCover,
+  },
   { slug: "indonesie", cover: indonesie.post[0]?.url },
   { slug: "vietnam", cover: vietnam.post[0]?.url },
   { slug: "supersonic", cover: await firstPhoto(galleries.superSonic) },
@@ -72,7 +89,8 @@ const couvertures = [
   { slug: "croatie", cover: await firstPhoto(galleries.croatie) },
 ];
 
-const destinations = couvertures.map((d) => ({
+// Avant la sortie du teaser, la Chine n'a pas de carte ici (aucune photo publiee).
+const destinations = couvertures.filter((d) => chineOuverte || d.slug !== "chine").map((d) => ({
   ...d,
   title: titres[langue][d.slug],
   href: cheminLocalise(`/${d.slug}`, langue),
@@ -83,7 +101,7 @@ const destinations = couvertures.map((d) => ({
 // jour tout seul. Le total de photos du site n'est PAS affiche ici : il faudrait
 // lister toutes les galeries distantes au build, et le « 958 » de l'accueil est
 // une valeur ecrite en dur que rien ne verifie.
-const commentees = vietnam.post.length + indonesie.post.length;
+const commentees = vietnam.post.length + indonesie.post.length + (chineOuverte ? chine.post.filter((p) => p.caption).length : 0);
 
 const T = {
   fr: {
