@@ -12,9 +12,7 @@ import { Image } from "astro:assets";
 // en WebP a la construction. En public/ ils partaient bruts — 2,4 / 2,0 / 2,7 Mo
 // pour des vignettes affichees en 322px de large.
 import visuelCloud from "../../assets/nabil-ishane.jpg";
-import visuelPhoto from "../../assets/A7401833.jpg";
-import visuelMusique from "../../assets/image.png";
-import visuelGaming from "../../assets/twitch.png";
+import visuelPhotoVideo from "../../assets/avant-apres/suzhou-apres.jpg";
 import Colophon from "../../components/Colophon.astro";
 import nouveautesData from "../../data/nouveautes.json";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
@@ -28,12 +26,12 @@ const langue = langueDepuisParam(Astro.params.lang);
 const T = {
   fr: {
     description:
-      "Site personnel de Nabil Chebili : Cloud & DevOps (Azure), photographie et musique. Projets, retours d’expérience et galeries.",
+      "Nabil Chebili, ingénieur Cloud, DevOps & IA, photographe et vidéaste : projets cloud, mariages, événements et films de voyage.",
     photographies: "photographies",
     galeries: "galeries",
-    metier: "Ingénieur Cloud & DevOps",
+    metier: "Ingénieur Cloud, DevOps & IA",
     anciennete: "ans",
-    chapo: "Cloud & DevOps, photographie et musique — projets, galeries et inspirations.",
+    chapo: "Ingénieur Cloud, DevOps & IA. Photographe et vidéaste.",
     explorerLien: "Explorer",
     aproposTitre: "Vous vous demandez sûrement qui je suis ?",
     aproposTexte:
@@ -42,33 +40,32 @@ const T = {
     explorer: "Explorer",
     nouveautes: "Nouveautés",
     voir: "Voir",
+    aCote: "À côté",
     univers: [
       {
-        titre: "Cloud & DevOps",
-        note: "Projets, automatisation et expérimentations autour du Cloud et de l'infrastructure.",
+        titre: "Cloud, DevOps & IA",
+        note: "Mon métier d’ingénieur : architectures Azure, automatisation, data et IA. Missions, projets et certifications.",
         alt: "Nabil Chebili chez I-Shane",
       },
       {
-        titre: "Photographie",
-        note: "Galeries & séries photographiques : voyages, portraits et instantanés.",
-        alt: "Photographie",
+        titre: "Photo & vidéo",
+        note: "Mariages, événements d’entreprise et films de voyage : prise de vue, retouche et montage.",
+        alt: "Canal de Suzhou, photo retouchée",
       },
-      {
-        titre: "Musique",
-        note: "Petites avancées dans le monde de la guitare (autodidacte)",
-        alt: "Musique",
-      },
-      { titre: "Gaming", note: "Twitch, streaming et jeux vidéo.", alt: "Gaming" },
+    ],
+    cotes: [
+      { titre: "Musique", note: "la guitare, en autodidacte" },
+      { titre: "Gaming", note: "Twitch et streaming" },
     ],
   },
   en: {
     description:
-      "Nabil Chebili’s personal site: Cloud & DevOps (Azure), photography and music. Projects, field notes and galleries.",
+      "Nabil Chebili, Cloud, DevOps & AI engineer, photographer and filmmaker: cloud projects, weddings, events and travel films.",
     photographies: "photographs",
     galeries: "galleries",
-    metier: "Cloud & DevOps engineer",
+    metier: "Cloud, DevOps & AI engineer",
     anciennete: "years",
-    chapo: "Cloud & DevOps, photography and music — projects, galleries and things that stick.",
+    chapo: "Cloud, DevOps & AI engineer. Photographer and filmmaker.",
     explorerLien: "Explore",
     aproposTitre: "Wondering who I am?",
     aproposTexte:
@@ -77,23 +74,22 @@ const T = {
     explorer: "Explore",
     nouveautes: "What's new",
     voir: "View",
+    aCote: "On the side",
     univers: [
       {
-        titre: "Cloud & DevOps",
-        note: "Projects, automation and experiments around cloud and infrastructure.",
+        titre: "Cloud, DevOps & AI",
+        note: "My engineering work: Azure architecture, automation, data and AI. Assignments, projects and certifications.",
         alt: "Nabil Chebili at I-Shane",
       },
       {
-        titre: "Photography",
-        note: "Galleries and photo series: travels, portraits and snapshots.",
-        alt: "Photography",
+        titre: "Photo & video",
+        note: "Weddings, corporate events and travel films: shooting, retouching and editing.",
+        alt: "Suzhou canal, retouched photo",
       },
-      {
-        titre: "Music",
-        note: "Small steps into the guitar, self-taught.",
-        alt: "Music",
-      },
-      { titre: "Gaming", note: "Twitch, streaming and video games.", alt: "Gaming" },
+    ],
+    cotes: [
+      { titre: "Music", note: "guitar, self-taught" },
+      { titre: "Gaming", note: "Twitch and streaming" },
     ],
   },
 };
@@ -121,13 +117,17 @@ const nouveautes = nouveautesData.nouveautes.slice(0, 4).map((n) => ({
   href: cheminLocalise(n.href, langue),
 }));
 
-const visuels = [visuelCloud, visuelPhoto, visuelMusique, visuelGaming];
-const routes = ["/clouddevops", "/photo", "/musique", "/gaming"];
+// Deux metiers a egalite (Nabil, 24/11 : la photo/video pro, et le Cloud,
+// le DevOps et l'IA « prennent aussi de l'espace ») ; Musique et Gaming
+// restent, en une ligne « A cote » sous les deux cartes.
+const visuels = [visuelCloud, visuelPhotoVideo];
+const routes = ["/clouddevops", "/photo-video"];
 const univers = c.univers.map((u, i) => ({
   ...u,
   img: visuels[i],
   href: cheminLocalise(routes[i], langue),
 }));
+const cotes = c.cotes.map((u, i) => ({ ...u, href: cheminLocalise(["/musique", "/gaming"][i], langue) }));
 ---
 
 <Layout
@@ -257,8 +257,8 @@ const univers = c.univers.map((u, i) => ({
               <Image
                 src={u.img}
                 alt={u.alt}
-                widths={[400, 800]}
-                sizes="(max-width: 700px) 100vw, 25vw"
+                widths={[600, 1200]}
+                sizes="(max-width: 700px) 40vw, 50vw"
                 loading="lazy"
                 decoding="async"
               />
@@ -276,6 +276,16 @@ const univers = c.univers.map((u, i) => ({
         ))
       }
     </div>
+    <p class="a-cote" data-reveal data-groupe="cartes">
+      <span class="a-cote-titre">{c.aCote}</span>
+      {
+        cotes.map((u) => (
+          <a href={u.href}>
+            <b>{u.titre}</b> <span>{u.note}</span> <i aria-hidden="true">&#8594;</i>
+          </a>
+        ))
+      }
+    </p>
   </section>
 
   {/* Le bloc de contact etait recopie ici a l'identique du composant que les

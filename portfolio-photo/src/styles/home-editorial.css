@@ -512,3 +512,93 @@
     transition: none;
   }
 }
+
+/* ======================================== Explorer : deux metiers, v3 ===
+   Deux cartes a egalite (Cloud, DevOps & IA / Photo & video), plus grandes
+   que les quatre d'avant ; Musique et Gaming passent en une ligne « A cote ». */
+.activites {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  padding-bottom: var(--pas-3);
+}
+.activite-visuel {
+  max-height: 460px;
+}
+.activite-titre {
+  font-size: clamp(22px, 2.2vw, 32px);
+}
+.activite-note {
+  font-size: 14px;
+  max-width: 52ch;
+}
+
+.a-cote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 36px;
+  margin: 0 var(--edge) var(--pas-10);
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+}
+.a-cote-titre {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-55);
+}
+.a-cote a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 14px;
+}
+.a-cote a b {
+  font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+.a-cote a span {
+  color: var(--ink-55);
+}
+.a-cote a i {
+  font-style: normal;
+  transition: transform var(--duree) var(--sortie);
+}
+.a-cote a:hover i,
+.a-cote a:focus-visible i {
+  transform: translateX(5px);
+}
+.a-cote a:hover b,
+.a-cote a:focus-visible b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+@media (max-width: 700px) {
+  .activites {
+    grid-template-columns: 1fr;
+  }
+  .activite-titre {
+    font-size: 19px;
+  }
+  .activite-note {
+    font-size: 12.5px;
+  }
+  .a-cote {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .a-cote a i {
+    transition: none;
+  }
+}
