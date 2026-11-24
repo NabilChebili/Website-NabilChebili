@@ -252,7 +252,6 @@
    "10461104_p0103",
    "10461104_p0107",
    "10461104_p0111",
-   "10461104_p0112",
    "10461104_p0119",
    "10461104_p0121",
    "10461104_p0128",
@@ -418,7 +417,6 @@
    "10761107_p0014",
    "10761107_p0019",
    "10761107_p0020",
-   "10761107_p0022",
    "10761107_p0026",
    "10761107_p0032",
    "10761107_p0034",
@@ -628,7 +626,6 @@
    "11161111_p0081",
    "11161111_p0082",
    "11161111_p0094",
-   "11161111_p0106",
    "11161111_p0116",
    "11161111_p0124",
    "11161111_p0148",
@@ -739,6 +736,16 @@
    "captionEn": "Dashilan in the evening, under the red lanterns of a pig's trotter shop."
   },
   {
+   "id": "10461104_p0079",
+   "caption": "Une porte rouge cloutée d'or, sous une plaque bleue.",
+   "captionEn": "A red door studded with gold, beneath a blue plaque."
+  },
+  {
+   "id": "10461104_p0081",
+   "caption": "Une pose devant les portes rouges à croisillons.",
+   "captionEn": "Posing in front of the red lattice doors."
+  },
+  {
    "id": "10461104_p0142",
    "caption": "Des statuettes alignées au bout des toits jaunes de la Cité interdite.",
    "captionEn": "A line of small figures on the edge of the Forbidden City's yellow roofs."
@@ -747,6 +754,21 @@
    "id": "10461104_p0159",
    "caption": "Deux étages de toits sous le ciel gris de Pékin.",
    "captionEn": "Two tiers of roofs under a grey Beijing sky."
+  },
+  {
+   "id": "10461104_p0209",
+   "caption": "Séance photo en costume impérial devant un mur rouge.",
+   "captionEn": "A photo shoot in imperial costume against a red wall."
+  },
+  {
+   "id": "10461104_p0210",
+   "caption": "Entre deux déclics, elle remet sa coiffe en place.",
+   "captionEn": "Between shots, she straightens her headdress."
+  },
+  {
+   "id": "10461104_p0212",
+   "caption": "Un passant presse le pas sous les avant-toits colorés.",
+   "captionEn": "Someone hurrying past under the painted eaves."
   },
   {
    "id": "10461104_p0229",
@@ -759,9 +781,24 @@
    "captionEn": "A carved dragon at the centre of a coffered ceiling."
   },
   {
+   "id": "10461104_p0271",
+   "caption": "La tour d'angle de la Cité interdite et son double dans les douves.",
+   "captionEn": "The Forbidden City corner tower and its double in the moat."
+  },
+  {
+   "id": "10561105_p0024",
+   "caption": "Au temple du Ciel, une boule dorée tout en haut des trois toits bleus.",
+   "captionEn": "At the Temple of Heaven, a gilded knob on top of three blue roofs."
+  },
+  {
    "id": "10561105_p0029",
    "caption": "Le temple du Ciel, rouge et bleu, sur un ciel sans nuage.",
    "captionEn": "The Temple of Heaven, red and blue against a cloudless sky."
+  },
+  {
+   "id": "10561105_p0047",
+   "caption": "Des tuiles bleues partout, jusqu'aux petits animaux posés sur les arêtes.",
+   "captionEn": "Blue tiles everywhere, right down to the little animals on the ridges."
   },
   {
    "id": "10561105_p0052",
@@ -769,9 +806,9 @@
    "captionEn": "A dragon moulded into a green glazed roof tile."
   },
   {
-   "id": "10561105_p0231",
-   "caption": "Le bateau de marbre du Palais d'été, dans la lumière du soir.",
-   "captionEn": "The Summer Palace marble boat in the evening light."
+   "id": "10661106_p0045",
+   "caption": "À Nankin, les terrasses descendent par étages jusqu'à l'eau.",
+   "captionEn": "In Nanjing, terraces stepping down to the water."
   },
   {
    "id": "10661106_p0055",
@@ -779,14 +816,39 @@
    "captionEn": "In Nanjing, everything lights up along the water after dark."
   },
   {
+   "id": "10661106_p0108",
+   "caption": "Un pavillon éclairé se détache sur le ciel noir de Nankin.",
+   "captionEn": "A lit pavilion standing out against the black Nanjing sky."
+  },
+  {
+   "id": "10761107_p0064",
+   "caption": "Sous la coupole, des dizaines de bouddhas autour d'un stupa.",
+   "captionEn": "Under the dome, dozens of Buddhas around a stupa."
+  },
+  {
+   "id": "10761107_p0071",
+   "caption": "Au mont Niushou, même les balcons intérieurs sont dorés.",
+   "captionEn": "At Niushou Mountain, even the inner balconies are gilded."
+  },
+  {
    "id": "10761107_p0104",
    "caption": "Sous le dôme du mont Niushou, à Nankin, un bouddha couché éclairé en doré.",
    "captionEn": "Under the dome on Niushou Mountain, Nanjing, a reclining Buddha lit in gold."
   },
   {
+   "id": "10761107_p0126",
+   "caption": "Une grande résille d'acier recouvre le dôme doré de Niushou.",
+   "captionEn": "A huge steel lattice arching over Niushou's golden dome."
+  },
+  {
    "id": "10861108_p0049",
    "caption": "Hangzhou après la pluie, un pavillon en bois au bord de l'eau.",
    "captionEn": "Hangzhou after the rain, a wooden pavilion by the water."
+  },
+  {
+   "id": "10861108_p0111",
+   "caption": "Une pagode éclairée entre les feuilles, un soir à Hangzhou.",
+   "captionEn": "A lit pagoda through the leaves, one evening in Hangzhou."
   },
   {
    "id": "10961109_p0129",
@@ -797,6 +859,16 @@
    "id": "11061110_p0010",
    "caption": "Le Sanwei Shuwu, la petite école de Lu Xun enfant, à Shaoxing.",
    "captionEn": "Sanwei Shuwu in Shaoxing, the little school Lu Xun went to as a boy."
+  },
+  {
+   "id": "11061110_p0028",
+   "caption": "Un homme longe les murs blancs d'une vieille maison de Shaoxing.",
+   "captionEn": "A man walking along the white walls of an old Shaoxing house."
+  },
+  {
+   "id": "11061110_p0089",
+   "caption": "Shaoxing écrit en grand sur un mur, entre les fleurs.",
+   "captionEn": "Shaoxing written large on a wall, among the flowers."
   },
   {
    "id": "11061110_p0121",
@@ -814,14 +886,34 @@
    "captionEn": "Searchlights sweeping the sky above the twin towers."
   },
   {
-   "id": "11161111_p0005",
-   "caption": "À Shanghai, une danseuse en parure d'argent fait cercle autour d'elle.",
-   "captionEn": "In Shanghai, a dancer in silver jewellery draws a crowd around her."
+   "id": "11161111_p0036",
+   "caption": "À Shanghai, des toits relevés en pointe sous un ciel rose.",
+   "captionEn": "In Shanghai, upturned eaves under a pink sky."
   },
   {
-   "id": "11161111_p0161",
-   "caption": "Pudong s'allume de l'autre côté du fleuve, derrière le pont Waibaidu.",
-   "captionEn": "Pudong lit up across the river, behind the Waibaidu Bridge."
+   "id": "11161111_p0094",
+   "caption": "Pudong de nuit vu du Bund, derrière le pont Waibaidu.",
+   "captionEn": "Pudong at night from the Bund, behind the Waibaidu Bridge."
+  },
+  {
+   "id": "11261112_p0050",
+   "caption": "L'atrium de la tour Jin Mao, étage après étage en spirale.",
+   "captionEn": "The Jin Mao Tower atrium, floor after floor in a spiral."
+  },
+  {
+   "id": "11361113_p0101",
+   "caption": "Suzhou, des barques amarrées le long d'un canal tranquille.",
+   "captionEn": "Suzhou, boats moored along a quiet canal."
+  },
+  {
+   "id": "11461114_p0009",
+   "caption": "Sur le parvis mouillé, une sculpture en métal poli renvoie le ciel.",
+   "captionEn": "On the wet forecourt, a polished metal sculpture mirrors the sky."
+  },
+  {
+   "id": "11461114_p0019",
+   "caption": "Le musée d'astronomie de Shanghai, tout en courbes sous un ciel gris.",
+   "captionEn": "The Shanghai Astronomy Museum, all curves under a grey sky."
   }
  ]
 }
