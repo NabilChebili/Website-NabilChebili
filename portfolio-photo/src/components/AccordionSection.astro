@@ -1,5 +1,8 @@
 ---
 import PhotoGrid from "./PhotoGrid.astro";
+import { chargerVignettesDuStockage, vignetteDe } from "../lib/blobList.js";
+
+await chargerVignettesDuStockage();
 
 // groupe : les etapes qui partagent un groupe s'excluent — en ouvrir une
 // referme l'autre (attribut name des <details>, natif dans les navigateurs).
@@ -8,7 +11,7 @@ const { id = "section", title = "", photos = [], lang = "fr", groupe, numero } =
 // Une photo est une URL, ou un objet { url, caption?, serie? } (rafale rassemblee,
 // voir PhotoGrid) : l'apercu ne garde que l'URL, le compte inclut toute la serie.
 const urlDe = (p) => (typeof p === "string" ? p : p.url);
-const previewPhotos = photos.slice(0, 4).map(urlDe);
+const previewPhotos = photos.slice(0, 4).map(urlDe).map((u) => vignetteDe(u) ?? u);
 const nbPhotos = photos.reduce((n, p) => n + 1 + (typeof p === "string" ? 0 : (p.serie?.length ?? 0)), 0);
 ---
 
@@ -25,9 +28,22 @@ const nbPhotos = photos.reduce((n, p) => n + 1 + (typeof p === "string" ? 0 : (p
     </span>
   </summary>
   <div class="etape-corps">
-    <PhotoGrid photos={photos} name={title} lang={lang} />
+    <PhotoGrid photos={photos} name={title} lang={lang} differer />
   </div>
 </details>
+
+<script>
+  // Les images d'une etape ne se chargent qu'a son ouverture (voir PhotoGrid, differer).
+  for (const etape of document.querySelectorAll("details.etape")) {
+    etape.addEventListener("toggle", () => {
+      if (!etape.open) return;
+      for (const img of etape.querySelectorAll("img[data-src]")) {
+        img.src = img.dataset.src;
+        img.removeAttribute("data-src");
+      }
+    });
+  }
+</script>
 
 <style>
   /* Une etape est une ligne de sommaire, pas une carte : un filet, aucun fond,

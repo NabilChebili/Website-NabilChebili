@@ -7,6 +7,7 @@ import BlocVideo from "../../components/BlocVideo.astro";
 import CarteVoyage from "../../components/CarteVoyage.astro";
 import chine from "../../data/chine.json";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
+import { declarerVignettes } from "../../lib/blobList.js";
 
 export function getStaticPaths() {
   return cheminsDesLangues();
@@ -38,6 +39,13 @@ const photosByKey = Object.fromEntries(
     ),
   ])
 );
+
+// maj_site.js fabrique une vignette (v/<id>.webp) pour chaque photo de la page,
+// et elles partent avec les photos sur le stockage : toutes existent.
+declarerVignettes([
+  ...recit.map((p) => p.url),
+  ...Object.values(photosByKey).flat().flatMap((x) => (typeof x === "string" ? [x] : [x.url, ...x.serie])),
+]);
 
 const labels = {
   fr: {

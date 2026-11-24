@@ -1,10 +1,20 @@
 ---
 import { traduire, type Langue } from "../i18n/ui";
+import { chargerVignettesDuStockage, vignetteDe } from "../lib/blobList.js";
 
-const { photos = [], name = "photos", lang = "fr" } = Astro.props;
+await chargerVignettesDuStockage();
+
+// differer : la grille est dans une etape repliee (AccordionSection) ; ses
+// images ne recoivent leur src qu'a l'ouverture, sinon le navigateur charge
+// des grilles entieres que personne ne voit (158 photos sur /chine, mesure 24/11).
+const { photos = [], name = "photos", lang = "fr", differer = false } = Astro.props;
 const langue = lang as Langue;
 const t = traduire(langue);
 const items = photos.map((p) => (typeof p === "string" ? { url: p, caption: null } : p));
+// La grille montre la vignette legere quand elle existe ; data-full garde
+// l'original, que la visionneuse, le partage et les telechargements utilisent.
+const mini = (u) => vignetteDe(u) ?? u;
+const source = (u) => (differer ? { "data-src": mini(u) } : { src: mini(u) });
 
 // Les libelles que le script affiche en cours de route passent par des
 // attributs de donnees. `define:vars` les y porterait aussi, mais au prix
@@ -37,26 +47,26 @@ const mots = {
             // la visionneuse ouvre), la prise suivante reellement glissee dessous.
             <span class="serie-pile">
               <span class="tirage tirage-dessus">
-                <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
+                <img {...source(p.url)} data-full={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
                 <span class="serie-compte" aria-label={`${p.serie.length + 1} ${t("grille.prises")}`}>+{p.serie.length}</span>
               </span>
               {p.serie.length > 1 ? (
                 <span class="tirage tirage-milieu" aria-hidden="true">
-                  <img src={p.serie[1]} alt="" loading="lazy" decoding="async" />
+                  <img {...source(p.serie[1])} alt="" loading="lazy" decoding="async" />
                 </span>
               ) : null}
               <span class="tirage tirage-dessous" aria-hidden="true">
-                <img src={p.serie[0]} alt="" loading="lazy" decoding="async" />
+                <img {...source(p.serie[0])} alt="" loading="lazy" decoding="async" />
               </span>
             </span>
           ) : (
-            <img src={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
+            <img {...source(p.url)} data-full={p.url} alt={p.caption ?? ""} loading="lazy" tabindex="0" />
           )}
           {p.caption ? <figcaption>{p.caption}</figcaption> : null}
         </figure>
         {(p.serie ?? []).map((u) => (
           <figure class="photo-card dans-serie" aria-hidden="true">
-            <img src={u} alt="" loading="lazy" tabindex="-1" />
+            <img {...source(u)} data-full={u} alt="" loading="lazy" tabindex="-1" />
           </figure>
         ))}
       </>
@@ -223,7 +233,7 @@ const mots = {
           img.hidden = true;
           return;
         }
-        const src = images[j].currentSrc || images[j].src;
+        const src = images[j].dataset.full || images[j].currentSrc || images[j].src;
         if (img.src !== src) img.src = src;
         img.alt = images[j].alt || "";
         img.hidden = false;
@@ -771,7 +781,7 @@ const mots = {
 
       async function downloadAll() {
         if (!downloadAllBtn) return;
-        const urls = images.map((img) => img.currentSrc || img.src).filter(Boolean);
+        const urls = images.map((img) => img.dataset.full || img.currentSrc || img.src).filter(Boolean);
         if (!urls.length) return;
         downloadAllBtn.disabled = true;
         const originalText = downloadAllBtn.textContent;
