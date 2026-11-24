@@ -1,5 +1,5 @@
 {
-  "_lisezmoi": "Section Nouveautes de l'accueil. Le plus recent en premier ; l'accueil n'en montre que les 4 premieres. date = AAAA-MM-JJ (affichee au mois) ; href = la route sans prefixe de langue. Vignette : image = URL d'une photo (les photos Chine passent par l'apercu local en dev), ou icone = globe | roadmap | langues (dessins au trait dans index.astro).",
+  "_lisezmoi": "Section Nouveautes de l'accueil. Le plus recent en premier ; l'accueil n'en montre que les 4 premieres. date = AAAA-MM-JJ (affichee au mois) ; href = la route sans prefixe de langue. Vignette : image = URL d'une photo (les photos Chine passent par l'apercu local en dev), ou icone = globe | roadmap | langues (dessins au trait dans index.astro). avant = {titre, texte, icone} montres a la place tant que la Chine est fermee (lib/chineOuverte.js).",
   "nouveautes": [
     {
       "date": "2026-11-24",
@@ -12,7 +12,18 @@
         "fr": "Une nouvelle galerie : la Grande Muraille, la Cité interdite, Nankin, Hangzhou, Shaoxing, Shanghai et Suzhou, en train.",
         "en": "A new gallery: the Great Wall, the Forbidden City, Nanjing, Hangzhou, Shaoxing, Shanghai and Suzhou, by train."
       },
-      "image": "https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/recit/10461104_p0079.jpg"
+      "image": "https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/recit/10461104_p0079.jpg",
+      "avant": {
+        "titre": {
+          "fr": "Chine : bientôt",
+          "en": "China: coming soon"
+        },
+        "texte": {
+          "fr": "Quinze jours de Pékin à Shanghai, en train. Le teaser sort le 10 décembre, la galerie ouvre le même jour.",
+          "en": "Fifteen days, Beijing to Shanghai by train. The teaser comes out on 10 December, and the gallery opens the same day."
+        },
+        "icone": "globe"
+      }
     },
     {
       "date": "2026-11-24",

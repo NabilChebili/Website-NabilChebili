@@ -3,7 +3,8 @@
  "base": "https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/",
  "video": {
   "id": null,
-  "titre": "CHINA - 2026"
+  "titre": "CHINA - 2026",
+  "sortie": "2026-12-10T18:00:00+01:00"
  },
  "couverture": "recit/10461104_p0079",
  "carte": [

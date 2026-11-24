@@ -5,6 +5,7 @@ import galleries from "../../data/galleries.json";
 import vietnam from "../../data/vietnam.json";
 import indonesie from "../../data/indonesie.json";
 import chine from "../../data/chine.json";
+import { chineOuverte } from "../../lib/chineOuverte.js";
 import { listBlobsFromPublicContainer } from "../../lib/blobList.js";
 import Colophon from "../../components/Colophon.astro";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
@@ -88,7 +89,8 @@ const couvertures = [
   { slug: "croatie", cover: await firstPhoto(galleries.croatie) },
 ];
 
-const destinations = couvertures.map((d) => ({
+// Avant la sortie du teaser, la Chine n'a pas de carte ici (aucune photo publiee).
+const destinations = couvertures.filter((d) => chineOuverte || d.slug !== "chine").map((d) => ({
   ...d,
   title: titres[langue][d.slug],
   href: cheminLocalise(`/${d.slug}`, langue),
@@ -99,7 +101,7 @@ const destinations = couvertures.map((d) => ({
 // jour tout seul. Le total de photos du site n'est PAS affiche ici : il faudrait
 // lister toutes les galeries distantes au build, et le « 958 » de l'accueil est
 // une valeur ecrite en dur que rien ne verifie.
-const commentees = vietnam.post.length + indonesie.post.length + chine.post.filter((p) => p.caption).length;
+const commentees = vietnam.post.length + indonesie.post.length + (chineOuverte ? chine.post.filter((p) => p.caption).length : 0);
 
 const T = {
   fr: {

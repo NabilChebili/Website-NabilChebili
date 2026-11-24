@@ -7,7 +7,8 @@ import BlocVideo from "../../components/BlocVideo.astro";
 import CarteVoyage from "../../components/CarteVoyage.astro";
 import chine from "../../data/chine.json";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
-import { declarerVignettes } from "../../lib/blobList.js";
+import { declarerVignettes, vignetteDe } from "../../lib/blobList.js";
+import { chineOuverte } from "../../lib/chineOuverte.js";
 
 export function getStaticPaths() {
   return cheminsDesLangues();
@@ -110,7 +111,7 @@ const points = chine.carte.map((p) => ({
 }));
 ---
 
-<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue} image={recit[0]?.url}>
+<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue} image={chineOuverte ? recit[0]?.url : undefined}>
   <section class="tete-page">
     <a class="retour" href={cheminLocalise("/photo", langue)}>{t("retour.galeries")}</a>
     <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
@@ -119,9 +120,17 @@ const points = chine.carte.map((p) => ({
     </div>
   </section>
 
-  {chine.video.id && <BlocVideo id={chine.video.id} titre={chine.video.titre} lang={langue} />}
+  {(chine.video.id || chine.video.sortie) && (
+    <BlocVideo
+      id={chine.video.id}
+      titre={chine.video.titre}
+      lang={langue}
+      sortie={chine.video.sortie}
+      fond={chineOuverte ? (vignetteDe(url("recit", chine.couverture.split("/").pop())) ?? url("recit", chine.couverture.split("/").pop())) : undefined}
+    />
+  )}
 
-  <section>
+  {chineOuverte && (<section>
     <div class="section-head" data-reveal data-groupe="recit">
       <span>{c.recit}</span>
       <span>({recit.length})</span>
@@ -129,9 +138,9 @@ const points = chine.carte.map((p) => ({
     <div class="galerie">
       <PhotoGrid photos={recit} name="Chine" lang={langue} />
     </div>
-  </section>
+  </section>)}
 
-  <section>
+  {chineOuverte && (<section>
     <div class="section-head" data-reveal data-groupe="etapes">
       <span>{c.etapes}</span>
       <span>({ordreEtapes.length})</span>
@@ -151,7 +160,7 @@ const points = chine.carte.map((p) => ({
         ))
       }
     </div>
-  </section>
+  </section>)}
 </Layout>
 
 <style>

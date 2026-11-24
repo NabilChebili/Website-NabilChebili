@@ -15,6 +15,7 @@ import visuelCloud from "../../assets/nabil-ishane.jpg";
 import visuelPhotoVideo from "../../assets/avant-apres/suzhou-apres.jpg";
 import Colophon from "../../components/Colophon.astro";
 import nouveautesData from "../../data/nouveautes.json";
+import { chineOuverte } from "../../lib/chineOuverte.js";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
 
 export function getStaticPaths() {
@@ -98,7 +99,9 @@ const c = T[langue];
 // Les quatre activites de la page d'origine : memes images, memes
 // destinations ; seuls les libelles changent de langue.
 // Nouveautes : les quatre plus recentes de nouveautes.json, datees au mois.
-const nouveautes = nouveautesData.nouveautes.slice(0, 4).map((n) => ({
+// Avant la sortie, une entree peut porter « avant » : texte et icone a la place
+// de la photo (la Chine : pas de photo publiee avant le teaser).
+const nouveautes = nouveautesData.nouveautes.slice(0, 4).map((n) => (n.avant && !chineOuverte ? { ...n, ...n.avant, image: undefined } : n)).map((n) => ({
   date: new Date(n.date + "T12:00:00Z").toLocaleDateString(langue === "en" ? "en-GB" : "fr-FR", {
     month: "short",
     year: "numeric",
@@ -152,7 +155,7 @@ const cotes = c.cotes.map((u, i) => ({ ...u, href: cheminLocalise(["/musique", "
 
   <section class="opening">
     <div class="meta-row" data-reveal data-groupe="manchette">
-      <span><b>1565</b> {c.photographies} &middot; <b>12</b> {c.galeries}</span>
+      <span><b>{chineOuverte ? 1565 : 958}</b> {c.photographies} &middot; <b>{chineOuverte ? 12 : 11}</b> {c.galeries}</span>
       <span>{c.metier} &middot; <b>+4</b> {c.anciennete}</span>
     </div>
 
