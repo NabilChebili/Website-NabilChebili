@@ -1,41 +1,57 @@
 {
-  "_lisezmoi": "Section Nouveautes de l'accueil. Le plus recent en premier ; l'accueil n'en montre que les 4 premieres. date = AAAA-MM-JJ (affichee au mois) ; href = la route sans prefixe de langue.",
+  "_lisezmoi": "Section Nouveautes de l'accueil. Le plus recent en premier ; l'accueil n'en montre que les 4 premieres. date = AAAA-MM-JJ (affichee au mois) ; href = la route sans prefixe de langue. Vignette : image = URL d'une photo (les photos Chine passent par l'apercu local en dev), ou icone = globe | roadmap | langues (dessins au trait dans index.astro).",
   "nouveautes": [
     {
       "date": "2026-11-24",
       "href": "/chine",
-      "titre": { "fr": "Chine : quinze jours de Pékin à Shanghai", "en": "China: fifteen days, Beijing to Shanghai" },
+      "titre": {
+        "fr": "Chine : quinze jours de Pékin à Shanghai",
+        "en": "China: fifteen days, Beijing to Shanghai"
+      },
       "texte": {
         "fr": "Une nouvelle galerie : la Grande Muraille, la Cité interdite, Nankin, Hangzhou, Shaoxing, Shanghai et Suzhou, en train.",
         "en": "A new gallery: the Great Wall, the Forbidden City, Nanjing, Hangzhou, Shaoxing, Shanghai and Suzhou, by train."
-      }
+      },
+      "image": "https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/recit/10461104_p0079.jpg"
     },
     {
       "date": "2026-11-20",
       "href": "/indonesie",
-      "titre": { "fr": "Les voyages sur un globe", "en": "Travels on a globe" },
+      "titre": {
+        "fr": "Les voyages sur un globe",
+        "en": "Travels on a globe"
+      },
       "texte": {
         "fr": "Chaque voyage pose ses étapes sur un globe dessiné ; un clic mène d'un pays à l'autre.",
         "en": "Each trip lays its stops out on a drawn globe; one click takes you from one country to the next."
-      }
+      },
+      "icone": "globe"
     },
     {
       "date": "2026-11-20",
       "href": "/roadmap",
-      "titre": { "fr": "La page Roadmap", "en": "The Roadmap page" },
+      "titre": {
+        "fr": "La page Roadmap",
+        "en": "The Roadmap page"
+      },
       "texte": {
         "fr": "Le parcours, daté, et ce qui vient ensuite, rangé par thème.",
         "en": "The road so far, dated, and what comes next, sorted by theme."
-      }
+      },
+      "icone": "roadmap"
     },
     {
       "date": "2026-10-28",
       "href": "/",
-      "titre": { "fr": "Le site en anglais", "en": "The site in English" },
+      "titre": {
+        "fr": "Le site en anglais",
+        "en": "The site in English"
+      },
       "texte": {
         "fr": "Toutes les pages existent aussi en anglais : la bascule FR / EN est en haut à droite.",
         "en": "Every page now exists in English too: the FR / EN switch sits top right."
-      }
+      },
+      "icone": "langues"
     }
   ]
 }

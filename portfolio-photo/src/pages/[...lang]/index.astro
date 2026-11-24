@@ -109,6 +109,13 @@ const nouveautes = nouveautesData.nouveautes.slice(0, 4).map((n) => ({
     timeZone: "UTC",
   }),
   iso: n.date,
+  // Les photos Chine ne sont pas encore sur le stockage : en local
+  // (CHINE_PHOTOS_LOCAL), elles viennent de l'apercu, comme sur /chine.
+  image:
+    n.image && process.env.CHINE_PHOTOS_LOCAL
+      ? n.image.replace("https://stnchvlqvproduction.blob.core.windows.net/photos/Chine/", "/_apercu-chine/")
+      : n.image,
+  icone: n.icone,
   titre: n.titre[langue],
   texte: n.texte[langue],
   href: cheminLocalise(n.href, langue),
@@ -179,6 +186,34 @@ const univers = c.univers.map((u, i) => ({
           <li data-reveal data-groupe="nouveautes">
             <a class="nouveaute" href={n.href}>
               <time class="nouveaute-date" datetime={n.iso}>{n.date}</time>
+              {/* La vignette : une photo, ou un dessin au trait de 1px dans le
+                  vocabulaire du globe et de l'orbite — aucun remplissage. */}
+              <span class="nouveaute-vignette" aria-hidden="true">
+                {n.image ? (
+                  <img src={n.image} alt="" loading="lazy" decoding="async" />
+                ) : n.icone === "globe" ? (
+                  <svg viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="15" />
+                    <ellipse cx="24" cy="24" rx="6.5" ry="15" />
+                    <path d="M9 24h30M11.5 16h25M11.5 32h25" />
+                    <rect x="27" y="19" width="4" height="4" class="plein" />
+                  </svg>
+                ) : n.icone === "roadmap" ? (
+                  <svg viewBox="0 0 48 48">
+                    <path d="M17 10v28" />
+                    <rect x="15" y="12" width="4" height="4" class="plein" />
+                    <rect x="15" y="22" width="4" height="4" class="plein" />
+                    <rect x="15" y="32" width="4" height="4" />
+                    <path d="M24 14h10M24 24h12M24 34h7" />
+                  </svg>
+                ) : n.icone === "langues" ? (
+                  <svg viewBox="0 0 48 48">
+                    <text x="24" y="21" class="mots">FR</text>
+                    <path d="M15 25.5h18" />
+                    <text x="24" y="36" class="mots">EN</text>
+                  </svg>
+                ) : null}
+              </span>
               <span class="nouveaute-corps">
                 <span class="nouveaute-titre">{n.titre}</span>
                 <span class="nouveaute-texte">{n.texte}</span>
@@ -368,7 +403,7 @@ const univers = c.univers.map((u, i) => ({
   }
   .nouveaute {
     display: grid;
-    grid-template-columns: 9em 1fr auto;
+    grid-template-columns: 9em 56px 1fr auto;
     align-items: baseline;
     gap: var(--pas-3);
     padding: 18px 0;
@@ -381,6 +416,48 @@ const univers = c.univers.map((u, i) => ({
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-55);
+  }
+  /* Vignette carree de 56px, filet de 1px : la photo y est rognee au carre,
+     les dessins s'y posent au trait. */
+  .nouveaute-vignette {
+    align-self: start;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    overflow: hidden;
+    transition: border-color var(--duree) var(--sortie);
+  }
+  .nouveaute-vignette img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .nouveaute-vignette svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .nouveaute-vignette .plein {
+    fill: var(--ink);
+    stroke: none;
+  }
+  .nouveaute-vignette .mots {
+    fill: var(--ink);
+    stroke: none;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-anchor: middle;
+  }
+  .nouveaute:hover .nouveaute-vignette {
+    border-color: var(--ink);
   }
   .nouveaute-corps {
     display: flex;
@@ -415,8 +492,12 @@ const univers = c.univers.map((u, i) => ({
   }
   @media (max-width: 700px) {
     .nouveaute {
-      grid-template-columns: 1fr auto;
-      gap: 6px 16px;
+      grid-template-columns: 48px 1fr auto;
+      gap: 6px 14px;
+    }
+    .nouveaute-vignette {
+      width: 48px;
+      height: 48px;
     }
     .nouveaute-date {
       grid-column: 1 / -1;
