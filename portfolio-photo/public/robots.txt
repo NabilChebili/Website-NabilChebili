@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /connexion
+Disallow: /api/
 
 Sitemap: https://www.nabilchebili.fr/sitemap-index.xml

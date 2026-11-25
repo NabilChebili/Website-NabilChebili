@@ -1,14 +1,11 @@
 ---
 import "../../styles/global.css";
 import Layout from "../../layouts/header.astro";
-import PhotoGrid from "../../components/PhotoGrid.astro";
-import AccordionSection from "../../components/AccordionSection.astro";
-import BlocVideo from "../../components/BlocVideo.astro";
 import CompteRebours from "../../components/CompteRebours.astro";
-import CarteVoyage from "../../components/CarteVoyage.astro";
+import ChineContenu from "../../components/ChineContenu.astro";
+import Commentaires from "../../components/Commentaires.astro";
 import chine from "../../data/chine.json";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
-import { declarerVignettes, vignetteDe } from "../../lib/blobList.js";
 import { chineOuverte } from "../../lib/chineOuverte.js";
 
 export function getStaticPaths() {
@@ -23,56 +20,10 @@ const t = traduire(langue);
 // de la serie photo notee, et la page se construit (et se previsualise) avant
 // meme que les photos soient envoyees. CHINE_PHOTOS_LOCAL=1 au `astro dev` les
 // sert depuis public/_apercu-chine/ (dossier ignore par git).
+//
+// Le contenu lui-meme vit dans components/ChineContenu.astro, partage avec
+// /chine/apercu : l'acces anticipe, par adresse IP, avant la sortie.
 const base = process.env.CHINE_PHOTOS_LOCAL ? "/_apercu-chine/" : chine.base;
-const url = (dossier, id) => `${base}${dossier}/${id}.jpg`;
-
-const recit = chine.post.map((p) => ({
-  url: url("recit", p.id),
-  caption: langue === "en" ? (p.captionEn || p.caption) : p.caption,
-}));
-
-// Une entree est un id, ou une rafale { id, serie } : une case qui porte « +N »
-// et dont la visionneuse fait defiler les autres prises (voir PhotoGrid).
-const photosByKey = Object.fromEntries(
-  Object.entries(chine.etapes).map(([cle, items]) => [
-    cle,
-    items.map((x) =>
-      typeof x === "string" ? url(cle, x) : { url: url(cle, x.id), serie: x.serie.map((id) => url(cle, id)) }
-    ),
-  ])
-);
-
-// maj_site.js fabrique une vignette (v/<id>.webp) pour chaque photo de la page,
-// et elles partent avec les photos sur le stockage : toutes existent.
-declarerVignettes([
-  ...recit.map((p) => p.url),
-  ...Object.values(photosByKey).flat().flatMap((x) => (typeof x === "string" ? [x] : [x.url, ...x.serie])),
-]);
-
-const labels = {
-  fr: {
-    pekin: "Pékin, la ville",
-    muraille: "La Grande Muraille",
-    "cite-interdite": "La Cité interdite",
-    "temple-du-ciel": "Temple du Ciel et Palais d'été",
-    nankin: "Nankin",
-    hangzhou: "Hangzhou",
-    shaoxing: "Shaoxing",
-    shanghai: "Shanghai",
-    suzhou: "Suzhou",
-  },
-  en: {
-    pekin: "Beijing, the city",
-    muraille: "The Great Wall",
-    "cite-interdite": "The Forbidden City",
-    "temple-du-ciel": "Temple of Heaven and Summer Palace",
-    nankin: "Nanjing",
-    hangzhou: "Hangzhou",
-    shaoxing: "Shaoxing",
-    shanghai: "Shanghai",
-    suzhou: "Suzhou",
-  },
-};
 
 const T = {
   fr: {
@@ -81,9 +32,7 @@ const T = {
       "Récit photo de quinze jours en Chine, de Pékin à Shanghai en train : la Grande Muraille, la Cité interdite, Nankin, Hangzhou, Shaoxing et Suzhou.",
     intro:
       "Quinze jours en novembre, de Pékin à Shanghai, en train : la Grande Muraille, les hutongs, Nankin, les lacs de Hangzhou et les canaux de Shaoxing.",
-    recit: "Le récit",
-    video: "La vidéo",
-    etapes: "Les étapes du voyage",
+    avantPremiere: "Voir les photos en avant-première",
   },
   en: {
     titre: "China",
@@ -91,28 +40,13 @@ const T = {
       "A photo story of fifteen days in China, from Beijing to Shanghai by train: the Great Wall, the Forbidden City, Nanjing, Hangzhou, Shaoxing and Suzhou.",
     intro:
       "Fifteen days in November, Beijing to Shanghai by train: the Great Wall, the hutongs, Nanjing, the lakes of Hangzhou and the canals of Shaoxing.",
-    recit: "The story",
-    video: "The film",
-    etapes: "Stops along the way",
+    avantPremiere: "See the photos ahead of release",
   },
 };
 const c = T[langue];
-const nomsEtapes = labels[langue];
-
-// Meme regle que /vietnam : la carte fixe l'ordre du voyage, la liste suit.
-const surLaCarte = chine.carte.flatMap((p) => p.etapes);
-const ordreEtapes = [
-  ...surLaCarte.filter((k) => k in chine.etapes),
-  ...Object.keys(chine.etapes).filter((k) => !surLaCarte.includes(k)),
-];
-const points = chine.carte.map((p) => ({
-  ...p,
-  lieu: langue === "en" ? (p.lieuEn ?? p.lieu) : p.lieu,
-  etapes: p.etapes.map((id) => ({ id, titre: nomsEtapes[id] ?? id })),
-}));
 ---
 
-<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue} image={chineOuverte ? recit[0]?.url : undefined}>
+<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue} image={chineOuverte ? `${base}recit/${chine.post[0]?.id}.jpg` : undefined}>
   <section class="tete-page">
     <a class="retour" href={cheminLocalise("/photo", langue)}>{t("retour.galeries")}</a>
     <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
@@ -123,55 +57,33 @@ const points = chine.carte.map((p) => ({
 
   {!chineOuverte && <CompteRebours sortie={chine.video.sortie} lang={langue} />}
 
-  {chineOuverte && (chine.video.id || chine.video.sortie) && (
-    <BlocVideo
-      id={chine.video.id}
-      titre={chine.video.titre}
-      lang={langue}
-      sortie={chine.video.sortie}
-      fond={chineOuverte ? (vignetteDe(url("recit", chine.couverture.split("/").pop())) ?? url("recit", chine.couverture.split("/").pop())) : undefined}
-    />
+  {/* Visible seulement pour une adresse IP autorisee dans /admin : l'API le dit,
+      la page ne fait que montrer le chemin. Les photos restent protegees par
+      l'API elle-meme, pas par ce bouton. */}
+  {!chineOuverte && (
+    <div class="avant-premiere" data-avant-premiere hidden>
+      <a class="bouton" href={cheminLocalise("/chine/apercu", langue)}>{c.avantPremiere}</a>
+    </div>
   )}
 
-  {chineOuverte && (<section>
-    <div class="section-head" data-reveal data-groupe="recit">
-      <span>{c.recit}</span>
-      <span>({recit.length})</span>
-    </div>
-    <div class="galerie">
-      <PhotoGrid photos={recit} name="Chine" lang={langue} />
-    </div>
-  </section>)}
-
-  {chineOuverte && (<section>
-    <div class="section-head" data-reveal data-groupe="etapes">
-      <span>{c.etapes}</span>
-      <span>({ordreEtapes.length})</span>
-    </div>
-    <CarteVoyage points={points} pays="156" lang={langue} />
-    <div class="etapes">
-      {
-        ordreEtapes.map((key) => (
-          <AccordionSection
-            id={key}
-            groupe="etapes"
-            numero={chine.carte.findIndex((p) => p.etapes.includes(key)) + 1 || undefined}
-            title={nomsEtapes[key] ?? key}
-            photos={photosByKey[key]}
-            lang={langue}
-          />
-        ))
-      }
-    </div>
-  </section>)}
+  {chineOuverte && <ChineContenu base={base} langue={langue} />}
+  {chineOuverte && <Commentaires page="chine" lang={langue} />}
 </Layout>
 
 <style>
-  .galerie,
-  .etapes {
-    padding: 0 var(--edge);
-  }
-  .etapes {
-    padding-top: var(--pas-3);
+  .avant-premiere {
+    margin: calc(-1 * var(--pas-6)) var(--edge) var(--pas-8);
   }
 </style>
+
+<script>
+  const lien = document.querySelector<HTMLElement>("[data-avant-premiere]");
+  if (lien) {
+    fetch("/api/chine/acces")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => {
+        if (r?.acces) lien.hidden = false;
+      })
+      .catch(() => {});
+  }
+</script>

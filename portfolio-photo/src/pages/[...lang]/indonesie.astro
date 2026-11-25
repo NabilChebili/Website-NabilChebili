@@ -5,6 +5,7 @@ import PhotoGrid from "../../components/PhotoGrid.astro";
 import AccordionSection from "../../components/AccordionSection.astro";
 import BlocVideo from "../../components/BlocVideo.astro";
 import CarteVoyage from "../../components/CarteVoyage.astro";
+import Commentaires from "../../components/Commentaires.astro";
 import indonesie from "../../data/indonesie.json";
 import { listGalleries } from "../../lib/blobList.js";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam, traduire } from "../../i18n/ui";
@@ -142,6 +143,8 @@ const points = indonesie.carte.map((p) => ({
       }
     </div>
   </section>
+
+  <Commentaires page="indonesie" lang={langue} />
 </Layout>
 
 <style>

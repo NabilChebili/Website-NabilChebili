@@ -29,6 +29,8 @@ const {
 	// La langue vient de la page, qui la tient de son parametre de route. Le
 	// repli sur l'URL sert les gabarits qui ne la passent pas encore.
 	lang,
+	// Les pages a ne pas indexer (l'apercu Chine) passent "noindex,nofollow".
+	robots = "index,follow",
 } = Astro.props;
 
 const chemin = (Astro.url?.pathname ?? "/").replace(/\/+$/, "") || "/";
@@ -106,7 +108,7 @@ const schemaWebsite = {
 		}
 		<title>{fullTitle}</title>
 		<meta name="description" content={metaDescription} />
-		<meta name="robots" content="index,follow" />
+		<meta name="robots" content={robots} />
 		{canonicalUrl ? <link rel="canonical" href={canonicalUrl} /> : null}
 		{alternates.map((a) => <link rel="alternate" hreflang={a.code} href={a.href} />)}
 
@@ -195,6 +197,22 @@ const schemaWebsite = {
 			<div class="container">© {new Date().getFullYear()} — Nabil Chebili</div>
 		</footer>
 
+		<script>
+			// Compteur de pages vues (api/src/functions/vue.js) : un appel par page,
+			// sans cookie ni identifiant. L'admin peut se retirer du compte depuis
+			// son navigateur (case de /admin), et Do Not Track / GPC sont respectes.
+			(function () {
+				if (import.meta.env.DEV) return;
+				try {
+					if (localStorage.getItem("nch-sans-stats") === "1") return;
+				} catch {}
+				const nav = navigator as Navigator & { globalPrivacyControl?: boolean };
+				if (nav.doNotTrack === "1" || nav.globalPrivacyControl) return;
+				const corps = JSON.stringify({ p: location.pathname, r: document.referrer, w: innerWidth });
+				const envoye = nav.sendBeacon?.("/api/vue", new Blob([corps], { type: "application/json" }));
+				if (!envoye) fetch("/api/vue", { method: "POST", body: corps, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => {});
+			})();
+		</script>
 		<script>
 			(function () {
 				const btn = document.querySelector('.nav-toggle');

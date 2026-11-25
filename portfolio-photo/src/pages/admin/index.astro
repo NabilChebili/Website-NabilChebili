@@ -1,0 +1,1022 @@
+---
+// /admin — reservee au role « admin » par staticwebapp.config.json : Static Web
+// Apps ne sert meme pas ce fichier a un visiteur sans le role. Les donnees
+// vivantes (frequentation, commentaires, IP Chine) viennent de /api/gestion/*,
+// fermee de la meme facon. Ce qui se calcule a la construction (etat des
+// galeries, legendes, Nouveautes) est fige au moment du deploiement.
+import Prive from "../../layouts/Prive.astro";
+import galleries from "../../data/galleries.json";
+import vietnam from "../../data/vietnam.json";
+import indonesie from "../../data/indonesie.json";
+import chine from "../../data/chine.json";
+import nouveautes from "../../data/nouveautes.json";
+import { chineOuverte } from "../../lib/chineOuverte.js";
+
+const CONTENEUR = "https://stnchvlqvproduction.blob.core.windows.net/photos";
+
+// Un seul listing du conteneur public : par dossier de tete, les photos, les
+// vignettes webp deja envoyees, et les photos qui n'en ont pas encore.
+async function inventaire() {
+  const noms: string[] = [];
+  let marker = "";
+  try {
+    do {
+      const r = await fetch(`${CONTENEUR}?restype=container&comp=list${marker ? `&marker=${encodeURIComponent(marker)}` : ""}`);
+      if (!r.ok) return null;
+      const xml = await r.text();
+      for (const m of xml.matchAll(/<Name>([^<]+)<\/Name>/g)) noms.push(m[1]);
+      marker = xml.match(/<NextMarker>([^<]*)<\/NextMarker>/)?.[1] ?? "";
+    } while (marker);
+  } catch {
+    return null;
+  }
+  const vignettes = new Set(noms.filter((n) => /\/v\/[^/]+\.webp$/i.test(n)));
+  const parDossier = new Map<string, { photos: number; vignettes: number; manquantes: number }>();
+  for (const n of noms) {
+    const dossier = n.split("/")[0];
+    const s = parDossier.get(dossier) ?? { photos: 0, vignettes: 0, manquantes: 0 };
+    if (/\/v\/[^/]+\.webp$/i.test(n)) s.vignettes++;
+    else if (/\.jpe?g$/i.test(n)) {
+      s.photos++;
+      if (!vignettes.has(n.replace(/\/([^/]+)\.jpe?g$/i, "/v/$1.webp"))) s.manquantes++;
+    }
+    parDossier.set(dossier, s);
+  }
+  return [...parDossier].sort((a, b) => a[0].localeCompare(b[0]));
+}
+const stock = await inventaire();
+
+// Le dossier de chaque galerie classique, pour relier l'inventaire a sa page.
+const pageDuDossier: Record<string, string> = {
+  Croatie: "/croatie",
+  EventDatabricks: "/event-databricks",
+  ExpoLum: "/illumination",
+  "GR1-1": "/gr1-1",
+  "GR1-2": "/gr1-2",
+  "GR1-3": "/gr1-3",
+  Indonesie: "/indonesie",
+  Londres: "/londres",
+  "Mariage-Pierre": "/mariage",
+  SuperSonic: "/supersonic",
+  Vietnam: "/vietnam",
+  Chine: "/chine",
+};
+void galleries;
+
+const sansAnglais = (liste: any[]) => liste.filter((p) => p.caption && !p.captionEn).length;
+const legendes = [
+  { page: "/vietnam", total: vietnam.post.length, manquantes: sansAnglais(vietnam.post) },
+  { page: "/indonesie", total: indonesie.post.length, manquantes: sansAnglais(indonesie.post) },
+  { page: "/chine", total: chine.post.length, manquantes: sansAnglais(chine.post) },
+];
+const photosChine =
+  chine.post.length +
+  Object.values(chine.etapes as Record<string, any[]>)
+    .flat()
+    .reduce((n, x) => n + (typeof x === "string" ? 1 : 1 + x.serie.length), 0);
+
+const sortie = new Date(chine.video.sortie);
+const fmtDate = (d: Date) =>
+  d.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short", timeZone: "Europe/Paris" });
+const construit = fmtDate(new Date());
+
+const liens = [
+  { nom: "Site en production", href: "https://www.nabilchebili.fr/" },
+  {
+    nom: "Static Web App (portail Azure)",
+    href: "https://portal.azure.com/#@i-shane.com/resource/subscriptions/2b079b5a-5da0-427c-a95a-53913e2af58c/resourceGroups/rg-nch-production/providers/Microsoft.Web/staticSites/stapp-nch-mdem-production/staticsite",
+  },
+  {
+    nom: "Rôles et invitations",
+    href: "https://portal.azure.com/#@i-shane.com/resource/subscriptions/2b079b5a-5da0-427c-a95a-53913e2af58c/resourceGroups/rg-nch-production/providers/Microsoft.Web/staticSites/stapp-nch-mdem-production/roleManagement",
+  },
+  {
+    nom: "Stockage des photos",
+    href: "https://portal.azure.com/#@i-shane.com/resource/subscriptions/2b079b5a-5da0-427c-a95a-53913e2af58c/resourceGroups/rg-nch-production/providers/Microsoft.Storage/storageAccounts/stnchvlqvproduction/overview",
+  },
+  { nom: "Déploiements GitHub Actions", href: "https://github.com/NabilChebili/Website-NabilChebili/actions" },
+  { nom: "Pull requests", href: "https://github.com/NabilChebili/Website-NabilChebili/pulls" },
+];
+---
+
+<Prive title="Administration">
+  <section class="tete-page">
+    <h1 class="titre-page">Admin</h1>
+    <div class="prose">
+      <p>Fréquentation, commentaires à modérer, accès anticipé à la Chine et état du contenu. Construit le {construit}.</p>
+    </div>
+  </section>
+
+  <!-- 01 Frequentation ------------------------------------------------- -->
+  <section id="stats">
+    <div class="section-head vu">
+      <span><span class="section-num">01</span> Fréquentation</span>
+      <span class="adm-periodes" role="group" aria-label="Période">
+        <button type="button" data-jours="7">7 j</button>
+        <button type="button" data-jours="30" aria-pressed="true">30 j</button>
+        <button type="button" data-jours="90">90 j</button>
+      </span>
+    </div>
+    <div class="adm-bloc">
+      <p class="adm-etat" data-etat="stats">Chargement…</p>
+      <dl class="adm-chiffres" data-chiffres hidden>
+        <div><dt>Pages vues</dt><dd data-k="vues">–</dd></div>
+        <div><dt>Arrivées sur le site</dt><dd data-k="entrees">–</dd></div>
+        <div><dt>Vues par jour</dt><dd data-k="moyenne">–</dd></div>
+      </dl>
+      <figure class="adm-graphe" data-graphe hidden>
+        <figcaption>Pages vues par jour</figcaption>
+        <div class="adm-graphe-zone">
+          <svg data-barres role="img" aria-label="Pages vues par jour"></svg>
+          <div class="adm-bulle" data-bulle hidden></div>
+        </div>
+        <div class="adm-axe" data-axe></div>
+      </figure>
+      <div class="adm-tables" data-tables hidden>
+        <div>
+          <h3>Pages les plus vues</h3>
+          <table data-t="pages"><thead><tr><th>Page</th><th>Vues</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div>
+          <h3>Provenance des arrivées</h3>
+          <table data-t="sources"><thead><tr><th>Source</th><th>Arrivées</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div>
+          <h3>Langue</h3>
+          <table data-t="langues"><thead><tr><th>Langue</th><th>Vues</th></tr></thead><tbody></tbody></table>
+          <h3>Appareil</h3>
+          <table data-t="appareils"><thead><tr><th>Appareil</th><th>Vues</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <details class="adm-detail" data-detail hidden>
+        <summary>Voir les jours en tableau</summary>
+        <table data-t="jours"><thead><tr><th>Jour</th><th>Vues</th><th>Arrivées</th></tr></thead><tbody></tbody></table>
+      </details>
+      <label class="adm-case">
+        <input type="checkbox" data-sans-stats />
+        Ne pas compter mes visites depuis ce navigateur
+      </label>
+      <p class="adm-note">
+        Compteur maison, sans cookie ni adresse IP : une page vue incrémente des totaux par jour. Les
+        navigateurs qui demandent à ne pas être suivis (Do Not Track, GPC) et les robots ne sont pas comptés.
+      </p>
+    </div>
+  </section>
+
+  <!-- 02 Commentaires --------------------------------------------------- -->
+  <section id="commentaires">
+    <div class="section-head vu">
+      <span><span class="section-num">02</span> Commentaires</span>
+      <span class="adm-periodes" role="group" aria-label="Statut">
+        <button type="button" data-statut="attente" aria-pressed="true">En attente</button>
+        <button type="button" data-statut="publie">Publiés</button>
+        <button type="button" data-statut="refuse">Refusés</button>
+      </span>
+    </div>
+    <div class="adm-bloc">
+      <p class="adm-etat" data-etat="commentaires">Chargement…</p>
+      <ol class="adm-commentaires" data-liste-commentaires></ol>
+      <p class="adm-note">
+        Déposés sous /vietnam, /indonesie et /chine. Rien n'apparaît sur le site avant d'être publié ici.
+      </p>
+    </div>
+  </section>
+
+  <!-- 03 Chine --------------------------------------------------------- -->
+  <section id="chine">
+    <div class="section-head vu">
+      <span><span class="section-num">03</span> Accès anticipé — Chine</span>
+      <span>{chineOuverte ? "Ouverte" : "Fermée"}</span>
+    </div>
+    <div class="adm-bloc">
+      <dl class="adm-chiffres">
+        <div><dt>Sortie</dt><dd class="petit">{fmtDate(sortie)}</dd></div>
+        <div><dt>Reste</dt><dd class="petit" data-reste data-sortie={sortie.toISOString()}>–</dd></div>
+        <div><dt>Photos de la page</dt><dd class="petit">{photosChine}</dd></div>
+      </dl>
+      <p class="adm-texte">
+        Les adresses ci-dessous voient les photos avant la sortie, sur
+        <a class="lien" href="/chine/apercu" target="_blank" rel="noopener">/chine/apercu</a>. Le lien
+        s'envoie tel quel : une personne sans accès y lit son adresse IP, à me renvoyer.
+      </p>
+      <form class="adm-form" data-form-ip>
+        <label>Adresse IP<input name="ip" required autocomplete="off" spellcheck="false" placeholder="81.2.3.4 ou 2a01:…" /></label>
+        <label>Qui<input name="nom" maxlength="80" autocomplete="off" placeholder="Prénom" /></label>
+        <label>Jusqu'au<input name="expire" type="date" /></label>
+        <div class="adm-form-actions">
+          <button class="bouton" type="submit">Autoriser</button>
+          <button class="adm-lien-bouton" type="button" data-mon-ip>Utiliser mon IP</button>
+        </div>
+      </form>
+      <p class="adm-etat" data-etat="ip">Chargement…</p>
+      <table class="adm-table-ip" data-t="ip" hidden>
+        <thead><tr><th>Qui</th><th>Adresse</th><th>Jusqu'au</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 04 Contenu ------------------------------------------------------- -->
+  <section id="contenu">
+    <div class="section-head vu">
+      <span><span class="section-num">04</span> Contenu</span>
+      <span>au déploiement</span>
+    </div>
+    <div class="adm-bloc adm-tables">
+      <div class="adm-large">
+        <h3>Photos du stockage public</h3>
+        {
+          stock ? (
+            <table>
+              <thead><tr><th>Dossier</th><th>Photos</th><th>Vignettes</th><th>Sans vignette</th></tr></thead>
+              <tbody>
+                {stock.map(([dossier, s]) => (
+                  <tr>
+                    <td>{pageDuDossier[dossier] ? <a class="lien" href={pageDuDossier[dossier]}>{dossier}</a> : dossier}</td>
+                    <td>{s.photos}</td>
+                    <td>{s.vignettes}</td>
+                    <td class={s.manquantes ? "alerte" : ""}>{s.manquantes || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p class="adm-etat">Listing du stockage indisponible à la construction.</p>
+          )
+        }
+      </div>
+      <div>
+        <h3>Légendes anglaises manquantes</h3>
+        <table>
+          <thead><tr><th>Récit</th><th>Photos</th><th>Sans EN</th></tr></thead>
+          <tbody>
+            {legendes.map((l) => (
+              <tr><td>{l.page}</td><td>{l.total}</td><td class={l.manquantes ? "alerte" : ""}>{l.manquantes || "—"}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <h3>Nouveautés de l'accueil</h3>
+        <ol class="adm-nouveautes">
+          {nouveautes.nouveautes.map((n: any, i: number) => (
+            <li class={i >= 4 ? "hors" : ""}>
+              <time>{n.date}</time> <a class="lien" href={n.href}>{n.titre.fr}</a>
+            </li>
+          ))}
+        </ol>
+        <p class="adm-note">L'accueil n'en montre que les quatre premières.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Exploitation -------------------------------------------------- -->
+  <section id="exploitation">
+    <div class="section-head vu">
+      <span><span class="section-num">05</span> Exploitation</span>
+      <span></span>
+    </div>
+    <div class="adm-bloc adm-tables">
+      <ul class="adm-liens">
+        {liens.map((l) => (
+          <li><a href={l.href} target="_blank" rel="noopener"><span>{l.nom}</span><i aria-hidden="true">&#8599;</i></a></li>
+        ))}
+      </ul>
+      <div>
+        <h3>Session</h3>
+        <dl class="adm-session" data-session>
+          <dt>Compte</dt><dd data-s="compte">–</dd>
+          <dt>Rôles</dt><dd data-s="roles">–</dd>
+          <dt>IP vue par le serveur</dt><dd data-s="ip">–</dd>
+        </dl>
+        <details class="adm-detail">
+          <summary>En-têtes IP reçus par l'API</summary>
+          <pre data-s="entetes">–</pre>
+        </details>
+      </div>
+    </div>
+  </section>
+</Prive>
+
+<style is:global>
+  /* Global, prefixe adm- : les lignes de tableau et les commentaires sont
+     crees en JavaScript, hors de portee des styles scopes d Astro. */
+  .adm-bloc {
+    padding: var(--pas-3) var(--edge) 0;
+  }
+  .adm-etat {
+    color: var(--ink-55);
+    margin: 0 0 var(--pas-3);
+  }
+  .adm-etat:empty {
+    display: none;
+  }
+  .adm-note,
+  .adm-texte {
+    max-width: 68ch;
+    color: var(--ink-55);
+    font-size: 12px;
+    line-height: 1.45;
+    margin: var(--pas-3) 0 0;
+  }
+  .adm-texte {
+    font-size: inherit;
+    margin: 0 0 var(--pas-3);
+  }
+
+  /* Boutons de filtre dans le bandeau de section : du texte, le choix courant
+     souligne. Pas de crochets : ils signalent une destination sur ce site. */
+  .adm-periodes {
+    display: flex;
+    gap: 16px;
+  }
+  .adm-periodes button,
+  .adm-lien-bouton {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-55);
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    min-height: 24px;
+  }
+  .adm-periodes button[aria-pressed="true"] {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .adm-periodes button:hover,
+  .adm-lien-bouton:hover {
+    color: var(--ink);
+  }
+
+  .adm-chiffres {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--pas-3) 0;
+    margin: 0 0 var(--pas-6);
+  }
+  .adm-chiffres > div {
+    padding: 0 16px 0 0;
+  }
+  .adm-chiffres dt {
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .adm-chiffres dd {
+    margin: 6px 0 0;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-weight: 800;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .adm-chiffres dd.petit {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .adm-graphe {
+    margin: 0 0 var(--pas-6);
+  }
+  .adm-graphe figcaption,
+  .adm-tables h3 {
+    margin: 0 0 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .adm-graphe-zone {
+    position: relative;
+  }
+  .adm-graphe svg {
+    display: block;
+    width: 100%;
+    height: 180px;
+    overflow: visible;
+  }
+  .adm-graphe rect.barre {
+    fill: var(--ink);
+  }
+  .adm-graphe rect.cible {
+    fill: transparent;
+  }
+  .adm-graphe rect.cible:hover + rect.barre,
+  .adm-graphe g.actif rect.barre {
+    fill: var(--ink-55);
+  }
+  .adm-graphe line.base {
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+  .adm-graphe line.grille {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+  .adm-graphe text {
+    fill: var(--ink-55);
+    font-size: 10px;
+    font-family: inherit;
+  }
+  .adm-bulle {
+    position: absolute;
+    top: 0;
+    padding: 6px 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+  }
+  .adm-axe {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    color: var(--ink-55);
+    font-size: 11px;
+  }
+
+  .adm-tables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--pas-6) var(--pas-6);
+    align-items: start;
+  }
+  .adm-tables .adm-large {
+    grid-column: span 2;
+  }
+  .adm-tables h3 + table + h3,
+  .adm-tables table + h3,
+  .adm-tables ol + p + h3 {
+    margin-top: var(--pas-3);
+  }
+  .adm-bloc table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .adm-bloc th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+    padding: 0 12px 6px 0;
+    border-bottom: 1px solid var(--ink);
+  }
+  .adm-bloc td {
+    padding: 7px 12px 7px 0;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+    /* break-word et non anywhere : anywhere laisse la colonne retrecir jusqu a
+       couper un nom de dossier en deux (« EventDatabri-cks » en mobile). */
+    overflow-wrap: break-word;
+  }
+  .adm-bloc th:not(:first-child),
+  .adm-bloc td:not(:first-child) {
+    text-align: right;
+  }
+  .adm-bloc td.alerte {
+    font-weight: 700;
+  }
+  .adm-table-ip td:nth-child(2) {
+    font-weight: 700;
+  }
+  /* Une adresse, une date ou un bouton ne se coupent pas au milieu d un mot :
+     seul le nom peut passer a la ligne. */
+  .adm-table-ip td {
+    overflow-wrap: normal;
+  }
+  .adm-table-ip td:nth-child(2),
+  .adm-table-ip td:last-child {
+    white-space: nowrap;
+  }
+
+  .adm-detail {
+    margin: var(--pas-3) 0 0;
+    font-size: 12px;
+  }
+  .adm-detail summary {
+    cursor: pointer;
+    min-height: 24px;
+  }
+  .adm-detail table {
+    margin-top: 12px;
+    max-width: 480px;
+  }
+  .adm-detail pre {
+    margin: 12px 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 11px;
+    color: var(--ink-55);
+  }
+  .adm-case {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: var(--pas-3);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .adm-case input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--ink);
+  }
+
+  /* Commentaires ------------------------------------------------------ */
+  .adm-commentaires {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 860px;
+  }
+  .adm-commentaires li {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .adm-commentaires li:first-child {
+    border-top: 1px solid var(--rule);
+  }
+  .adm-commentaires .c-tete {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .adm-commentaires .c-tete b {
+    color: var(--ink);
+  }
+  .adm-commentaires .c-texte {
+    margin: 8px 0 12px;
+    max-width: 68ch;
+    white-space: pre-wrap;
+    line-height: 1.45;
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+  }
+  .adm-commentaires .c-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Formulaire IP ----------------------------------------------------- */
+  .adm-form {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(140px, 0.8fr) auto;
+    gap: 12px 16px;
+    align-items: end;
+    margin: 0 0 var(--pas-3);
+    max-width: 980px;
+  }
+  .adm-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .adm-form input {
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .adm-form input:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .adm-form-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    height: 40px;
+  }
+  .adm-lien-bouton {
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .adm-ligne-bouton {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 12px;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    min-height: 24px;
+  }
+
+  .adm-nouveautes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+  }
+  .adm-nouveautes li {
+    display: flex;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .adm-nouveautes li.hors {
+    color: var(--ink-55);
+  }
+  .adm-nouveautes time {
+    flex: none;
+    color: var(--ink-55);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .adm-liens {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .adm-liens a {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .adm-liens li:first-child a {
+    border-top: 1px solid var(--rule);
+  }
+  .adm-liens a:hover span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .adm-session {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 6px 16px;
+    margin: 0;
+    font-size: 12px;
+  }
+  .adm-session dt {
+    color: var(--ink-55);
+  }
+  .adm-session dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 700px) {
+    .adm-tables .adm-large {
+      grid-column: auto;
+    }
+    .adm-form {
+      grid-template-columns: 1fr 1fr;
+    }
+    .adm-form label:first-child {
+      grid-column: 1 / -1;
+    }
+    .adm-form-actions {
+      grid-column: 1 / -1;
+    }
+    .section-head {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+
+<script>
+  // Toutes les ecritures portent x-demande: admin : l'API refuse sans (CSRF).
+  const api = async (chemin: string, options: RequestInit = {}) => {
+    const r = await fetch(chemin, {
+      ...options,
+      headers: { "content-type": "application/json", "x-demande": "admin", ...(options.headers || {}) },
+      credentials: "same-origin",
+    });
+    const type = r.headers.get("content-type") || "";
+    const corps = type.includes("json") ? await r.json() : null;
+    if (!r.ok) throw new Error(corps?.erreur || (r.status === 401 || r.status === 403 ? "Session expirée : recharge la page." : `Erreur ${r.status}`));
+    return corps;
+  };
+  const $ = <T extends Element = HTMLElement>(sel: string) => document.querySelector(sel) as T;
+  const nf = new Intl.NumberFormat("fr-FR");
+  const etat = (cle: string, texte: string) => {
+    const el = $(`[data-etat="${cle}"]`);
+    if (el) el.textContent = texte;
+  };
+  const ligne = (cellules: (string | Node)[]) => {
+    const tr = document.createElement("tr");
+    for (const c of cellules) {
+      const td = document.createElement("td");
+      td.append(c);
+      tr.append(td);
+    }
+    return tr;
+  };
+  const remplir = (cle: string, lignes: HTMLTableRowElement[], vide = "Rien pour l'instant.") => {
+    const tbody = $(`[data-t="${cle}"] tbody`);
+    tbody.replaceChildren(...(lignes.length ? lignes : [ligne([vide, ""])]));
+  };
+
+  // ---------------------------------------------------------- session ---
+  api("/api/gestion/moi")
+    .then((m) => {
+      const fournisseur = m.fournisseur === "aad" ? "Microsoft" : m.fournisseur === "github" ? "GitHub" : m.fournisseur;
+      $("[data-qui]").textContent = `${m.utilisateur} · ${fournisseur}`;
+      $('[data-s="compte"]').textContent = `${m.utilisateur} (${fournisseur})`;
+      $('[data-s="roles"]').textContent = (m.roles || []).join(", ");
+      $('[data-s="ip"]').textContent = m.ip || "non détectée";
+      $('[data-s="entetes"]').textContent = JSON.stringify(m.entetes, null, 2);
+    })
+    .catch((e) => ($('[data-s="compte"]').textContent = e.message));
+
+  // ----------------------------------------------------- frequentation ---
+  const jourCourt = (j: string) => {
+    const [, m, d] = j.split("-");
+    return `${d}/${m}`;
+  };
+  const LIBELLES: Record<string, string> = { fr: "Français", en: "Anglais", mobile: "Mobile", ordinateur: "Ordinateur" };
+
+  function dessiner(jours: { jour: string; vues: number; entrees: number }[]) {
+    const svg = $<SVGSVGElement>("[data-barres]");
+    const bulle = $("[data-bulle]");
+    const W = Math.max(svg.clientWidth, 300);
+    const H = 180;
+    const haut = 14;
+    const max = Math.max(1, ...jours.map((j) => j.vues));
+    // Une graduation ronde au-dessus du maximum : la grille dit l'echelle.
+    const pas = Math.pow(10, Math.floor(Math.log10(max)));
+    const plafond = Math.ceil(max / pas) * pas;
+    const larg = W / jours.length;
+    const ecart = Math.min(2, larg * 0.2);
+    const y = (v: number) => H - (v / plafond) * (H - haut);
+    const ns = "http://www.w3.org/2000/svg";
+    const el = (n: string, a: Record<string, string | number>) => {
+      const e = document.createElementNS(ns, n);
+      for (const k in a) e.setAttribute(k, String(a[k]));
+      return e;
+    };
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.replaceChildren();
+    svg.append(el("line", { class: "grille", x1: 0, x2: W, y1: y(plafond), y2: y(plafond) }));
+    const t = el("text", { x: 0, y: y(plafond) - 4 });
+    t.textContent = nf.format(plafond);
+    svg.append(t);
+    jours.forEach((j, i) => {
+      const g = el("g", {});
+      const x = i * larg;
+      const h = H - y(j.vues);
+      // Cible de survol pleine hauteur : une barre de 2px de haut reste
+      // atteignable.
+      const cible = el("rect", { class: "cible", x, y: 0, width: larg, height: H });
+      const barre = el("rect", { class: "barre", x: x + ecart / 2, y: H - h, width: Math.max(1, larg - ecart), height: h });
+      g.append(cible, barre);
+      const montrer = () => {
+        svg.querySelectorAll("g.actif").forEach((a) => a.classList.remove("actif"));
+        g.classList.add("actif");
+        bulle.textContent = `${jourCourt(j.jour)} · ${nf.format(j.vues)} vue${j.vues > 1 ? "s" : ""} · ${nf.format(j.entrees)} arrivée${j.entrees > 1 ? "s" : ""}`;
+        bulle.style.left = `${((x + larg / 2) / W) * 100}%`;
+        bulle.style.top = `${(Math.min(y(j.vues), H - 4) / H) * 100}%`;
+        bulle.hidden = false;
+      };
+      cible.addEventListener("pointerenter", montrer);
+      g.addEventListener("pointerleave", () => {
+        g.classList.remove("actif");
+        bulle.hidden = true;
+      });
+      svg.append(g);
+    });
+    svg.append(el("line", { class: "base", x1: 0, x2: W, y1: H - 0.5, y2: H - 0.5 }));
+    const axe = $("[data-axe]");
+    axe.replaceChildren(
+      ...[jours[0], jours[Math.floor(jours.length / 2)], jours[jours.length - 1]].map((j) => {
+        const s = document.createElement("span");
+        s.textContent = jourCourt(j.jour);
+        return s;
+      })
+    );
+  }
+
+  let dernieresStats: any = null;
+  async function chargerStats(jours: number) {
+    etat("stats", "Chargement…");
+    try {
+      const s = await api(`/api/gestion/stats?jours=${jours}`);
+      dernieresStats = s;
+      etat("stats", s.totaux.vues ? "" : "Aucune page vue enregistrée sur la période.");
+      $('[data-k="vues"]').textContent = nf.format(s.totaux.vues);
+      $('[data-k="entrees"]').textContent = nf.format(s.totaux.entrees);
+      const moy = s.totaux.vues / s.periode.jours;
+      $('[data-k="moyenne"]').textContent = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: moy < 10 ? 1 : 0 }).format(moy);
+      for (const sel of ["[data-chiffres]", "[data-graphe]", "[data-tables]", "[data-detail]"]) $(sel).hidden = false;
+      dessiner(s.jours);
+      const paire = ([cle, n]: [string, number]) => ligne([LIBELLES[cle] ?? cle, nf.format(n)]);
+      remplir("pages", s.pages.slice(0, 15).map(paire));
+      remplir("sources", s.sources.slice(0, 15).map(paire));
+      remplir("langues", s.langues.map(paire));
+      remplir("appareils", s.appareils.map(paire));
+      remplir("jours", [...s.jours].reverse().map((j: any) => ligne([j.jour, nf.format(j.vues), nf.format(j.entrees)])));
+    } catch (e: any) {
+      etat("stats", e.message);
+    }
+  }
+  document.querySelectorAll<HTMLButtonElement>("[data-jours]").forEach((b) =>
+    b.addEventListener("click", () => {
+      document.querySelectorAll("[data-jours]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      chargerStats(Number(b.dataset.jours));
+    })
+  );
+  chargerStats(30);
+  let redim = 0;
+  addEventListener("resize", () => {
+    clearTimeout(redim);
+    redim = window.setTimeout(() => dernieresStats && dessiner(dernieresStats.jours), 150);
+  });
+
+  // Meme cle que le compteur du gabarit public (header.astro).
+  const caseStats = $<HTMLInputElement>("[data-sans-stats]");
+  try {
+    caseStats.checked = localStorage.getItem("nch-sans-stats") === "1";
+  } catch {}
+  caseStats.addEventListener("change", () => {
+    try {
+      if (caseStats.checked) localStorage.setItem("nch-sans-stats", "1");
+      else localStorage.removeItem("nch-sans-stats");
+    } catch {}
+  });
+
+  // ------------------------------------------------------ commentaires ---
+  const dateLongue = (iso: string) =>
+    new Date(iso).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Paris" });
+  let statutCourant = "attente";
+
+  function bouton(texte: string, action: () => void, plein = false) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = plein ? "bouton" : "adm-ligne-bouton";
+    b.textContent = texte;
+    b.addEventListener("click", action);
+    return b;
+  }
+
+  async function moderer(c: any, action: string, li: HTMLElement) {
+    if (action === "supprimer" && !confirm(`Supprimer définitivement le commentaire de ${c.nom} ?`)) return;
+    li.style.opacity = "0.5";
+    try {
+      await api("/api/gestion/commentaires", { method: "POST", body: JSON.stringify({ page: c.page, id: c.id, action }) });
+      li.remove();
+      const reste = document.querySelectorAll("[data-liste-commentaires] li").length;
+      if (!reste) etat("commentaires", "Aucun commentaire ici.");
+    } catch (e: any) {
+      li.style.opacity = "";
+      alert(e.message);
+    }
+  }
+
+  async function chargerCommentaires(statut: string) {
+    statutCourant = statut;
+    const liste = $("[data-liste-commentaires]");
+    liste.replaceChildren();
+    etat("commentaires", "Chargement…");
+    try {
+      const { commentaires } = await api(`/api/gestion/commentaires?statut=${statut}`);
+      if (statut !== statutCourant) return;
+      etat("commentaires", commentaires.length ? "" : "Aucun commentaire ici.");
+      for (const c of commentaires) {
+        const li = document.createElement("li");
+        const tete = document.createElement("div");
+        tete.className = "c-tete";
+        const nom = document.createElement("b");
+        nom.textContent = c.nom;
+        const ou = document.createElement("span");
+        ou.textContent = `/${c.page}${c.langue === "en" ? " · EN" : ""}`;
+        const quand = document.createElement("span");
+        quand.textContent = dateLongue(c.cree);
+        tete.append(nom, ou, quand);
+        // textContent partout : un commentaire n'est jamais interprete comme
+        // du HTML, meme ici.
+        const texte = document.createElement("p");
+        texte.className = "c-texte";
+        texte.textContent = c.texte;
+        const actions = document.createElement("div");
+        actions.className = "c-actions";
+        if (statut !== "publie") actions.append(bouton("Publier", () => moderer(c, "publier", li), true));
+        if (statut === "attente") actions.append(bouton("Refuser", () => moderer(c, "refuser", li)));
+        if (statut === "publie") actions.append(bouton("Dépublier", () => moderer(c, "attente", li)));
+        actions.append(bouton("Supprimer", () => moderer(c, "supprimer", li)));
+        li.append(tete, texte, actions);
+        liste.append(li);
+      }
+    } catch (e: any) {
+      etat("commentaires", e.message);
+    }
+  }
+  document.querySelectorAll<HTMLButtonElement>("[data-statut]").forEach((b) =>
+    b.addEventListener("click", () => {
+      document.querySelectorAll("[data-statut]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      chargerCommentaires(b.dataset.statut!);
+    })
+  );
+  chargerCommentaires("attente");
+
+  // ------------------------------------------------------------- Chine ---
+  const reste = $("[data-reste]");
+  const sortie = Date.parse(reste.dataset.sortie!);
+  const majReste = () => {
+    const ms = sortie - Date.now();
+    if (ms <= 0) {
+      reste.textContent = "Sortie passée";
+      return;
+    }
+    const j = Math.floor(ms / 86400000);
+    const h = Math.floor((ms % 86400000) / 3600000);
+    reste.textContent = `${j} j ${h} h`;
+  };
+  majReste();
+  setInterval(majReste, 60000);
+
+  let monIp = "";
+  async function chargerIp() {
+    try {
+      const { ip, moi } = await api("/api/gestion/chine-ip");
+      monIp = moi;
+      const table = $<HTMLTableElement>('[data-t="ip"]');
+      etat("ip", ip.length ? "" : "Aucune adresse autorisée.");
+      table.hidden = !ip.length;
+      remplir(
+        "ip",
+        ip.map((x: any) => {
+          const expiree = x.expire && Date.parse(x.expire) < Date.now();
+          const fin = x.expire ? new Date(x.expire).toLocaleDateString("fr-FR") + (expiree ? " (expirée)" : "") : "Sans fin";
+          const tr = ligne([x.nom || "—", x.ip + (x.ip === moi ? " · toi" : ""), fin, ""]);
+          (tr.lastElementChild as HTMLElement).append(
+            bouton("Retirer", async () => {
+              if (!confirm(`Retirer l'accès de ${x.nom || x.ip} ?`)) return;
+              try {
+                await api("/api/gestion/chine-ip", { method: "POST", body: JSON.stringify({ action: "retirer", ip: x.ip }) });
+                chargerIp();
+              } catch (e: any) {
+                alert(e.message);
+              }
+            })
+          );
+          return tr;
+        })
+      );
+    } catch (e: any) {
+      etat("ip", e.message);
+    }
+  }
+  chargerIp();
+
+  const form = $<HTMLFormElement>("[data-form-ip]");
+  $("[data-mon-ip]").addEventListener("click", () => {
+    if (monIp) (form.elements.namedItem("ip") as HTMLInputElement).value = monIp;
+  });
+  form.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const d = new FormData(form);
+    // Une date seule vaut jusqu'a la fin de ce jour, heure de Paris.
+    const jour = String(d.get("expire") || "");
+    const expire = jour ? `${jour}T23:59:59+01:00` : "";
+    const envoi = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    envoi.disabled = true;
+    try {
+      await api("/api/gestion/chine-ip", {
+        method: "POST",
+        body: JSON.stringify({ action: "ajouter", ip: d.get("ip"), nom: d.get("nom"), expire }),
+      });
+      form.reset();
+      chargerIp();
+    } catch (e: any) {
+      alert(e.message);
+    } finally {
+      envoi.disabled = false;
+    }
+  });
+</script>

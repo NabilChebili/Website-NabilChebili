@@ -40,6 +40,14 @@ resource "azurerm_static_web_app" "main" {
   sku_tier            = var.static_web_app_sku_tier
   sku_size            = var.static_web_app_sku_tier
   tags                = var.tags
+
+  # Lus par l'API (/api) : tables des pages vues, des commentaires et des IP de
+  # l'acces anticipe Chine (creees par l'API a la premiere ecriture), et
+  # signature des liens temporaires vers les photos du conteneur prive.
+  app_settings = {
+    STOCKAGE_CONNEXION = azurerm_storage_account.photos.primary_connection_string
+    CHINE_CONTENEUR    = azurerm_storage_container.attente.name
+  }
 }
 
 resource "azurerm_static_web_app_custom_domain" "main" {

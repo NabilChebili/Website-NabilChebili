@@ -1,0 +1,268 @@
+---
+// Commentaires sous les recits de voyage. Rien n'est publie sans relecture :
+// un commentaire depose part « en attente » et n'apparait ici qu'une fois
+// valide dans /admin. La liste et l'envoi passent par /api/commentaires.
+//
+// Anti-spam sans captcha : un champ « site » invisible qu'un robot remplit,
+// un delai minimal entre l'affichage et l'envoi, et une limite par heure cote
+// API.
+const { page, lang = "fr" } = Astro.props;
+
+const T = {
+  fr: {
+    titre: "Commentaires",
+    vide: "Aucun commentaire pour l'instant.",
+    nom: "Votre nom",
+    texte: "Votre commentaire",
+    envoyer: "Envoyer",
+    envoi: "Envoi…",
+    merci: "Merci ! Votre commentaire apparaîtra après relecture.",
+    erreurs: {
+      nom: "Indiquez un nom d'au moins deux lettres.",
+      texte: "Le commentaire est trop court.",
+      liens: "Deux liens au plus, s'il vous plaît.",
+      trop: "Trop de commentaires d'un coup : réessayez dans une heure.",
+      autre: "L'envoi n'a pas abouti. Réessayez dans un instant.",
+    },
+    sansJs: "Les commentaires ont besoin de JavaScript.",
+    moderation: "Les commentaires sont relus avant publication.",
+    locale: "fr-FR",
+  },
+  en: {
+    titre: "Comments",
+    vide: "No comments yet.",
+    nom: "Your name",
+    texte: "Your comment",
+    envoyer: "Send",
+    envoi: "Sending…",
+    merci: "Thank you! Your comment will appear once it has been reviewed.",
+    erreurs: {
+      nom: "Please enter a name of at least two letters.",
+      texte: "The comment is too short.",
+      liens: "Two links at most, please.",
+      trop: "Too many comments at once: please try again in an hour.",
+      autre: "Sending failed. Please try again in a moment.",
+    },
+    sansJs: "Comments need JavaScript.",
+    moderation: "Comments are reviewed before they are published.",
+    locale: "en-GB",
+  },
+};
+const c = T[lang] ?? T.fr;
+---
+
+<section class="commentaires" data-commentaires data-page={page} data-langue={lang} data-textes={JSON.stringify(c)}>
+  <div class="section-head" data-reveal data-groupe="commentaires">
+    <span>{c.titre}</span>
+    <span data-compte></span>
+  </div>
+  <div class="com-corps">
+    <ol class="com-liste" data-liste aria-live="polite"></ol>
+    <p class="com-vide" data-vide hidden>{c.vide}</p>
+    <noscript><p class="com-vide">{c.sansJs}</p></noscript>
+
+    <form class="com-form" data-form novalidate>
+      <label>
+        <span>{c.nom}</span>
+        <input name="nom" maxlength="60" autocomplete="name" required />
+      </label>
+      <label>
+        <span>{c.texte}</span>
+        <textarea name="texte" rows="4" maxlength="2000" required></textarea>
+      </label>
+      {/* Invisible pour un humain et hors du parcours au clavier : un robot
+          qui remplit tout le formulaire le remplit aussi. */}
+      <label class="com-piege" aria-hidden="true">
+        Site <input name="site" tabindex="-1" autocomplete="off" />
+      </label>
+      <div class="com-actions">
+        <button class="bouton" type="submit">{c.envoyer}</button>
+        <span class="com-note">{c.moderation}</span>
+      </div>
+      <p class="com-retour" data-retour role="status" hidden></p>
+    </form>
+  </div>
+</section>
+
+<style>
+  /* Dernier bloc de la page : sans marge basse, le pied de page venait
+     toucher le bouton Envoyer. */
+  .commentaires {
+    padding-bottom: var(--pas-10);
+  }
+  .com-corps {
+    padding: var(--pas-3) var(--edge) 0;
+    max-width: 860px;
+  }
+  .com-liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .com-liste :global(li) {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .com-liste :global(li:first-child) {
+    border-top: 1px solid var(--rule);
+  }
+  .com-liste :global(.com-tete) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .com-liste :global(.com-tete b) {
+    color: var(--ink);
+  }
+  .com-liste :global(.com-texte) {
+    margin: 8px 0 0;
+    max-width: 68ch;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.45;
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+  }
+  .com-vide {
+    margin: 0;
+    color: var(--ink-55);
+  }
+  .com-form {
+    display: grid;
+    gap: 16px;
+    margin-top: var(--pas-6);
+  }
+  .com-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .com-form input,
+  .com-form textarea {
+    padding: 10px;
+    border: 1px solid var(--ink);
+    border-radius: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .com-form input {
+    max-width: 360px;
+  }
+  .com-form textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+  .com-form input:focus-visible,
+  .com-form textarea:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .com-piege {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .com-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    align-items: center;
+  }
+  .com-note {
+    font-size: 12px;
+    color: var(--ink-55);
+  }
+  .com-retour {
+    margin: 0;
+    font-size: 13px;
+  }
+</style>
+
+<script>
+  for (const bloc of document.querySelectorAll<HTMLElement>("[data-commentaires]")) {
+    const page = bloc.dataset.page!;
+    const langue = bloc.dataset.langue!;
+    const c = JSON.parse(bloc.dataset.textes!);
+    const liste = bloc.querySelector<HTMLElement>("[data-liste]")!;
+    const vide = bloc.querySelector<HTMLElement>("[data-vide]")!;
+    const compte = bloc.querySelector<HTMLElement>("[data-compte]")!;
+    const form = bloc.querySelector<HTMLFormElement>("[data-form]")!;
+    const retour = bloc.querySelector<HTMLElement>("[data-retour]")!;
+    const envoi = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const affiche = Date.now();
+
+    fetch(`/api/commentaires?page=${encodeURIComponent(page)}`)
+      .then((r) => (r.ok ? r.json() : { commentaires: [] }))
+      .then(({ commentaires }) => {
+        compte.textContent = commentaires.length ? `(${commentaires.length})` : "";
+        vide.hidden = commentaires.length > 0;
+        for (const x of commentaires) {
+          const li = document.createElement("li");
+          const tete = document.createElement("div");
+          tete.className = "com-tete";
+          const nom = document.createElement("b");
+          nom.textContent = x.nom;
+          const quand = document.createElement("time");
+          quand.dateTime = x.cree;
+          quand.textContent = new Date(x.cree).toLocaleDateString(c.locale, { day: "numeric", month: "long", year: "numeric" });
+          tete.append(nom, quand);
+          // textContent : le texte d'un visiteur n'est jamais lu comme du HTML.
+          const texte = document.createElement("p");
+          texte.className = "com-texte";
+          texte.textContent = x.texte;
+          li.append(tete, texte);
+          liste.append(li);
+        }
+      })
+      .catch(() => (vide.hidden = false));
+
+    form.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const d = new FormData(form);
+      const nom = String(d.get("nom") || "").trim();
+      const texte = String(d.get("texte") || "").trim();
+      const dire = (msg: string) => {
+        retour.textContent = msg;
+        retour.hidden = false;
+      };
+      if (nom.length < 2) return dire(c.erreurs.nom);
+      if (texte.length < 3) return dire(c.erreurs.texte);
+      envoi.disabled = true;
+      envoi.textContent = c.envoi;
+      try {
+        const r = await fetch("/api/commentaires", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ page, nom, texte, langue, site: d.get("site"), t: Date.now() - affiche }),
+        });
+        if (r.ok) {
+          form.reset();
+          dire(c.merci);
+        } else {
+          const corps = await r.json().catch(() => ({}));
+          dire(c.erreurs[corps.erreur] ?? c.erreurs.autre);
+        }
+      } catch {
+        dire(c.erreurs.autre);
+      } finally {
+        envoi.disabled = false;
+        envoi.textContent = c.envoyer;
+      }
+    });
+  }
+</script>
