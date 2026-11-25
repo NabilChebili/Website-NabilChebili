@@ -1,0 +1,104 @@
+---
+// Gabarit des pages privees (/admin, /connexion). Volontairement hors de
+// src/pages/[...lang]/ : ces pages n'existent qu'en francais, ne sont pas
+// indexees, et n'ont ni bascule de langue ni navigation publique — la bascule
+// de header.astro menerait a un /en/admin qui n'existe pas.
+//
+// Meme systeme visuel que le site : jetons, fontes et primitives viennent
+// d'editorial.css. Seule la coque change.
+import "../styles/global.css";
+import "../styles/editorial.css";
+
+const { title = "Administration", actions = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr-FR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="referrer" content="same-origin" />
+    <link rel="icon" type="image/svg+xml" href="/LogoRond.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sofia+Sans:wght@400;600&family=Sofia+Sans+Condensed:wght@800&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title} — Nabil Chebili</title>
+  </head>
+  <body class="prive">
+    <header class="prive-barre">
+      <a class="prive-marque" href="/">Nabil Chebili</a>
+      {
+        actions && (
+          <div class="prive-compte">
+            <span class="prive-qui" data-qui />
+            <a class="prive-sortie" href="/.auth/logout?post_logout_redirect_uri=/">
+              <span>Se déconnecter</span>
+            </a>
+          </div>
+        )
+      }
+    </header>
+    <main class="page editorial prive-main">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  /* Un display: flex ou grid pose par une classe l'emporte sur l'attribut
+     hidden : sans cette regle, les blocs masques en attendant l'API
+     s'affichaient quand meme, vides. */
+  .prive [hidden] {
+    display: none !important;
+  }
+  .prive-barre {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    height: 56px;
+    padding: 0 var(--edge);
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    font-size: 12px;
+  }
+  .prive-marque {
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .prive-compte {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    min-width: 0;
+  }
+  .prive-qui {
+    color: var(--ink-55);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .prive-sortie {
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .prive-main.page.editorial {
+    padding-top: 0;
+    padding-bottom: var(--pas-10);
+  }
+  @media (max-width: 700px) {
+    .prive-qui {
+      display: none;
+    }
+  }
+</style>

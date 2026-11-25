@@ -1,0 +1,65 @@
+{
+  "platform": {
+    "apiRuntime": "node:20"
+  },
+  "routes": [
+    {
+      "route": "/admin",
+      "allowedRoles": [
+        "admin"
+      ],
+      "headers": {
+        "cache-control": "no-store",
+        "x-robots-tag": "noindex, nofollow"
+      }
+    },
+    {
+      "route": "/admin/*",
+      "allowedRoles": [
+        "admin"
+      ],
+      "headers": {
+        "cache-control": "no-store",
+        "x-robots-tag": "noindex, nofollow"
+      }
+    },
+    {
+      "route": "/api/gestion/*",
+      "allowedRoles": [
+        "admin"
+      ]
+    },
+    {
+      "route": "/connexion*",
+      "headers": {
+        "cache-control": "no-store",
+        "x-robots-tag": "noindex, nofollow"
+      }
+    },
+    {
+      "route": "/chine/apercu*",
+      "headers": {
+        "x-robots-tag": "noindex, nofollow"
+      }
+    },
+    {
+      "route": "/en/chine/apercu*",
+      "headers": {
+        "x-robots-tag": "noindex, nofollow"
+      }
+    }
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/connexion/",
+      "statusCode": 302
+    },
+    "403": {
+      "redirect": "/connexion/",
+      "statusCode": 302
+    }
+  },
+  "globalHeaders": {
+    "referrer-policy": "strict-origin-when-cross-origin"
+  }
+}

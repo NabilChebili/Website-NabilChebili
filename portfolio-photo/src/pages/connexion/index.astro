@@ -1,0 +1,78 @@
+---
+// /connexion — la porte de /admin. Static Web Apps sert aussi cette page a la
+// place de /admin quand on n'est pas connecte (401) ou que le compte n'a pas le
+// role admin (403) : voir responseOverrides dans staticwebapp.config.json.
+//
+// Le MFA est celui du fournisseur : la double authentification du compte
+// GitHub, ou celle du compte Microsoft. Le role admin, lui, n'est attribue
+// qu'aux deux comptes de Nabil, par invitation Static Web Apps.
+import Prive from "../../layouts/Prive.astro";
+
+const retour = encodeURIComponent("/admin");
+---
+
+<Prive title="Connexion" actions={false}>
+  <section class="tete-page">
+    <h1 class="titre-page">Connexion</h1>
+    <div class="prose">
+      <p>Espace réservé à l'administration du site.</p>
+    </div>
+  </section>
+
+  <section class="connexion">
+    <div class="connexion-choix" data-choix>
+      <a class="bouton" href={`/.auth/login/github?post_login_redirect_uri=${retour}`}>Continuer avec GitHub</a>
+      <a class="bouton" href={`/.auth/login/aad?post_login_redirect_uri=${retour}`}>Continuer avec Microsoft</a>
+    </div>
+    <p class="connexion-refus" data-refus hidden>
+      Connecté avec <b data-compte></b>, mais ce compte n'a pas accès à l'administration.
+      <a class="lien" href="/.auth/logout?post_logout_redirect_uri=/connexion">Changer de compte</a>
+    </p>
+  </section>
+</Prive>
+
+<style>
+  .connexion {
+    padding: var(--pas-6) var(--edge) 0;
+  }
+  .connexion-choix {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .connexion-refus {
+    max-width: 68ch;
+    margin: var(--pas-3) 0 0;
+    color: var(--ink-55);
+    line-height: 1.45;
+  }
+  .connexion-refus b {
+    color: var(--ink);
+  }
+</style>
+
+<script>
+  // Deja connecte sans le role : on le dit, au lieu de reproposer les memes
+  // boutons qui ramenaient ici.
+  fetch("/.auth/me")
+    .then((r) => (r.ok ? r.json() : null))
+    .then((moi) => {
+      const p = moi?.clientPrincipal;
+      if (!p) return;
+      if (p.userRoles?.includes("admin")) {
+        location.replace("/admin");
+        return;
+      }
+      const refus = document.querySelector<HTMLElement>("[data-refus]");
+      const choix = document.querySelector<HTMLElement>("[data-choix]");
+      const compte = document.querySelector("[data-compte]");
+      if (!refus || !compte) return;
+      const fournisseur = p.identityProvider === "aad" ? "Microsoft" : "GitHub";
+      compte.textContent = p.userDetails ? `${p.userDetails} (${fournisseur})` : `un compte ${fournisseur}`;
+      refus.hidden = false;
+      // Les memes boutons ramenaient ici avec le meme compte : on ne laisse
+      // que « Changer de compte ».
+      if (choix) choix.hidden = true;
+    })
+    .catch(() => {});
+</script>

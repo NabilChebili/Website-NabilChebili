@@ -111,6 +111,47 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
 - **Les colonnes sont en `auto-fit`** : ajouter ou retirer un thème ne demande
   aucune retouche de la grille.
 
+## Admin, statistiques, commentaires, accès anticipé Chine (25/11/2026)
+
+- **`/admin`** (FR seulement, hors de `[...lang]` : volontaire, page privée) est réservée au rôle
+  `admin` de Static Web Apps, attribué par **invitation** à deux comptes (GitHub et Microsoft). Le MFA
+  est celui du fournisseur. Aucune auth maison. `/connexion` est la porte ; les 401/403 y redirigent.
+- **La frontière de sécurité, c'est l'API, pas le HTML.** Testé à l'émulateur : `/admin/`,
+  `/admin/index.html`, `/admin//` sont refusés, mais `/ADMIN/` ou `/%61dmin/` servent la coquille
+  HTML (disque insensible à la casse, routes sensibles à la casse). Ce n'est pas une fuite : la page
+  ne porte rien de secret (son source est public sur GitHub) et toutes les données passent par
+  `/api/gestion/*`, qui **revérifie le rôle dans la fonction** (`refusAdmin`) et exige l'en-tête
+  `x-demande: admin` sur les écritures (anti-CSRF). Ne jamais mettre de donnée sensible dans le
+  HTML de l'admin au build.
+- **`/api/gestion` et non `/api/admin`** : Azure Functions réserve le préfixe de route `admin`.
+- **`staticwebapp.config.json` vit dans `portfolio-photo/`** (l'`app_location`). À la racine du
+  repo il était ignoré : la prod servait `referrer-policy: same-origin` au lieu de la valeur
+  configurée.
+- **L'API Functions n'avait jamais tourné** : `api/health` (modèle v3 sans `function.json`)
+  répondait 404 en prod. Elle est passée au modèle v4 (`api/src/functions/*.js`), runtime
+  `node:20` déclaré dans la config SWA. Tables Azure (`stats`, `commentaires`, `chineip`,
+  `limites`) créées par l'API à la première écriture. App settings requis : `STOCKAGE_CONNEXION`,
+  `CHINE_CONTENEUR` (`attente`).
+- **Stats** : compteur maison, sans cookie ni IP (`/api/vue`, beacon dans `header.astro`).
+  Agrégats par jour (heure de Paris). DNT/GPC et robots ignorés. Case « ne pas compter mes
+  visites » dans l'admin (clé `localStorage` `nch-sans-stats`).
+- **Commentaires** sur `/vietnam`, `/indonesie` et `/chine` (une fois ouverte) : rien n'est public
+  avant validation dans l'admin. Anti-spam : champ piège, délai ≥ 3 s, 4 par heure et par
+  empreinte d'IP (HMAC, l'IP elle-même n'est pas stockée). Affichage en `textContent` partout.
+- **Accès anticipé Chine par IP** : `/chine/apercu` réutilise `ChineContenu.astro` avec la base
+  `/api/chine/photo/`, qui vérifie l'IP puis redirige vers un SAS d'1 h du conteneur **privé**
+  `attente/Chine/`. Les photos Chine ne doivent **pas** aller dans `photos/` (public et listable)
+  avant le 10/12, sinon la restriction ne sert à rien.
+- **À vérifier au premier déploiement** : quel en-tête porte la vraie IP sur SWA et s'il peut être
+  forgé par le client. `/api/gestion/moi` les renvoie tous ; une fois tranché, fixer
+  `IP_ENTETE` dans les app settings.
+- **Terraform** : aucun état local pour ce projet (un `plan` voudrait tout recréer). Les app
+  settings sont déclarés dans `main.tf` mais posés via `az` en attendant.
+- **Test local** : Functions Core Tools refuse Node 24. Lancer `func` avec un Node 20
+  (`languageWorkers__node__defaultExecutablePath`), Azurite pour le stockage, puis
+  `swa start portfolio-photo/dist --api-devserver-url http://localhost:7071 --swa-config-location portfolio-photo`.
+  `cd api && npm test` pour les tests unitaires.
+
 ## Architecture du site photo (évolution récente)
 
 Le site a été refait plusieurs fois dans la même session avant de converger ; la version actuelle :

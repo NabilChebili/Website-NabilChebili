@@ -14,6 +14,8 @@ export default defineConfig({
 	// a besoin de connaitre les langues pour emettre les alternates hreflang.
 	integrations: [
 		sitemap({
+			// Pages privees ou non indexees : /admin, /connexion, l'apercu Chine.
+			filter: (page) => !/\/(admin|connexion|chine\/apercu)\/?$/.test(new URL(page).pathname),
 			i18n: {
 				defaultLocale: 'fr',
 				locales: { fr: 'fr-FR', en: 'en' },

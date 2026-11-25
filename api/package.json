@@ -1,4 +1,16 @@
 {
   "name": "swa-api",
-  "version": "1.0.0"
+  "version": "2.0.0",
+  "private": true,
+  "description": "API du site : pages vues, commentaires, acces anticipe Chine, et /api/gestion pour /admin.",
+  "main": "src/functions/*.js",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.2",
+    "@azure/functions": "^4.17.1",
+    "@azure/storage-blob": "^12.34.0"
+  }
 }

@@ -1,0 +1,164 @@
+---
+// /chine/apercu — la galerie Chine avant sa sortie, pour les adresses IP
+// autorisees dans /admin.
+//
+// Ce qui protege les photos, c'est l'API : chaque image passe par
+// /api/chine/photo/<chemin>, qui verifie l'IP avant de rediriger vers un lien
+// temporaire du conteneur PRIVE « attente ». Le HTML, lui, ne contient que
+// les textes, deja publics dans chine.json. La verification faite ici au
+// chargement ne sert qu'a ne pas montrer une page d'images cassees a qui n'a
+// pas l'acces — et a lui donner son IP, pour la demander.
+//
+// Apres la sortie, la page renvoie simplement vers /chine.
+import "../../../styles/global.css";
+import Layout from "../../../layouts/header.astro";
+import ChineContenu from "../../../components/ChineContenu.astro";
+import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../../i18n/ui";
+import { chineOuverte } from "../../../lib/chineOuverte.js";
+
+export function getStaticPaths() {
+  return cheminsDesLangues();
+}
+
+const langue = langueDepuisParam(Astro.params.lang);
+const versChine = cheminLocalise("/chine", langue);
+
+const T = {
+  fr: {
+    titre: "Chine",
+    surtitre: "Avant-première",
+    intro: "Vous voyez la galerie avant sa sortie. Merci de garder les photos pour vous jusque-là.",
+    verif: "Vérification de l'accès…",
+    refus: "Cette avant-première est réservée à quelques personnes.",
+    ip: "Votre adresse IP",
+    demande: "Envoyez-la à Nabil pour obtenir l'accès, puis rechargez la page.",
+    retour: "← Revenir au compte à rebours",
+  },
+  en: {
+    titre: "China",
+    surtitre: "Preview",
+    intro: "You are seeing the gallery before its release. Please keep the photos to yourself until then.",
+    verif: "Checking access…",
+    refus: "This preview is limited to a few people.",
+    ip: "Your IP address",
+    demande: "Send it to Nabil to get access, then reload the page.",
+    retour: "← Back to the countdown",
+  },
+};
+const c = T[langue];
+---
+
+<Layout title={c.titre} description={c.intro} mainClass="page editorial" lang={langue} robots="noindex,nofollow">
+
+  <section class="tete-page">
+    <a class="retour" href={versChine}>{c.retour}</a>
+    <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
+    <div class="prose" data-reveal data-groupe="tete">
+      <p><b class="apercu-marque">{c.surtitre}</b> <span data-intro>{c.intro}</span></p>
+    </div>
+  </section>
+
+  <p class="apercu-etat" data-etat>{c.verif}</p>
+
+  <div class="apercu-refus" data-refus hidden>
+    <p>{c.refus}</p>
+    <dl>
+      <dt>{c.ip}</dt>
+      <dd data-ip>—</dd>
+    </dl>
+    <p>{c.demande}</p>
+  </div>
+
+  {/* Masque mais pose dans la page : les composants (globe, grilles) se
+      mesurent au chargement, ce que « display: none » leur aurait fausse. */}
+  <div class="apercu-contenu cache" data-contenu data-ouverte={chineOuverte ? "1" : undefined} data-vers={versChine}>
+    <ChineContenu base="/api/chine/photo/" langue={langue} />
+  </div>
+</Layout>
+
+<style>
+  .apercu-marque {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 7px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    vertical-align: 2px;
+  }
+  .apercu-etat {
+    margin: 0;
+    padding: var(--pas-3) var(--edge) 0;
+    color: var(--ink-55);
+  }
+  .apercu-etat:empty {
+    display: none;
+  }
+  .apercu-refus {
+    margin: var(--pas-3) var(--edge) var(--pas-10);
+    padding-top: 14px;
+    border-top: 2px solid var(--ink);
+    max-width: 68ch;
+  }
+  .apercu-refus p {
+    margin: 0 0 var(--pas-3);
+    line-height: 1.45;
+  }
+  .apercu-refus dl {
+    margin: 0 0 var(--pas-3);
+  }
+  .apercu-refus dt {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-55);
+  }
+  .apercu-refus dd {
+    margin: 6px 0 0;
+    font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif;
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 56px);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+  /* Masque seulement si le script tourne (.reveal-ok, pose dans le head) :
+     sans JavaScript, la page reste lisible. */
+  :global(.reveal-ok) .apercu-contenu.cache {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  const contenu = document.querySelector<HTMLElement>("[data-contenu]")!;
+  const etat = document.querySelector<HTMLElement>("[data-etat]")!;
+  const refus = document.querySelector<HTMLElement>("[data-refus]")!;
+  if (contenu.dataset.ouverte) location.replace(contenu.dataset.vers!);
+  fetch("/api/chine/acces")
+    .then((r) => (r.ok ? r.json() : { acces: false, ip: "" }))
+    .then((r) => {
+      etat.textContent = "";
+      if (r.acces) {
+        contenu.classList.remove("cache");
+        // Le globe et les grilles se sont mesures dans une boite de hauteur
+        // nulle : on leur redonne l occasion de se recaler.
+        window.dispatchEvent(new Event("resize"));
+        return;
+      }
+      contenu.remove();
+      document.querySelector("[data-intro]")?.remove();
+      refus.querySelector("[data-ip]")!.textContent = r.ip || "—";
+      refus.hidden = false;
+    })
+    .catch(() => {
+      etat.textContent = "";
+      contenu.remove();
+      refus.hidden = false;
+    });
+</script>
