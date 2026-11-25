@@ -60,16 +60,25 @@ function normaliserIp(brut) {
 //   - x-azure-clientip, x-client-ip, x-real-ip ne sont PAS poses par Static
 //     Web Apps : un client y met ce qu'il veut, et c'etait repris tel quel ;
 //   - x-forwarded-for : SWA garde ce que le client y a ecrit et AJOUTE a la fin
-//     l'adresse qu'il voit. Une valeur forgee ressortait en premiere position.
-// Seule la DERNIERE entree de x-forwarded-for vient de la plateforme : c'est la
-// seule qu'on lit. Le reste ne sert qu'au diagnostic (entetesIp).
+//     DEUX entrees : l'adresse du visiteur, puis celle de son propre relais
+//     (une IP Microsoft en 13.69.116.x, qui change d'une requete a l'autre :
+//     on se fie a la position de l'entree, jamais a sa valeur).
+//     Forme : "<forge par le client…>, <visiteur>, <relais SWA>".
+// La bonne valeur est donc l'AVANT-DERNIERE entree. Lire la premiere laissait
+// un client forger son IP ; lire la derniere donnait a tous les visiteurs l'IP
+// du relais. Le reste ne sert qu'au diagnostic (entetesIp).
+const RELAIS_PLATEFORME = 1;
 const ENTETES_IP = ["x-forwarded-for", "x-azure-clientip", "x-client-ip", "x-real-ip"];
 function ipClient(req) {
   const entrees = (req.headers.get("x-forwarded-for") || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  return normaliserIp(entrees[entrees.length - 1]);
+  // Moins d'entrees que prevu : l'en-tete n'a pas la forme posee par la
+  // plateforme (appel direct, environnement local). Pas d'IP plutot qu'une
+  // IP devinee.
+  if (entrees.length < RELAIS_PLATEFORME + 1) return "";
+  return normaliserIp(entrees[entrees.length - 1 - RELAIS_PLATEFORME]);
 }
 
 function entetesIp(req) {

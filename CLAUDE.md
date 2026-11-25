@@ -142,12 +142,13 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
   `/api/chine/photo/`, qui vérifie l'IP puis redirige vers un SAS d'1 h du conteneur **privé**
   `attente/Chine/`. Les photos Chine ne doivent **pas** aller dans `photos/` (public et listable)
   avant le 10/12, sinon la restriction ne sert à rien.
-- **L’IP du visiteur = la DERNIÈRE entrée de `x-forwarded-for`, rien d autre.** Mesuré en prod le
-  25/11/2026 en forgeant chaque en-tête : `x-azure-clientip`, `x-client-ip` et `x-real-ip` ne sont
-  pas posés par Static Web Apps (le client y met ce qu’il veut), et SWA **garde** le
-  `x-forwarded-for` envoyé par le client en y **ajoutant** l’adresse vue à la fin. La première
-  version lisait la première entrée : n’importe qui pouvait se faire passer pour une IP autorisée.
-  Rejouer le test de falsification après tout changement de plateforme (Front Door, CDN).
+- **L’IP du visiteur = l’AVANT-DERNIÈRE entrée de `x-forwarded-for`, rien d’autre.** Mesuré en
+  prod le 25/11/2026 : `x-azure-clientip`, `x-client-ip` et `x-real-ip` ne sont pas posés par Static
+  Web Apps (le client y met ce qu’il veut). SWA **garde** le `x-forwarded-for` du client et y
+  **ajoute** deux entrées : le visiteur, puis son propre relais (IP Microsoft en `13.69.116.x`, qui
+  varie). Deux erreurs déjà payées : lire la première entrée laissait forger son IP (#15) ; lire la
+  dernière donnait à tous les visiteurs l’IP du relais (#16). Le test de vérification compare à
+  l’IP publique réelle mesurée par un service extérieur, jamais à la réponse de l’API elle-même.
 - **Terraform** : aucun état local pour ce projet (un `plan` voudrait tout recréer). Les app
   settings sont déclarés dans `main.tf` mais posés via `az` en attendant.
 - **Test local** : Functions Core Tools refuse Node 24. Lancer `func` avec un Node 20
