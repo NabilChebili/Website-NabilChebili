@@ -16,19 +16,20 @@ test("normaliserIp ramene chaque ecriture a la forme canonique", () => {
   assert.equal(normaliserIp("999.1.1.1"), "");
 });
 
-test("ipClient prend le premier en-tete exploitable", () => {
-  assert.equal(ipClient(req({ "x-forwarded-for": "81.2.3.4:1234, 10.0.0.1" })), "81.2.3.4");
-  assert.equal(ipClient(req({ "x-azure-clientip": "90.1.1.1", "x-forwarded-for": "1.1.1.1" })), "90.1.1.1");
-  assert.equal(ipClient(req({})), "");
+test("ipClient ne lit que la derniere entree de x-forwarded-for, posee par la plateforme", () => {
+  // Requete normale : la plateforme a ecrit l IP vue.
+  assert.equal(ipClient(req({ "x-forwarded-for": "83.167.38.106:51234" })), "83.167.38.106");
+  // Attaque mesuree en production : le client forge x-forwarded-for, la
+  // plateforme ajoute la vraie adresse a la fin.
+  assert.equal(ipClient(req({ "x-forwarded-for": "198.51.100.66, 83.167.38.106:51234" })), "83.167.38.106");
+  assert.equal(ipClient(req({ "x-forwarded-for": "198.51.100.66,198.51.100.67, 83.167.38.106" })), "83.167.38.106");
 });
 
-test("IP_ENTETE force l'en-tete lu", () => {
-  process.env.IP_ENTETE = "x-forwarded-for";
-  try {
-    assert.equal(ipClient(req({ "x-azure-clientip": "90.1.1.1", "x-forwarded-for": "1.1.1.1" })), "1.1.1.1");
-  } finally {
-    delete process.env.IP_ENTETE;
-  }
+test("les en-tetes que la plateforme ne pose pas sont ignores", () => {
+  const forges = { "x-azure-clientip": "198.51.100.66", "x-client-ip": "198.51.100.66", "x-real-ip": "198.51.100.66" };
+  assert.equal(ipClient(req({ ...forges, "x-forwarded-for": "83.167.38.106" })), "83.167.38.106");
+  assert.equal(ipClient(req(forges)), "");
+  assert.equal(ipClient(req({})), "");
 });
 
 test("refusAdmin : role et en-tete anti-CSRF", () => {

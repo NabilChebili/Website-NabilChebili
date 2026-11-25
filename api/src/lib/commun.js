@@ -54,21 +54,22 @@ function normaliserIp(brut) {
   return net.isIP(ip) ? ip : "";
 }
 
-// L'en-tete qui porte l'IP du visiteur depend de la plateforme. La route
-// /api/gestion/moi les renvoie tous : c'est elle qui permet de verifier, sur un
-// environnement deploye, lequel est fiable et lequel un client peut forger.
-// IP_ENTETE force le choix une fois verifie.
-const ENTETES_IP = ["x-azure-clientip", "x-client-ip", "x-forwarded-for", "x-real-ip"];
+// L'IP du visiteur, telle que la plateforme l'a vue.
+//
+// Mesure en production le 25/11/2026, en forgeant chaque en-tete :
+//   - x-azure-clientip, x-client-ip, x-real-ip ne sont PAS poses par Static
+//     Web Apps : un client y met ce qu'il veut, et c'etait repris tel quel ;
+//   - x-forwarded-for : SWA garde ce que le client y a ecrit et AJOUTE a la fin
+//     l'adresse qu'il voit. Une valeur forgee ressortait en premiere position.
+// Seule la DERNIERE entree de x-forwarded-for vient de la plateforme : c'est la
+// seule qu'on lit. Le reste ne sert qu'au diagnostic (entetesIp).
+const ENTETES_IP = ["x-forwarded-for", "x-azure-clientip", "x-client-ip", "x-real-ip"];
 function ipClient(req) {
-  const force = process.env.IP_ENTETE;
-  const ordre = force ? [force.toLowerCase()] : ENTETES_IP;
-  for (const nom of ordre) {
-    const v = req.headers.get(nom);
-    if (!v) continue;
-    const ip = normaliserIp(v.split(",")[0]);
-    if (ip) return ip;
-  }
-  return "";
+  const entrees = (req.headers.get("x-forwarded-for") || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return normaliserIp(entrees[entrees.length - 1]);
 }
 
 function entetesIp(req) {
