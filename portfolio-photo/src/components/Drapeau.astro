@@ -1,0 +1,62 @@
+---
+// Drapeau rond du selecteur de langue (header.astro). Demande de Nabil,
+// 25/11/2026 : « FR / EN » en petites capitales ne se lisait pas comme un
+// choix de langue, les visiteurs ne le voyaient pas.
+//
+// Rond par le SVG (clipPath + cercle a filet de 1px, comme les reseaux du
+// Colophon), jamais par border-radius : la regle du systeme tient. Les couleurs
+// sont celles des drapeaux, seule couleur de la barre, comme les logos de
+// /clouddevops.
+//
+// Anglais = Union Jack. Les identifiants de clipPath sont prefixes par la
+// langue : le composant n'apparait qu'une fois par langue sur une page.
+const { langue, taille = 16 } = Astro.props;
+const id = `drapeau-${langue}`;
+---
+
+{
+  langue === "fr" ? (
+    <svg class="drapeau" width={taille} height={taille} viewBox="0 0 30 30" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id={`${id}-rond`}><circle cx="15" cy="15" r="15" /></clipPath>
+      </defs>
+      <g clip-path={`url(#${id}-rond)`}>
+        <rect width="10" height="30" fill="#000091" />
+        <rect x="10" width="10" height="30" fill="#ffffff" />
+        <rect x="20" width="10" height="30" fill="#e1000f" />
+      </g>
+      <circle class="drapeau-filet" cx="15" cy="15" r="14.5" />
+    </svg>
+  ) : (
+    <svg class="drapeau" width={taille} height={taille} viewBox="15 0 30 30" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id={`${id}-rond`}><circle cx="30" cy="15" r="15" /></clipPath>
+        <clipPath id={`${id}-diag`}><path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" /></clipPath>
+      </defs>
+      <g clip-path={`url(#${id}-rond)`}>
+        <rect width="60" height="30" fill="#012169" />
+        <path d="M0,0 L60,30 M60,0 L0,30" stroke="#ffffff" stroke-width="6" />
+        <path d="M0,0 L60,30 M60,0 L0,30" clip-path={`url(#${id}-diag)`} stroke="#c8102e" stroke-width="4" />
+        <path d="M30,0 v30 M0,15 h60" stroke="#ffffff" stroke-width="10" />
+        <path d="M30,0 v30 M0,15 h60" stroke="#c8102e" stroke-width="6" />
+      </g>
+      <circle class="drapeau-filet" cx="30" cy="15" r="14.5" />
+    </svg>
+  )
+}
+
+<style>
+  .drapeau {
+    display: block;
+    flex: none;
+  }
+  .drapeau-filet {
+    fill: none;
+    stroke: currentColor;
+    stroke-opacity: 0.35;
+    /* Un filet de 1px a l'ecran, quelle que soit la taille du drapeau : dans
+       un viewBox de 30 pour 16px affiches, 1 unite ne ferait que 0,5px. */
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+</style>
