@@ -142,9 +142,12 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
   `/api/chine/photo/`, qui vérifie l'IP puis redirige vers un SAS d'1 h du conteneur **privé**
   `attente/Chine/`. Les photos Chine ne doivent **pas** aller dans `photos/` (public et listable)
   avant le 10/12, sinon la restriction ne sert à rien.
-- **À vérifier au premier déploiement** : quel en-tête porte la vraie IP sur SWA et s'il peut être
-  forgé par le client. `/api/gestion/moi` les renvoie tous ; une fois tranché, fixer
-  `IP_ENTETE` dans les app settings.
+- **L’IP du visiteur = la DERNIÈRE entrée de `x-forwarded-for`, rien d autre.** Mesuré en prod le
+  25/11/2026 en forgeant chaque en-tête : `x-azure-clientip`, `x-client-ip` et `x-real-ip` ne sont
+  pas posés par Static Web Apps (le client y met ce qu’il veut), et SWA **garde** le
+  `x-forwarded-for` envoyé par le client en y **ajoutant** l’adresse vue à la fin. La première
+  version lisait la première entrée : n’importe qui pouvait se faire passer pour une IP autorisée.
+  Rejouer le test de falsification après tout changement de plateforme (Front Door, CDN).
 - **Terraform** : aucun état local pour ce projet (un `plan` voudrait tout recréer). Les app
   settings sont déclarés dans `main.tf` mais posés via `az` en attendant.
 - **Test local** : Functions Core Tools refuse Node 24. Lancer `func` avec un Node 20
