@@ -16,18 +16,28 @@ test("normaliserIp ramene chaque ecriture a la forme canonique", () => {
   assert.equal(normaliserIp("999.1.1.1"), "");
 });
 
-test("ipClient ne lit que la derniere entree de x-forwarded-for, posee par la plateforme", () => {
-  // Requete normale : la plateforme a ecrit l IP vue.
-  assert.equal(ipClient(req({ "x-forwarded-for": "83.167.38.106:51234" })), "83.167.38.106");
-  // Attaque mesuree en production : le client forge x-forwarded-for, la
-  // plateforme ajoute la vraie adresse a la fin.
-  assert.equal(ipClient(req({ "x-forwarded-for": "198.51.100.66, 83.167.38.106:51234" })), "83.167.38.106");
-  assert.equal(ipClient(req({ "x-forwarded-for": "198.51.100.66,198.51.100.67, 83.167.38.106" })), "83.167.38.106");
+// Forme mesuree en production le 25/11/2026 : "<forge…>, <visiteur>, <relais SWA>".
+const RELAIS = "13.69.116.6";
+
+test("ipClient lit l avant-derniere entree de x-forwarded-for : le visiteur, avant le relais SWA", () => {
+  assert.equal(ipClient(req({ "x-forwarded-for": `83.167.38.106:51234, ${RELAIS}` })), "83.167.38.106");
+  assert.equal(ipClient(req({ "x-forwarded-for": `83.167.38.106, ${RELAIS}:443` })), "83.167.38.106");
+});
+
+test("une IP forgee par le client dans x-forwarded-for est ignoree", () => {
+  assert.equal(ipClient(req({ "x-forwarded-for": `198.51.100.66, 83.167.38.106, ${RELAIS}` })), "83.167.38.106");
+  assert.equal(ipClient(req({ "x-forwarded-for": `198.51.100.66,198.51.100.67, 83.167.38.106, ${RELAIS}` })), "83.167.38.106");
+});
+
+test("jamais l IP du relais, commune a tous les visiteurs", () => {
+  assert.notEqual(ipClient(req({ "x-forwarded-for": `83.167.38.106, ${RELAIS}` })), RELAIS);
+  // Une seule entree : forme inattendue, pas d IP plutot qu une IP devinee.
+  assert.equal(ipClient(req({ "x-forwarded-for": RELAIS })), "");
 });
 
 test("les en-tetes que la plateforme ne pose pas sont ignores", () => {
   const forges = { "x-azure-clientip": "198.51.100.66", "x-client-ip": "198.51.100.66", "x-real-ip": "198.51.100.66" };
-  assert.equal(ipClient(req({ ...forges, "x-forwarded-for": "83.167.38.106" })), "83.167.38.106");
+  assert.equal(ipClient(req({ ...forges, "x-forwarded-for": `83.167.38.106, ${RELAIS}` })), "83.167.38.106");
   assert.equal(ipClient(req(forges)), "");
   assert.equal(ipClient(req({})), "");
 });
