@@ -14,16 +14,6 @@
       }
     },
     {
-      "route": "/admin/",
-      "allowedRoles": [
-        "admin"
-      ],
-      "headers": {
-        "cache-control": "no-store",
-        "x-robots-tag": "noindex, nofollow"
-      }
-    },
-    {
       "route": "/admin/*",
       "allowedRoles": [
         "admin"
