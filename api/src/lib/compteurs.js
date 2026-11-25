@@ -53,7 +53,7 @@ async function lireStats(jours) {
     new Date(Date.UTC(y, m - 1, d - (jours - 1 - i))).toISOString().slice(0, 10)
   );
   const de = liste[0];
-  const parJour = new Map(liste.map((j) => [j, { jour: j, vues: 0, entrees: 0 }]));
+  const parJour = new Map(liste.map((j) => [j, { jour: j, vues: 0, entrees: 0, requetes: 0, photos: 0 }]));
   const somme = { p: new Map(), r: new Map(), l: new Map(), d: new Map() };
   const iter = t.listEntities({
     queryOptions: { filter: `PartitionKey ge '${de}' and PartitionKey le '${a}'`, select: ["PartitionKey", "RowKey", "n"] },
@@ -64,6 +64,11 @@ async function lireStats(jours) {
     if (type === "t") {
       const j = parJour.get(e.partitionKey);
       if (j && (cle === "vues" || cle === "entrees")) j[cle] += e.n || 0;
+    } else if (type === "h") {
+      // Historique repris d'Azure Monitor (requetes servies par le site, photos
+      // lues sur le stockage) : une autre mesure que les pages vues, gardee a part.
+      const j = parJour.get(e.partitionKey);
+      if (j && (cle === "requetes" || cle === "photos")) j[cle] = e.n || 0;
     } else if (somme[type]) {
       somme[type].set(cle, (somme[type].get(cle) || 0) + (e.n || 0));
     }
@@ -75,6 +80,8 @@ async function lireStats(jours) {
     totaux: {
       vues: serie.reduce((s, j) => s + j.vues, 0),
       entrees: serie.reduce((s, j) => s + j.entrees, 0),
+      requetes: serie.reduce((s, j) => s + j.requetes, 0),
+      photos: serie.reduce((s, j) => s + j.photos, 0),
     },
     jours: serie,
     pages: classer(somme.p),

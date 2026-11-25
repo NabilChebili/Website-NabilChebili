@@ -115,6 +115,7 @@ const liens = [
         <button type="button" data-jours="7">7 j</button>
         <button type="button" data-jours="30" aria-pressed="true">30 j</button>
         <button type="button" data-jours="90">90 j</button>
+        <button type="button" data-jours="365">1 an</button>
       </span>
     </div>
     <div class="adm-bloc">
@@ -131,6 +132,15 @@ const liens = [
           <div class="adm-bulle" data-bulle hidden></div>
         </div>
         <div class="adm-axe" data-axe></div>
+      </figure>
+      <figure class="adm-graphe" data-graphe-historique hidden>
+        <figcaption>Requêtes servies par le site · historique Azure</figcaption>
+        <div class="adm-graphe-zone">
+          <svg data-barres role="img" aria-label="Requêtes servies par le site, par jour"></svg>
+          <div class="adm-bulle" data-bulle hidden></div>
+        </div>
+        <div class="adm-axe" data-axe></div>
+        <p class="adm-note" data-note-historique></p>
       </figure>
       <div class="adm-tables" data-tables hidden>
         <div>
@@ -762,13 +772,15 @@ const liens = [
   };
   const LIBELLES: Record<string, string> = { fr: "Français", en: "Anglais", mobile: "Mobile", ordinateur: "Ordinateur" };
 
-  function dessiner(jours: { jour: string; vues: number; entrees: number }[]) {
-    const svg = $<SVGSVGElement>("[data-barres]");
-    const bulle = $("[data-bulle]");
+  // Un graphe par mesure, jamais deux echelles sur le meme : pages vues et
+  // requetes Azure ne se comparent pas.
+  function dessiner(zone: Element, jours: any[], cle: string, texte: (j: any) => string) {
+    const svg = zone.querySelector<SVGSVGElement>("[data-barres]")!;
+    const bulle = zone.querySelector<HTMLElement>("[data-bulle]")!;
     const W = Math.max(svg.clientWidth, 300);
     const H = 180;
     const haut = 14;
-    const max = Math.max(1, ...jours.map((j) => j.vues));
+    const max = Math.max(1, ...jours.map((j) => j[cle]));
     // Une graduation ronde au-dessus du maximum : la grille dit l'echelle.
     const pas = Math.pow(10, Math.floor(Math.log10(max)));
     const plafond = Math.ceil(max / pas) * pas;
@@ -790,7 +802,7 @@ const liens = [
     jours.forEach((j, i) => {
       const g = el("g", {});
       const x = i * larg;
-      const h = H - y(j.vues);
+      const h = H - y(j[cle]);
       // Cible de survol pleine hauteur : une barre de 2px de haut reste
       // atteignable.
       const cible = el("rect", { class: "cible", x, y: 0, width: larg, height: H });
@@ -799,9 +811,9 @@ const liens = [
       const montrer = () => {
         svg.querySelectorAll("g.actif").forEach((a) => a.classList.remove("actif"));
         g.classList.add("actif");
-        bulle.textContent = `${jourCourt(j.jour)} · ${nf.format(j.vues)} vue${j.vues > 1 ? "s" : ""} · ${nf.format(j.entrees)} arrivée${j.entrees > 1 ? "s" : ""}`;
+        bulle.textContent = texte(j);
         bulle.style.left = `${((x + larg / 2) / W) * 100}%`;
-        bulle.style.top = `${(Math.min(y(j.vues), H - 4) / H) * 100}%`;
+        bulle.style.top = `${(Math.min(y(j[cle]), H - 4) / H) * 100}%`;
         bulle.hidden = false;
       };
       cible.addEventListener("pointerenter", montrer);
@@ -812,7 +824,7 @@ const liens = [
       svg.append(g);
     });
     svg.append(el("line", { class: "base", x1: 0, x2: W, y1: H - 0.5, y2: H - 0.5 }));
-    const axe = $("[data-axe]");
+    const axe = zone.querySelector<HTMLElement>("[data-axe]")!;
     axe.replaceChildren(
       ...[jours[0], jours[Math.floor(jours.length / 2)], jours[jours.length - 1]].map((j) => {
         const s = document.createElement("span");
@@ -820,6 +832,18 @@ const liens = [
         return s;
       })
     );
+  }
+
+  const pluriel = (n: number, mot: string) => `${nf.format(n)} ${mot}${n > 1 ? "s" : ""}`;
+  function dessinerTout(s: any) {
+    dessiner($("[data-graphe]"), s.jours, "vues", (j) => `${jourCourt(j.jour)} · ${pluriel(j.vues, "vue")} · ${pluriel(j.entrees, "arrivée")}`);
+    const histo = $("[data-graphe-historique]");
+    histo.hidden = !s.totaux.requetes;
+    if (!s.totaux.requetes) return;
+    dessiner(histo, s.jours, "requetes", (j) => `${jourCourt(j.jour)} · ${pluriel(j.requetes, "requête")} · ${pluriel(j.photos, "photo")} lue${j.photos > 1 ? "s" : ""}`);
+    $("[data-note-historique]").textContent =
+      `${pluriel(s.totaux.requetes, "requête")} et ${pluriel(s.totaux.photos, "photo")} lue${s.totaux.photos > 1 ? "s" : ""} sur la période. ` +
+      "Mesure d’Azure, relevée jusqu’au 24/11, avant le compteur : une visite charge des dizaines de fichiers, ce ne sont donc pas des pages vues.";
   }
 
   let dernieresStats: any = null;
@@ -834,7 +858,7 @@ const liens = [
       const moy = s.totaux.vues / s.periode.jours;
       $('[data-k="moyenne"]').textContent = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: moy < 10 ? 1 : 0 }).format(moy);
       for (const sel of ["[data-chiffres]", "[data-graphe]", "[data-tables]", "[data-detail]"]) $(sel).hidden = false;
-      dessiner(s.jours);
+      dessinerTout(s);
       const paire = ([cle, n]: [string, number]) => ligne([LIBELLES[cle] ?? cle, nf.format(n)]);
       remplir("pages", s.pages.slice(0, 15).map(paire));
       remplir("sources", s.sources.slice(0, 15).map(paire));
@@ -855,7 +879,7 @@ const liens = [
   let redim = 0;
   addEventListener("resize", () => {
     clearTimeout(redim);
-    redim = window.setTimeout(() => dernieresStats && dessiner(dernieresStats.jours), 150);
+    redim = window.setTimeout(() => dernieresStats && dessinerTout(dernieresStats), 150);
   });
 
   // Meme cle que le compteur du gabarit public (header.astro).
