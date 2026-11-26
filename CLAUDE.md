@@ -189,6 +189,10 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
   - les règles téléphone doivent venir **après** les règles de base dans la feuille, sinon elles
     sont écrasées (le HUD débordait de 59px) ;
   - `scroll-behavior: smooth` est global : tout repositionnement passe `behavior: "instant"`.
+  - au téléphone, la barre d'adresse change la **hauteur** de la fenêtre au moindre toucher. Fermer
+    la carte sur `resize` laissait une carte affichée mais marquée fermée : la croix ne faisait plus
+    rien (Brave Android). Seul un changement de **largeur** ferme la carte. Les tests simulés ne le
+    voyaient pas : il a fallu reproduire en changeant la hauteur juste après le tap.
 - **Prototypes et captures** : `portfolio-photo/.prompts/` (ignoré par git).
 
 ## Architecture du site photo (évolution récente)
