@@ -529,7 +529,8 @@ export function demarrerViseur(racine) {
     }));
     ouverte = i; declencheur = source; carteOuverte = true;
     racine.querySelectorAll("[data-carte]").forEach((b) => b.setAttribute("aria-expanded", String(+b.dataset.carte === i)));
-    requestAnimationFrame(() => requestAnimationFrame(() => { carte.classList.add("on"); voile.classList.add("on"); }));
+    // Seulement si la carte n'a pas ete refermee entre-temps.
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (ouverte !== i) return; carte.classList.add("on"); voile.classList.add("on"); }));
     setTimeout(() => carte.querySelector(".v3d-fermer").focus({ preventScroll: true }), 60);
   }
   function fermer(rendreFocus = true) {
@@ -564,7 +565,12 @@ export function demarrerViseur(racine) {
     }
     dernier = -1; maj();
   }
-  addEventListener("resize", () => { fermer(false); taille(); });
+  // Au telephone, la barre d'adresse qui apparait ou disparait au moindre toucher change
+  // la HAUTEUR de la fenetre. Fermer la carte a ce moment-la laissait, juste apres son
+  // ouverture, une carte affichee mais marquee fermee : la croix ne faisait plus rien
+  // (Brave sur Android, 26/11). Seul un changement de largeur ferme donc la carte.
+  let largeur = innerWidth;
+  addEventListener("resize", () => { if (innerWidth !== largeur) { largeur = innerWidth; fermer(false); } taille(); });
   if (scrollY - ancre() >= ENTREE * hEcran) { etat = "viseur"; pAnim = 1; }
   if (!renderer || pAnim >= 1) { precharger(); chargerLaSuite(); }
   document.fonts.ready.then(taille);
