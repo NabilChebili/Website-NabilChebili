@@ -1,12 +1,14 @@
 ---
 // Photo & video : la page « travaillons ensemble » (Nabil, 24/11). Le site
 // presente deux metiers a egalite ; celle-ci montre le travail photo/video
-// pour des clients : mariage, evenementiel, films, retouche, puis le contact.
+// pour des clients. Depuis le 26/11/2026, l'ouverture est le viseur 3D
+// (components/Viseur.astro) : mariage, evenementiel, concert, voyages et basse
+// lumiere y defilent ; suivent les films, la retouche et le contact.
 // Ton sobre et pro : aucune promesse qu'on ne peut pas montrer.
 import "../../styles/global.css";
 import Layout from "../../layouts/header.astro";
 import { Image } from "astro:assets";
-import galleries from "../../data/galleries.json";
+import Viseur from "../../components/Viseur.astro";
 import { cheminLocalise, cheminsDesLangues, langueDepuisParam } from "../../i18n/ui";
 
 import suzhouAvant from "../../assets/avant-apres/suzhou-avant.jpg";
@@ -28,16 +30,6 @@ const T = {
     titre: "Photo & vidéo",
     description:
       "Photographe et vidéaste : mariages, événements d’entreprise et films de voyage. Prise de vue, retouche et montage. Contact pour un projet.",
-    intro:
-      "Je photographie et je filme des mariages, des événements d’entreprise et des voyages. Je fais aussi la retouche et le montage, pour livrer des images prêtes à être publiées.",
-    ecrire: "Écrire pour un projet",
-    galeries: "Toutes les galeries photo",
-    mariage: "Mariage",
-    mariageTexte: "La mairie, les proches, le dîner : la journée entière, posée et spontanée.",
-    mariageLien: "Voir la galerie du mariage",
-    evenement: "Événementiel",
-    evenementTexte: "Meetup Databricks chez I-Shane : les intervenants, la salle, les échanges.",
-    evenementLien: "Voir la galerie de l’événement",
     films: "Films",
     filmsTexte: "Des films de voyage, du tournage au montage et au son.",
     chaine: "Voir la chaîne YouTube",
@@ -50,8 +42,6 @@ const T = {
     contact: "Contact",
     contactTitre: "Un projet photo ou vidéo ?",
     contactTexte: "Dites-moi la date, le lieu et ce que vous imaginez. Je réponds généralement sous quelques heures.",
-    altMariage: ["Les mariés devant la mairie", "Les mariés et leurs proches", "Les témoins et les alliances", "Le dîner"],
-    altEvent: ["Un intervenant devant le public", "Une présentation", "Les intervenants réunis", "Une intervention"],
     voyages: [
       { titre: "Indonésie", href: "/indonesie", id: "_cPEUTOqEoI" },
       { titre: "Vietnam", href: "/vietnam", id: "4ds0mpAiWJw" },
@@ -62,16 +52,6 @@ const T = {
     titre: "Photo & video",
     description:
       "Photographer and filmmaker: weddings, corporate events and travel films. Shooting, retouching and editing. Get in touch about a project.",
-    intro:
-      "I photograph and film weddings, corporate events and travels. I also do the retouching and the editing, so the images are ready to publish.",
-    ecrire: "Write about a project",
-    galeries: "All photo galleries",
-    mariage: "Wedding",
-    mariageTexte: "The town hall, the family, the dinner: the whole day, posed and candid.",
-    mariageLien: "See the wedding gallery",
-    evenement: "Events",
-    evenementTexte: "Databricks meetup at I-Shane: the speakers, the room, the conversations.",
-    evenementLien: "See the event gallery",
     films: "Films",
     filmsTexte: "Travel films, from shooting to editing and sound.",
     chaine: "See the YouTube channel",
@@ -83,8 +63,6 @@ const T = {
     contact: "Contact",
     contactTitre: "A photo or video project?",
     contactTexte: "Tell me the date, the place and what you have in mind. I usually reply within a few hours.",
-    altMariage: ["The couple outside the town hall", "The couple and their family", "The best men and the rings", "The dinner"],
-    altEvent: ["A speaker facing the audience", "A talk", "The speakers together", "A talk"],
     voyages: [
       { titre: "Indonesia", href: "/indonesie", id: "_cPEUTOqEoI" },
       { titre: "Vietnam", href: "/vietnam", id: "4ds0mpAiWJw" },
@@ -94,15 +72,6 @@ const T = {
 };
 const c = T[langue];
 
-// Quatre images par galerie, choisies a la main sur planche (24/11).
-const mariage = ["DAO07099", "DAO07499", "DAO07547", "DAO07959"].map((n, i) => ({
-  src: `${galleries.mariage}${n}.jpg`,
-  alt: c.altMariage[i],
-}));
-const evenement = ["A7405120", "A7405105", "A7405199", "A7405167"].map((n, i) => ({
-  src: `${galleries.eventDatabricks}${n}.jpg`,
-  alt: c.altEvent[i],
-}));
 const paires = [
   [suzhouAvant, suzhouApres],
   [shaoxingAvant, shaoxingApres],
@@ -110,53 +79,15 @@ const paires = [
 ].map(([avant, apres], i) => ({ avant, apres, titre: c.paires[i] }));
 ---
 
-<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue} image={mariage[1].src}>
-  <section class="tete-page">
-    <h1 class="titre-page" data-reveal data-groupe="tete">{c.titre}</h1>
-    <div class="prose" data-reveal data-groupe="tete">
-      <p>{c.intro}</p>
-    </div>
-    <a class="pv-ecrire" href={`mailto:${EMAIL}`} data-reveal data-groupe="tete">
-      <span>{c.ecrire}</span><i aria-hidden="true">&#8594;</i>
-    </a>
-    <a class="pv-lien pv-galeries" href={cheminLocalise("/photo", langue)} data-reveal data-groupe="tete"><span>{c.galeries}</span><i aria-hidden="true">&#8594;</i></a>
-  </section>
-
-  <section>
-    <div class="section-head" data-reveal data-groupe="mariage">
-      <span><b class="pv-num">01</b>{c.mariage}</span>
-      <span>({mariage.length})</span>
-    </div>
-    <div class="pv-bloc">
-      <p class="pv-texte">{c.mariageTexte}</p>
-      <div class="pv-grille">
-        {mariage.map((p) => (
-          <Image src={p.src} alt={p.alt} inferSize widths={[400, 800]} sizes="(max-width: 700px) 50vw, 25vw" loading="lazy" decoding="async" />
-        ))}
-      </div>
-      <a class="pv-lien" href={cheminLocalise("/mariage", langue)}><span>{c.mariageLien}</span><i aria-hidden="true">&#8594;</i></a>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-head" data-reveal data-groupe="evenement">
-      <span><b class="pv-num">02</b>{c.evenement}</span>
-      <span>({evenement.length})</span>
-    </div>
-    <div class="pv-bloc">
-      <p class="pv-texte">{c.evenementTexte}</p>
-      <div class="pv-grille">
-        {evenement.map((p) => (
-          <Image src={p.src} alt={p.alt} inferSize widths={[400, 800]} sizes="(max-width: 700px) 50vw, 25vw" loading="lazy" decoding="async" />
-        ))}
-      </div>
-      <a class="pv-lien" href={cheminLocalise("/event-databricks", langue)}><span>{c.evenementLien}</span><i aria-hidden="true">&#8594;</i></a>
-    </div>
-  </section>
+<Layout title={c.titre} description={c.description} mainClass="page editorial" lang={langue} image="https://stnchvlqvproduction.blob.core.windows.net/photos/Croatie/A7400342.jpg">
+  {/* Ouverture : le boitier au trait, puis les sujets dans le viseur (Mariage,
+      Evenementiel, Concert, Voyages & nature, Basse lumiere : 01 a 05). Les
+      chapitres de la page continuent donc a 06. */}
+  <Viseur langue={langue} email={EMAIL} />
 
   <section>
     <div class="section-head" data-reveal data-groupe="films">
-      <span><b class="pv-num">03</b>{c.films}</span>
+      <span><b class="pv-num">06</b>{c.films}</span>
       <span>({c.voyages.length})</span>
     </div>
     <div class="pv-bloc">
@@ -173,9 +104,9 @@ const paires = [
     </div>
   </section>
 
-  <section>
+  <section id="retouche">
     <div class="section-head" data-reveal data-groupe="retouche">
-      <span><b class="pv-num">04</b>{c.retouche}</span>
+      <span><b class="pv-num">07</b>{c.retouche}</span>
       <span>({paires.length})</span>
     </div>
     <div class="pv-bloc">
@@ -203,7 +134,7 @@ const paires = [
 
   <section class="pv-contact">
     <div class="section-head" data-reveal data-groupe="contact">
-      <span><b class="pv-num">05</b>{c.contact}</span>
+      <span><b class="pv-num">08</b>{c.contact}</span>
       <span></span>
     </div>
     <div class="pv-bloc">
@@ -224,6 +155,10 @@ const paires = [
 </script>
 
 <style>
+  /* Le lien « Plus d'exemples » de la carte Retouche arrive ici : l'en-tete fixe ne doit pas cacher le titre. */
+  #retouche {
+    scroll-margin-top: 72px;
+  }
   .pv-bloc {
     padding: var(--pas-3) var(--edge) var(--pas-6, 48px);
   }
@@ -244,20 +179,6 @@ const paires = [
     font-size: 15px;
     line-height: 1.55;
     color: var(--ink);
-  }
-
-  .pv-grille {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-  }
-  .pv-grille :global(img) {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    background: var(--block);
   }
 
   .pv-films {
@@ -341,11 +262,6 @@ const paires = [
     background-color: var(--ink);
     outline: 1px solid var(--ink);
     outline-offset: 3px;
-  }
-  @media (min-width: 701px) {
-    .pv-galeries {
-      margin-left: 24px;
-    }
   }
   .pv-ecrire.grand {
     font-size: 13px;
@@ -455,10 +371,6 @@ const paires = [
     }
   }
   @media (max-width: 700px) {
-    .pv-grille {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
     .pv-films {
       grid-template-columns: 1fr;
     }

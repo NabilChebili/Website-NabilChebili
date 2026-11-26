@@ -156,6 +156,39 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
   `swa start portfolio-photo/dist --api-devserver-url http://localhost:7071 --swa-config-location portfolio-photo`.
   `cd api && npm test` pour les tests unitaires.
 
+## Page Photo & vidéo — le viseur 3D (26/11/2026)
+
+- **Navigation** : l'entrée « Photo » du header mène à `/photo-video` ; « Galeries » mène au hub
+  `/photo` (adresse inchangée, déjà indexée). Une entrée de plus a élargi la barre : la nav se
+  replie sous **1080px** (défaut mesuré jusqu'à 1067px sur `/croatie`).
+- **L'ouverture** (`components/Viseur.astro` + `scripts/viseur3d.js`, three.js **0.160.0** épinglé) :
+  un α7 IV + Sigma 24-70 F2.8 DG DN II modélisés à la main d'après les photos de Nabil, **rendus au
+  trait** (papier, silhouettes à l'encre par `OutlineEffect`, arêtes par `EdgesGeometry`). Seuls
+  l'écran arrière, les verres de l'objectif et le T\* rouge gardent leur couleur. Le rendu ombré a
+  été écarté : ~300 ms par image sur un Intel intégré.
+- **Le mouvement est déclenché, pas piloté par le défilement** : le premier geste (molette, doigt,
+  clavier, clic sur la flèche) joue seul le plan d'entrée (2,6 s, page retenue pendant le plan),
+  puis le défilement fait passer les sujets dans le viseur. Remonter en haut du viseur joue le plan
+  inverse. Mouvement réduit : saut direct. Sans WebGL : le viseur est là dès l'arrivée.
+- **Les sujets du viseur** (01 à 05) sont les photos triées par Nabil le 26/11 ; aucune ne le montre
+  (il était témoin au mariage : la quasi-totalité de `Mariage-Pierre/` le montre, d'où une seule
+  photo de mariage). Les chapitres de la page continuent à 06.
+- **Annotations** Prise de vue / Retouche / Vidéo cliquables → carte animée (cercle depuis le point
+  de la pièce ; au téléphone, feuille qui monte du bas, ouverte par trois boutons sous l'intro).
+- **Performance, mesurée** (Intel intégré, synchro écran) : 60 i/s. Ce qui coûtait : ombre douce
+  recalculée (~25 ms → tache d'ombre peinte), densité 2 (~20 ms → plafond 1.5, sans lissage à 1.5),
+  photos du viseur décodées à la volée (→ décodées à l'approche, deux affichées au plus).
+- **Pièges déjà payés** :
+  - deux surfaces à la même profondeur se battent (stries diagonales sur l'écran : -0.2675 vs -0.2690) ;
+  - un cylindre **fermé** devant les verres les masque ; `OutlineEffect` peint en noir la face
+    intérieure d'un cylindre **ouvert** — d'où paroi intérieure à l'encre séparée ;
+  - WebGL ne peut pas lire les photos du stockage (pas d'en-tête CORS) : l'image de l'écran arrière
+    passe par `getImage`, donc servie par le site ;
+  - les règles téléphone doivent venir **après** les règles de base dans la feuille, sinon elles
+    sont écrasées (le HUD débordait de 59px) ;
+  - `scroll-behavior: smooth` est global : tout repositionnement passe `behavior: "instant"`.
+- **Prototypes et captures** : `portfolio-photo/.prompts/` (ignoré par git).
+
 ## Architecture du site photo (évolution récente)
 
 Le site a été refait plusieurs fois dans la même session avant de converger ; la version actuelle :

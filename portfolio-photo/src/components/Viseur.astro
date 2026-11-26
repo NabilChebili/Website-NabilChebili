@@ -1,0 +1,327 @@
+---
+// Ouverture de /photo-video : le boitier au trait, ses annotations et leurs
+// cartes, puis le viseur ou defilent les sujets. La scene 3D vit dans
+// src/scripts/viseur3d.js ; ce composant pose le balisage, le texte (FR/EN)
+// et les images, optimisees a la construction.
+import { getImage } from "astro:assets";
+import { cheminLocalise, type Langue } from "../i18n/ui";
+import suzhouAvant from "../assets/avant-apres/suzhou-avant.jpg";
+import suzhouApres from "../assets/avant-apres/suzhou-apres.jpg";
+
+interface Props { langue: Langue; email: string }
+const { langue, email } = Astro.props;
+
+const B = "https://stnchvlqvproduction.blob.core.windows.net/photos/";
+const T = {
+  fr: {
+    titre: "Photo & vidéo",
+    intro: "Je photographie et je filme des mariages, des événements d’entreprise, des concerts et des voyages.",
+    ecrire: "Écrire pour un projet",
+    galeries: "Toutes les galeries",
+    entrer: "Entrer dans le viseur",
+    fermer: "Fermer",
+    sujet: "Projet",
+    chapitres: ["Mariage", "Événementiel", "Concert", "Voyages & nature", "Basse lumière"],
+    photo: "photo",
+    notes: [
+      ["Prise de vue", "Mariages, événements d’entreprise, concerts, voyages"],
+      ["Retouche", "Chaque image travaillée avant livraison"],
+      ["Vidéo", "Tournage, montage et son"],
+    ],
+    cartes: [
+      "Mariages, événements d’entreprise, concerts, voyages : je suis là du premier au dernier moment, discret quand il le faut, présent quand il le faut.",
+      "Chaque image est travaillée avant livraison : lumière, couleur, détails. Faites glisser pour comparer.",
+      "Des films de voyage, du tournage au montage et au son.",
+    ],
+    trio: ["Mariage", "Concert", "Voyage"],
+    voirViseur: "Voir dans le viseur",
+    exemples: "Plus d’exemples",
+    chaine: "La chaîne YouTube",
+    appareil: "Appareil",
+    fini: "Retouchée",
+    comparer: "Comparer avant et après",
+    suzhou: "Suzhou, le canal",
+    films: ["Indonésie", "Vietnam"],
+  },
+  en: {
+    titre: "Photo & video",
+    intro: "I photograph and film weddings, corporate events, concerts and travels.",
+    ecrire: "Write about a project",
+    galeries: "All galleries",
+    entrer: "Enter the viewfinder",
+    fermer: "Close",
+    sujet: "Project",
+    chapitres: ["Wedding", "Events", "Concert", "Travel & nature", "Low light"],
+    photo: "photo",
+    notes: [
+      ["Shooting", "Weddings, corporate events, concerts, travels"],
+      ["Retouching", "Every image worked on before delivery"],
+      ["Video", "Shooting, editing and sound"],
+    ],
+    cartes: [
+      "Weddings, corporate events, concerts, travels: I am there from the first moment to the last, discreet when it matters, present when it matters.",
+      "Every image is worked on before delivery: light, colour, detail. Drag to compare.",
+      "Travel films, from shooting to editing and sound.",
+    ],
+    trio: ["Wedding", "Concert", "Travel"],
+    voirViseur: "See in the viewfinder",
+    exemples: "More examples",
+    chaine: "The YouTube channel",
+    appareil: "Camera",
+    fini: "Retouched",
+    comparer: "Compare before and after",
+    suzhou: "Suzhou, the canal",
+    films: ["Indonesia", "Vietnam"],
+  },
+}[langue];
+
+// Sujets du viseur : les photos retenues au tri du 26/11/2026, et des reglages
+// plausibles pour chacun (affichage de visee, pas des donnees EXIF).
+const CHAPITRES = [
+  { reglages: ["1/160", "f/2.8", "ISO 640"], photos: ["Mariage-Pierre/DAO07228"] },
+  { reglages: ["1/125", "f/2.0", "ISO 1600"], photos: ["EventDatabricks/A7405120", "EventDatabricks/A7405105", "EventDatabricks/A7405199", "EventDatabricks/A7405167", "EventDatabricks/A7405096", "EventDatabricks/A7405131", "EventDatabricks/A7405114"] },
+  { reglages: ["1/250", "f/1.8", "ISO 3200"], photos: ["SuperSonic/A7406043", "SuperSonic/A7405647", "SuperSonic/A7405618"] },
+  { reglages: ["1/500", "f/5.6", "ISO 200"], photos: ["Croatie/A7400342", "Indonesie/post/A7404703", "GR1-2/A7400868", "Indonesie/falaise-lombok/A7404800", "Indonesie/post/A7404854", "Vietnam/post/A7402488"] },
+  { reglages: ["1/30", "f/1.8", "ISO 6400"], photos: ["ExpoLum/A7402424"] },
+];
+const distante = (chemin: string, width: number, format = "webp") =>
+  getImage({ src: `${B}${chemin}.jpg`, inferSize: true, width, format: format as "webp" });
+
+const plans = await Promise.all(
+  CHAPITRES.flatMap((c, ci) => c.photos.map(async (p, pi) => ({
+    ci, pi,
+    src: (await distante(p, 1600)).src,
+    alt: `${T.chapitres[ci]}, ${T.photo} ${pi + 1} / ${c.photos.length}`,
+  }))),
+);
+// L'ecran arriere du boitier : servi par le site, WebGL ne peut pas lire le stockage (pas de CORS).
+const ecran = (await distante("Mariage-Pierre/DAO07228", 900, "jpg")).src;
+const trio = await Promise.all(
+  ["Mariage-Pierre/DAO07228", "SuperSonic/A7406043", "Indonesie/post/A7404703"].map(async (p, i) => ({ src: (await distante(p, 480)).src, legende: T.trio[i] })),
+);
+const avant = (await getImage({ src: suzhouAvant, width: 800, format: "webp" })).src;
+const apres = (await getImage({ src: suzhouApres, width: 800, format: "webp" })).src;
+const films = [["/indonesie", "_cPEUTOqEoI"], ["/vietnam", "4ds0mpAiWJw"]].map(([h, id], i) => ({ href: cheminLocalise(h, langue), img: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, titre: T.films[i] }));
+const mailto = (sujet: string) => `mailto:${email}?subject=${encodeURIComponent(`${T.sujet} ${sujet.toLowerCase()}`)}`;
+
+const donnees = {
+  ecran,
+  plans: plans.map(({ ci, pi }) => ({ ci, pi })),
+  chapitres: CHAPITRES.map((c, i) => ({ titre: T.chapitres[i], reglages: c.reglages, n: c.photos.length })),
+};
+const json = JSON.stringify(donnees).replace(/</g, "\\u003c");
+---
+
+<section class="v3d" aria-label={T.titre}>
+  <div class="v3d-sonde" aria-hidden="true"></div>
+  <div class="v3d-colle">
+    <canvas class="v3d-gl" aria-hidden="true"></canvas>
+
+    <div class="v3d-tete">
+      <h1 class="v3d-h1">{T.titre}</h1>
+      <p>{T.intro}</p>
+      <div class="v3d-appel">
+        <a class="v3d-btn-ecrire" href={`mailto:${email}`}>{T.ecrire} <span aria-hidden="true">→</span></a>
+        <a class="v3d-btn-lien" href={cheminLocalise("/photo", langue)}>{T.galeries} <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="v3d-puces">
+        {T.notes.map(([titre], i) => <button type="button" data-carte={i} aria-haspopup="dialog" aria-expanded="false">{titre}</button>)}
+      </div>
+    </div>
+
+    <div class="v3d-notes">
+      <svg aria-hidden="true"></svg>
+      {T.notes.map(([titre, court], i) => (
+        <button type="button" class="v3d-note" data-carte={i} aria-haspopup="dialog" aria-expanded="false"><b>{titre}</b><span>{court}</span></button>
+      ))}
+    </div>
+
+    <button type="button" class="v3d-indic" aria-label={T.entrer}><span class="v3d-fleche" aria-hidden="true"></span></button>
+    <div class="v3d-legende" aria-hidden="true">α7 IV · 24×36 · 33 Mpx</div>
+
+    <div class="v3d-viseur" aria-hidden="true">
+      <div class="v3d-plans">
+        {plans.map((p) => <img class="v3d-plan" data-src={p.src} alt={p.alt} decoding="async" />)}
+      </div>
+      <div class="v3d-hud" aria-live="polite">
+        <div class="v3d-coin hg"></div><div class="v3d-coin hd"></div><div class="v3d-coin bg"></div><div class="v3d-coin bd"></div>
+        <div class="v3d-af"></div>
+        <div class="v3d-chap"><b class="v3d-num">01</b><span class="v3d-titre">{T.chapitres[0]}</span></div>
+        <div class="v3d-cpt">1 / 1</div>
+        <div class="v3d-donnees-visee"><span class="v3d-vit">1/160</span><span class="v3d-ouv">f/2.8</span><span class="v3d-iso">ISO 640</span><i aria-hidden="true">●</i><span>RAW</span></div>
+      </div>
+      <div class="v3d-obtu"></div>
+    </div>
+  </div>
+
+  <div class="v3d-voile" hidden></div>
+  <div class="v3d-carte" role="dialog" aria-modal="true" aria-labelledby="v3d-carte-titre" hidden></div>
+
+  <template class="v3d-modele">
+    <div class="v3d-carte-tete"><h2 id="v3d-carte-titre"><b>01</b>{T.notes[0][0]}</h2><button type="button" class="v3d-fermer" aria-label={T.fermer}>×</button></div>
+    <p>{T.cartes[0]}</p>
+    <div class="v3d-trio">{trio.map((t) => <figure><img src={t.src} alt={t.legende} loading="lazy" /><figcaption>{t.legende}</figcaption></figure>)}</div>
+    <div class="v3d-carte-pied"><a class="v3d-btn-ecrire" href={mailto(T.notes[0][0])}>{T.ecrire} <span aria-hidden="true">→</span></a><button type="button" class="v3d-btn-lien" data-viseur>{T.voirViseur} <span aria-hidden="true">→</span></button></div>
+  </template>
+  <template class="v3d-modele">
+    <div class="v3d-carte-tete"><h2 id="v3d-carte-titre"><b>02</b>{T.notes[1][0]}</h2><button type="button" class="v3d-fermer" aria-label={T.fermer}>×</button></div>
+    <p>{T.cartes[1]}</p>
+    <div class="v3d-comparer">
+      <img src={apres} alt={`${T.suzhou} — ${T.fini}`} />
+      <img class="v3d-avant" src={avant} alt={`${T.suzhou} — ${T.appareil}`} />
+      <span class="v3d-trait" aria-hidden="true"></span>
+      <span class="v3d-etq gauche" aria-hidden="true">{T.appareil}</span><span class="v3d-etq droite" aria-hidden="true">{T.fini}</span>
+      <input type="range" min="0" max="100" value="50" aria-label={T.comparer} />
+    </div>
+    <div class="v3d-carte-pied"><a class="v3d-btn-ecrire" href={mailto(T.notes[1][0])}>{T.ecrire} <span aria-hidden="true">→</span></a><a class="v3d-btn-lien" href="#retouche">{T.exemples} <span aria-hidden="true">→</span></a></div>
+  </template>
+  <template class="v3d-modele">
+    <div class="v3d-carte-tete"><h2 id="v3d-carte-titre"><b>03</b>{T.notes[2][0]}</h2><button type="button" class="v3d-fermer" aria-label={T.fermer}>×</button></div>
+    <p>{T.cartes[2]}</p>
+    <div class="v3d-films">{films.map((f) => <a href={f.href}><img src={f.img} alt="" loading="lazy" /><span>{f.titre}</span></a>)}</div>
+    <div class="v3d-carte-pied"><a class="v3d-btn-ecrire" href={mailto(T.notes[2][0])}>{T.ecrire} <span aria-hidden="true">→</span></a><a class="v3d-btn-lien" href="https://www.youtube.com/@Nabs-world" target="_blank" rel="noopener">{T.chaine} <span aria-hidden="true">↗</span></a></div>
+  </template>
+
+  <script type="application/json" class="v3d-donnees" set:html={json} />
+</section>
+
+<script>
+  import { demarrerViseur } from "../scripts/viseur3d.js";
+  const racine = document.querySelector<HTMLElement>(".v3d");
+  if (racine) demarrerViseur(racine);
+</script>
+
+<style is:global>
+  /* Tout est prefixe v3d- : carte, tete, fermer et viseur existent deja ailleurs
+     sur le site. Les cartes sont en position fixe, au-dessus de l'en-tete (z 1000). */
+  .v3d { position: relative; --v3d-entete: 64px; --v3d-hud: #f4f4f2; }
+  @media (max-width: 768px) { .v3d { --v3d-entete: 56px; } }
+  html { scrollbar-gutter: stable; }
+  html.v3d-verrou { overflow: hidden; }
+  .v3d-colle { position: sticky; top: var(--v3d-entete); height: calc(100vh - var(--v3d-entete)); height: calc(100svh - var(--v3d-entete)); overflow: hidden; }
+  .v3d-sonde { position: absolute; top: 0; left: 0; width: 1px; height: calc(100vh - var(--v3d-entete)); height: calc(100svh - var(--v3d-entete)); visibility: hidden; pointer-events: none; }
+  .v3d-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  .v3d-tete { position: absolute; top: 32px; left: var(--edge); z-index: 3; pointer-events: none; }
+  .v3d-h1 { font-family: "Sofia Sans Condensed", "Arial Narrow", sans-serif; font-weight: 800; text-transform: uppercase; font-size: clamp(64px, 9vw, 150px); line-height: .9; margin: 0; }
+  .v3d-tete p { font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif; max-width: 46ch; font-size: 15px; line-height: 1.55; margin: 14px 0 0; }
+  .v3d-appel { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-top: 26px; pointer-events: auto; }
+  .v3d-btn-ecrire { display: inline-flex; align-items: center; gap: 10px; padding: 13px 18px; background: var(--ink); color: var(--paper);
+    font: 700 11px/1 "JetBrains Mono", monospace; letter-spacing: .09em; text-transform: uppercase; text-decoration: none; }
+  .v3d-btn-ecrire:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .v3d-btn-lien { display: inline-flex; gap: 10px; font: 700 11px/1 "JetBrains Mono", monospace; letter-spacing: .09em; text-transform: uppercase; color: var(--ink);
+    text-decoration: none; padding: 13px 0; background: none; border: 0; cursor: pointer; }
+  .v3d-puces { display: none; }
+
+  /* Indicateur : la fleche seule, qui descend et remonte ; zone de clic invisible autour. */
+  .v3d-indic { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 3; background: none; border: 0; padding: 0; cursor: pointer; }
+  .v3d-fleche { position: relative; display: block; width: 46px; height: 46px; }
+  .v3d-fleche::before { content: ""; position: absolute; left: 50%; top: 50%; width: 1.5px; height: 24px; margin: -15px 0 0 -0.75px; background: var(--ink); animation: v3d-descend 1.6s cubic-bezier(.2,0,0,1) infinite; }
+  .v3d-fleche::after { content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 11px; margin: 1px 0 0 -6px; border: solid var(--ink); border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); animation: v3d-descend 1.6s cubic-bezier(.2,0,0,1) infinite; }
+  @keyframes v3d-descend { 0%, 100% { translate: 0 -4px; } 55% { translate: 0 6px; } }
+  .v3d-indic:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; }
+  .v3d-legende { position: absolute; right: var(--edge); bottom: 32px; font: 400 11px/1.4 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-55); }
+
+  /* Annotations */
+  .v3d-notes { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+  .v3d-notes svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .v3d-notes line { stroke: var(--ink); stroke-width: 1; }
+  .v3d-notes circle { fill: var(--paper); stroke: var(--ink); stroke-width: 1; }
+  .v3d-notes circle.v3d-pouls { fill: none; opacity: .5; transform-box: fill-box; transform-origin: center; animation: v3d-pouls 2.4s cubic-bezier(.2,0,0,1) infinite; }
+  @keyframes v3d-pouls { from { transform: scale(1); opacity: .55; } to { transform: scale(3.2); opacity: 0; } }
+  .v3d-note { position: absolute; width: 220px; padding: 6px 0; font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif; font-size: 13px; line-height: 1.4; color: var(--ink);
+    background: none; border: 0; cursor: pointer; pointer-events: auto; text-align: inherit; }
+  .v3d-note b { display: inline-flex; gap: 8px; align-items: center; font: 700 11px/1.4 "JetBrains Mono", monospace; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 3px; }
+  .v3d-note b::after { content: "+"; display: inline-grid; place-items: center; width: 15px; height: 15px; border: 1px solid var(--ink); font-size: 11px; line-height: 1; transition: background 240ms cubic-bezier(.2,0,0,1), color 240ms; }
+  .v3d-note:hover b::after, .v3d-note:focus-visible b::after, .v3d-note[aria-expanded="true"] b::after { background: var(--ink); color: var(--paper); }
+  .v3d-note span { display: block; background-image: linear-gradient(currentColor, currentColor); background-repeat: no-repeat; background-position: 0 100%; background-size: 0 1px; transition: background-size 240ms cubic-bezier(.2,0,0,1); }
+  .v3d-note:hover span { background-size: 100% 1px; }
+  .v3d-note:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+  /* Viseur */
+  .v3d-viseur { position: absolute; inset: 0; background: #070707; opacity: 0; pointer-events: none; }
+  .v3d-plan { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; display: none; transition: opacity 260ms cubic-bezier(.2,0,0,1); }
+  .v3d-plan.on { opacity: 1; }
+  .v3d-hud { position: absolute; inset: 0; color: var(--v3d-hud); font-family: "JetBrains Mono", monospace; }
+  .v3d-coin { position: absolute; width: 34px; height: 34px; border: 0 solid var(--v3d-hud); }
+  .v3d-coin.hg { top: 28px; left: 28px; border-top-width: 1.5px; border-left-width: 1.5px; }
+  .v3d-coin.hd { top: 28px; right: 28px; border-top-width: 1.5px; border-right-width: 1.5px; }
+  .v3d-coin.bg { bottom: 64px; left: 28px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+  .v3d-coin.bd { bottom: 64px; right: 28px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+  .v3d-af { position: absolute; left: 50%; top: 50%; width: 64px; height: 44px; margin: -22px 0 0 -32px; border: 1.5px solid var(--v3d-hud); }
+  .v3d-chap { position: absolute; top: 34px; left: 80px; display: flex; align-items: baseline; gap: 14px; }
+  .v3d-chap b { font-size: 11px; padding: 2px 6px; background: var(--v3d-hud); color: #070707; }
+  .v3d-chap span { font-family: "Sofia Sans Condensed", sans-serif; font-weight: 800; text-transform: uppercase; font-size: 30px; }
+  .v3d-cpt { position: absolute; top: 40px; right: 80px; font-size: 12px; }
+  .v3d-donnees-visee { position: absolute; left: 0; right: 0; bottom: 22px; display: flex; justify-content: center; gap: 34px; font-size: 13px; }
+  .v3d-donnees-visee i { font-style: normal; opacity: .6; }
+  .v3d-obtu { position: absolute; inset: 0; background: #000; opacity: 0; }
+  /* Sans WebGL : pas de boitier, le viseur est la des l'arrivee. */
+  .v3d-sans-3d .v3d-gl, .v3d-sans-3d .v3d-notes, .v3d-sans-3d .v3d-indic { display: none; }
+
+  /* Carte */
+  /* Le site ne met pas box-sizing: border-box partout : sans lui, la feuille du
+     telephone (largeur 100 % + rembourrage) debordait a droite. */
+  .v3d, .v3d * { box-sizing: border-box; }
+  .v3d-voile { position: fixed; inset: 0; z-index: 1100; background: rgba(244,244,242,.55); opacity: 0; transition: opacity 320ms cubic-bezier(.2,0,0,1); }
+  .v3d-voile.on { opacity: 1; }
+  .v3d-carte { position: fixed; z-index: 1101; width: min(440px, calc(100vw - 32px)); background: var(--paper); border: 1px solid var(--ink);
+    padding: 22px 22px 20px; color: var(--ink); font-family: "Sofia Sans", "Helvetica Neue", Arial, sans-serif;
+    clip-path: circle(0 at var(--ox) var(--oy)); transition: clip-path 520ms cubic-bezier(.2,0,0,1); }
+  .v3d-carte.on { clip-path: circle(150% at var(--ox) var(--oy)); }
+  .v3d-carte > * { opacity: 0; transform: translateY(8px); transition: opacity 320ms cubic-bezier(.2,0,0,1), transform 320ms cubic-bezier(.2,0,0,1); }
+  .v3d-carte.on > * { opacity: 1; transform: none; }
+  .v3d-carte.on > *:nth-child(2) { transition-delay: 120ms; } .v3d-carte.on > *:nth-child(3) { transition-delay: 180ms; } .v3d-carte.on > *:nth-child(4) { transition-delay: 240ms; }
+  .v3d-carte-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .v3d-carte-tete b { font: 700 10px/1.2 "JetBrains Mono", monospace; padding: 2px 6px; background: var(--ink); color: var(--paper); margin-right: 10px; }
+  .v3d-carte h2 { margin: 0; font-family: "Sofia Sans Condensed", sans-serif; font-weight: 800; text-transform: uppercase; font-size: 30px; line-height: 1; display: flex; align-items: baseline; }
+  .v3d-fermer { width: 36px; height: 36px; border: 1px solid var(--ink); background: none; cursor: pointer; font-size: 18px; line-height: 1; color: var(--ink); flex: none; }
+  .v3d-fermer:hover, .v3d-fermer:focus-visible { background: var(--ink); color: var(--paper); }
+  .v3d-carte p { font-size: 14px; line-height: 1.5; margin: 12px 0 16px; }
+  .v3d-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .v3d-trio figure { margin: 0; }
+  .v3d-trio img { width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; background: var(--block); }
+  .v3d-trio figcaption { font: 400 10px/1.4 "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .08em; margin-top: 5px; color: var(--ink-55); }
+  .v3d-comparer { position: relative; aspect-ratio: 4/3; overflow: hidden; background: var(--block); --pos: 50%; touch-action: pan-y; }
+  .v3d-comparer img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; }
+  .v3d-comparer .v3d-avant { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+  .v3d-trait { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 2px; margin-left: -1px; background: var(--paper); pointer-events: none; }
+  .v3d-etq { position: absolute; top: 10px; padding: 3px 6px; background: var(--ink); color: var(--paper); font: 700 10px/1 "JetBrains Mono", monospace; text-transform: uppercase; pointer-events: none; }
+  .v3d-etq.gauche { left: 10px; } .v3d-etq.droite { right: 10px; }
+  .v3d-comparer input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+  .v3d-comparer:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .v3d-films { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .v3d-films a { color: var(--ink); text-decoration: none; }
+  .v3d-films img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: var(--block); }
+  .v3d-films span { display: block; margin-top: 6px; font-family: "Sofia Sans Condensed", sans-serif; font-weight: 800; font-size: 17px; text-transform: uppercase; }
+  .v3d-carte-pied { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin-top: 18px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v3d-fleche::before, .v3d-fleche::after { animation: none; }
+    .v3d-carte, .v3d-carte > *, .v3d-voile, .v3d-note b::after, .v3d-note span { transition: none; }
+    .v3d-notes circle.v3d-pouls { display: none; }
+  }
+  /* Telephone : en fin de feuille, sinon les regles de base l'emportent. */
+  @media (max-width: 700px) {
+    .v3d-tete { top: 20px; right: var(--edge); }
+    .v3d-h1 { font-size: 13vw; }
+    .v3d-tete p { font-size: 14px; max-width: 34ch; }
+    .v3d-appel { margin-top: 18px; }
+    .v3d-notes, .v3d-legende { display: none; }
+    .v3d-puces { display: flex; gap: 8px; margin-top: 14px; pointer-events: auto; flex-wrap: wrap; }
+    .v3d-puces button { font: 700 10px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--ink);
+      background: none; border: 1px solid var(--ink); padding: 9px 10px; cursor: pointer; }
+    .v3d-puces button::after { content: " +"; }
+    .v3d-indic { bottom: 22px; }
+    .v3d-coin { width: 24px; height: 24px; }
+    .v3d-coin.hg { top: 16px; left: 16px; } .v3d-coin.hd { top: 16px; right: 16px; }
+    .v3d-coin.bg { bottom: 52px; left: 16px; } .v3d-coin.bd { bottom: 52px; right: 16px; }
+    .v3d-chap { top: 26px; left: 48px; gap: 10px; } .v3d-chap span { font-size: 18px; }
+    .v3d-cpt { top: 32px; right: 48px; font-size: 11px; }
+    .v3d-donnees-visee { gap: 14px; font-size: 11px; bottom: 20px; }
+    .v3d-carte { left: 0 !important; right: 0; bottom: 0; top: auto !important; width: 100%; border-width: 1px 0 0;
+      padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px)); max-height: 86svh; overflow: auto;
+      clip-path: none; transform: translateY(100%); transition: transform 420ms cubic-bezier(.2,0,0,1); }
+    .v3d-carte.on { clip-path: none; transform: none; }
+  }
+</style>
