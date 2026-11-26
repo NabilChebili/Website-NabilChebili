@@ -189,7 +189,7 @@ body {
 /* Sur grand ecran elle se range apres les sections, a l'extremite de la barre.
    Dans le flux du document elle les precede, pour qu'au telephone — ou les
    sections se replient derriere le bouton — elle reste visible a cote de lui. */
-@media (min-width: 941px) {
+@media (min-width: 1081px) {
   .nav-langues { order: 3; margin-left: 6px; }
   .site-nav { order: 2; }
 }
@@ -250,15 +250,21 @@ main { padding-top: 64px; }
    « Roadmap » a rouvert le defaut entre 870 et 900 : la valeur depend du
    CONTENU de la nav, pas d'une taille d'ecran de catalogue. Toute entree
    ajoutee demande donc de rebalayer les largeurs et, au besoin, de remonter
-   ce seuil. */
-@media (max-width: 940px) {
+   ce seuil.
+
+   26/11/2026 : l'entree « Galeries » (le hub /photo, separe de « Photo » qui
+   mene a /photo-video) a rouvert le defaut jusqu'a 1067px — mesure sur
+   /croatie, la pire page : aucune entree n'y est courante, toutes portent leurs
+   crochets. « [ Accueil ] » passait a deux lignes et touchait la marque. Seuil
+   remonte a 1080. */
+@media (max-width: 1080px) {
   .nav-wrap { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: flex-end }
   .nav-home { margin-right: 8px; font-weight:700; display: inline-block; color: var(--muted); text-decoration: none; }
   .nav-home:hover { color: var(--accent); }
   .nav-toggle { background: transparent; border: none; font-size: 18px; padding: 8px; cursor: pointer; border-radius: 8px; display: inline-flex; align-items: center; }
   .nav-toggle:focus { outline: 2px solid rgba(0,0,0,0.08); }
   /* hide the nav by default on very small screens; it will be shown when .open is added */
-  .site-nav { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--ui-bg, #fff); padding: 10px 20px; box-shadow: 0 10px 30px rgba(2,6,23,0.06); z-index: 1500; flex-direction: column; gap: 6px; }
+  .site-nav { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--ui-bg, #fff); padding: 10px 20px; box-shadow: 0 10px 30px rgba(2,6,23,0.06); z-index: 1500; flex-direction: column; align-items: center; gap: 6px; }
   .site-nav.open { display: flex; }
   .site-nav a { display: block; padding: 10px 0; margin-left: 0; }
   .header-inner { position: relative; }

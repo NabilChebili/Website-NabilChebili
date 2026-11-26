@@ -51,6 +51,7 @@ export const ui = {
     "nav.accueil": "Accueil",
     "nav.clouddevops": "Cloud DevOps",
     "nav.photo": "Photo",
+    "nav.galeries": "Galeries",
     "nav.musique": "Musique",
     "nav.gaming": "Gaming",
     "nav.roadmap": "Roadmap",
@@ -96,6 +97,7 @@ export const ui = {
     "nav.accueil": "Home",
     "nav.clouddevops": "Cloud DevOps",
     "nav.photo": "Photo",
+    "nav.galeries": "Galleries",
     "nav.musique": "Music",
     "nav.gaming": "Gaming",
     "nav.roadmap": "Roadmap",
@@ -147,7 +149,11 @@ export function sections(langue: Langue) {
   const t = traduire(langue);
   return [
     { href: cheminLocalise("/clouddevops", langue), route: "/clouddevops", label: t("nav.clouddevops") },
-    { href: cheminLocalise("/photo", langue), route: "/photo", label: t("nav.photo") },
+    // « Photo » mene a la page metier (/photo-video) ; le hub des galeries
+    // garde son adresse /photo, deja indexee, et sa propre entree juste apres
+    // (Nabil, 26/11/2026).
+    { href: cheminLocalise("/photo-video", langue), route: "/photo-video", label: t("nav.photo") },
+    { href: cheminLocalise("/photo", langue), route: "/photo", label: t("nav.galeries") },
     { href: cheminLocalise("/musique", langue), route: "/musique", label: t("nav.musique") },
     { href: cheminLocalise("/gaming", langue), route: "/gaming", label: t("nav.gaming") },
     { href: cheminLocalise("/roadmap", langue), route: "/roadmap", label: t("nav.roadmap") },
