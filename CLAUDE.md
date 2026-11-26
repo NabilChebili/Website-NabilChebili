@@ -176,7 +176,9 @@ photos, tout géré en Terraform. Domaine `www.nabilchebili.fr` chez IONOS.
 - **Annotations** Prise de vue / Retouche / Vidéo cliquables → carte animée (cercle depuis le point
   de la pièce ; au téléphone, feuille qui monte du bas, ouverte par trois boutons sous l'intro).
 - **Performance, mesurée** (Intel intégré, synchro écran) : 60 i/s. Ce qui coûtait : ombre douce
-  recalculée (~25 ms → tache d'ombre peinte), densité 2 (~20 ms → plafond 1.5, sans lissage à 1.5),
+  recalculée (~25 ms → tache d'ombre peinte), densité 2 (~20 ms → plafond 1.5, sans lissage à 1.5
+  **sur ordinateur seulement** : sur téléphone, le lissage reste actif — sans lui les cannelures
+  crénelaient, et les puces mobiles le font presque gratuitement),
   photos du viseur décodées à la volée (→ décodées à l'approche, deux affichées au plus).
 - **Pièges déjà payés** :
   - deux surfaces à la même profondeur se battent (stries diagonales sur l'écran : -0.2675 vs -0.2690) ;

@@ -33,8 +33,13 @@ export function demarrerViseur(racine) {
   // ---------- Rendu ----------
   let renderer, effet;
   try {
-    // Mesure (Intel integre) : sans lissage en densite 1.5, 24 -> 17 ms par image.
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: devicePixelRatio < 1.5, alpha: true });
+    // Lissage des traits (anti-crenelage) :
+    // - telephones et tablettes : toujours. Leurs puces le font presque gratuitement,
+    //   et sans lui les cannelures et les contours crenelaient (capture de Nabil, 26/11) ;
+    // - ordinateur haute densite : non. Mesure sur Intel integre, densite 1.5 :
+    //   24 ms par image avec, 17 ms sans ; a cette densite le crenelage s'y voit peu.
+    const tactile = matchMedia("(pointer: coarse)").matches;
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: tactile || devicePixelRatio < 1.5, alpha: true });
   } catch {
     renderer = null;
   }
